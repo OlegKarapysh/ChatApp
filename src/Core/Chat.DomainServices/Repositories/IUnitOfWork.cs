@@ -1,8 +1,9 @@
-﻿namespace Chat.DomainServices.Repositories;
+﻿using Chat.Domain.Abstract;
 
-public interface IUnitOfWork
+namespace Chat.DomainServices.Repositories;
+
+public interface IUnitOfWork : IDisposable
 {
-    IRepository<T> GetRepository<T>() where T : class;
-    Task SaveChangesAsync();
-    void SaveChanges();
+    IRepository<T, TId> GetRepository<T, TId>() where T : EntityBase<TId> where TId : struct;
+    Task SaveChangesAsync(CancellationToken token = default);
 }
