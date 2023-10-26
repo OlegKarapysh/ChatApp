@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.WebAPI", "src\Web\Chat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.WebUI", "src\Web\Chat.WebUI\Chat.WebUI.csproj", "{45014640-C3DA-461D-AD20-6D55FB6D8910}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Persistance", "src\Infrastructure\Chat.Persistance\Chat.Persistance.csproj", "{F395481E-D096-424F-AEA7-A4A2E9A7A62F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Persistence", "src\Infrastructure\Chat.Persistence\Chat.Persistence.csproj", "{F395481E-D096-424F-AEA7-A4A2E9A7A62F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.UnitTests", "tests\Chat.UnitTests\Chat.UnitTests.csproj", "{BEAF02AF-93B7-4CBA-87A9-C9970BA4597F}"
 EndProject
