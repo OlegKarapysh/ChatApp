@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Core\Char.DomainServices\Char.DomainServices.csproj" />
+      <ProjectReference Include="..\..\Core\Chat.DomainServices\Chat.DomainServices.csproj" />
     </ItemGroup>
 
     <ItemGroup>
