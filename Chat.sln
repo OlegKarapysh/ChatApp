@@ -6,10 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.DomainServices", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Application", "src\Core\Chat.Application\Chat.Application.csproj", "{524C1E10-10F7-4595-9B33-5AC976BB94CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.WebAPI", "src\Web\Chat.WebAPI\Chat.WebAPI.csproj", "{73DED593-99B8-4458-8360-67CE30EC21FF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.WebUI", "src\Web\Chat.WebUI\Chat.WebUI.csproj", "{45014640-C3DA-461D-AD20-6D55FB6D8910}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Persistence", "src\Infrastructure\Chat.Persistence\Chat.Persistence.csproj", "{F395481E-D096-424F-AEA7-A4A2E9A7A62F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.UnitTests", "tests\Chat.UnitTests\Chat.UnitTests.csproj", "{BEAF02AF-93B7-4CBA-87A9-C9970BA4597F}"
@@ -32,14 +28,6 @@ Global
 		{524C1E10-10F7-4595-9B33-5AC976BB94CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{524C1E10-10F7-4595-9B33-5AC976BB94CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{524C1E10-10F7-4595-9B33-5AC976BB94CC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{73DED593-99B8-4458-8360-67CE30EC21FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{73DED593-99B8-4458-8360-67CE30EC21FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{73DED593-99B8-4458-8360-67CE30EC21FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{73DED593-99B8-4458-8360-67CE30EC21FF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{45014640-C3DA-461D-AD20-6D55FB6D8910}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{45014640-C3DA-461D-AD20-6D55FB6D8910}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{45014640-C3DA-461D-AD20-6D55FB6D8910}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{45014640-C3DA-461D-AD20-6D55FB6D8910}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F395481E-D096-424F-AEA7-A4A2E9A7A62F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F395481E-D096-424F-AEA7-A4A2E9A7A62F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F395481E-D096-424F-AEA7-A4A2E9A7A62F}.Release|Any CPU.ActiveCfg = Release|Any CPU

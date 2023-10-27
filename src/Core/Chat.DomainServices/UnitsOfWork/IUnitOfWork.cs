@@ -1,6 +1,7 @@
 ﻿using Chat.Domain.Abstract;
+using Chat.DomainServices.Repositories;
 
-namespace Chat.DomainServices.Repositories;
+namespace Chat.DomainServices.UnitsOfWork;
 
 public interface IUnitOfWork : IDisposable
 {

@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Chat.Domain.Abstract;
 using Chat.DomainServices.Repositories;
+using Chat.Persistence.UnitsOfWork;
 using Microsoft.EntityFrameworkCore;
 
 namespace Chat.Persistence.Repositories;
@@ -27,12 +28,15 @@ public sealed class EfRepository<T, TId> : IRepository<T, TId>
 
     public void Update(T entity) => _dbContext.Set<T>().Update(entity);
 
-    public async Task RemoveAsync(TId id)
+    public async Task<bool> RemoveAsync(TId id)
     {
         var entity = await GetByIdAsync(id);
-        if (entity is not null)
+        if (entity is null)
         {
-            _dbContext.Set<T>().Remove(entity);
+            return false;
         }
+        
+        _dbContext.Set<T>().Remove(entity);
+        return true;
     }
 }
