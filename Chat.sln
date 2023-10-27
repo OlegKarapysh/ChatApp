@@ -1,14 +1,30 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Domain", "src\Core\Chat.Domain\Chat.Domain.csproj", "{5B4769A4-40B6-4B9A-B95E-81FD087E7821}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34221.43
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Domain", "src\Core\Chat.Domain\Chat.Domain.csproj", "{5B4769A4-40B6-4B9A-B95E-81FD087E7821}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.DomainServices", "src\Core\Chat.DomainServices\Chat.DomainServices.csproj", "{002BDEBC-813D-462C-94E3-C4BCB0AEA955}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.DomainServices", "src\Core\Chat.DomainServices\Chat.DomainServices.csproj", "{002BDEBC-813D-462C-94E3-C4BCB0AEA955}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Application", "src\Core\Chat.Application\Chat.Application.csproj", "{524C1E10-10F7-4595-9B33-5AC976BB94CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Application", "src\Core\Chat.Application\Chat.Application.csproj", "{524C1E10-10F7-4595-9B33-5AC976BB94CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Persistence", "src\Infrastructure\Chat.Persistence\Chat.Persistence.csproj", "{F395481E-D096-424F-AEA7-A4A2E9A7A62F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Persistence", "src\Infrastructure\Chat.Persistence\Chat.Persistence.csproj", "{F395481E-D096-424F-AEA7-A4A2E9A7A62F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.UnitTests", "tests\Chat.UnitTests\Chat.UnitTests.csproj", "{BEAF02AF-93B7-4CBA-87A9-C9970BA4597F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.UnitTests", "tests\Chat.UnitTests\Chat.UnitTests.csproj", "{BEAF02AF-93B7-4CBA-87A9-C9970BA4597F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{002BDEBC-813D-462C-94E3-C4BCB0AEA955} = {002BDEBC-813D-462C-94E3-C4BCB0AEA955}
+		{524C1E10-10F7-4595-9B33-5AC976BB94CC} = {524C1E10-10F7-4595-9B33-5AC976BB94CC}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.WebAPI", "src\Web\Chat.WebAPI\Chat.WebAPI.csproj", "{78CB5E3B-C700-4680-9D7F-5F5A4D0CC10D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{524C1E10-10F7-4595-9B33-5AC976BB94CC} = {524C1E10-10F7-4595-9B33-5AC976BB94CC}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.WebUI", "src\Web\Chat.WebUI\Chat.WebUI.csproj", "{2BB2861C-AA3C-4535-9BC1-2B71A6EE15A1}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Chat.Database", "src\Infrastructure\Chat.Database\Chat.Database.sqlproj", "{4F025F53-42E0-45F1-9A4C-4BE481F221E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,5 +52,25 @@ Global
 		{BEAF02AF-93B7-4CBA-87A9-C9970BA4597F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEAF02AF-93B7-4CBA-87A9-C9970BA4597F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BEAF02AF-93B7-4CBA-87A9-C9970BA4597F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78CB5E3B-C700-4680-9D7F-5F5A4D0CC10D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78CB5E3B-C700-4680-9D7F-5F5A4D0CC10D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78CB5E3B-C700-4680-9D7F-5F5A4D0CC10D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78CB5E3B-C700-4680-9D7F-5F5A4D0CC10D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BB2861C-AA3C-4535-9BC1-2B71A6EE15A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BB2861C-AA3C-4535-9BC1-2B71A6EE15A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BB2861C-AA3C-4535-9BC1-2B71A6EE15A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BB2861C-AA3C-4535-9BC1-2B71A6EE15A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F025F53-42E0-45F1-9A4C-4BE481F221E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F025F53-42E0-45F1-9A4C-4BE481F221E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F025F53-42E0-45F1-9A4C-4BE481F221E2}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{4F025F53-42E0-45F1-9A4C-4BE481F221E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F025F53-42E0-45F1-9A4C-4BE481F221E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F025F53-42E0-45F1-9A4C-4BE481F221E2}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8ECA7413-DD1D-41E7-BCD7-DE2FCD079C87}
 	EndGlobalSection
 EndGlobal
