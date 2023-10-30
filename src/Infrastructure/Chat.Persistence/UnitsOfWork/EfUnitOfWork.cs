@@ -1,6 +1,7 @@
 ﻿using Chat.Domain.Abstract;
 using Chat.DomainServices.Repositories;
 using Chat.DomainServices.UnitsOfWork;
+using Chat.Persistence.Contexts;
 using Chat.Persistence.Repositories;
 
 namespace Chat.Persistence.UnitsOfWork;
@@ -32,10 +33,13 @@ public sealed class EfUnitOfWork : IUnitOfWork
         return (IRepository<T, TId>)newRepository;
     }
 
-    public async Task SaveChangesAsync(CancellationToken token = default) => await _dbContext.SaveChangesAsync(token);
-    
-    public void Dispose()
+    public async Task SaveChangesAsync(CancellationToken token = default)
     {
-        _dbContext.Dispose();
+        await _dbContext.SaveChangesAsync(token);
+    }
+
+    public async Task RollBackChangesAsync(CancellationToken token = default)
+    {
+        await _dbContext.Database.RollbackTransactionAsync(token);
     }
 }
