@@ -1,5 +1,6 @@
-﻿using Blazored.LocalStorage;
-using Chat.WebUI.Providers;
+﻿using System.Net.Http.Headers;
+using Blazored.LocalStorage;
+using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.HttpHandlers;
 
@@ -9,6 +10,7 @@ public class JwtAuthInterceptor : DelegatingHandler
 
     public JwtAuthInterceptor(ILocalStorageService localStorage)
     {
+        InnerHandler = this;
         _localStorage = localStorage;
     }
 
@@ -16,8 +18,8 @@ public class JwtAuthInterceptor : DelegatingHandler
         HttpRequestMessage request, CancellationToken cancellation)
     {
         var jwt = await _localStorage.GetItemAsStringAsync(
-            JwtAuthenticationStateProvider.JwtTokenLocalStorageKey, cancellation);
-        request.Headers.Add("Authorization", $"Bearer {jwt}");
+            JwtAuthService.JwtLocalStorageKey, cancellation);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
 
         return await base.SendAsync(request, cancellation);
     }

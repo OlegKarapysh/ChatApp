@@ -1,13 +1,13 @@
 ﻿using System.Security.Claims;
 using System.Text.Json;
 using Blazored.LocalStorage;
+using Chat.WebUI.Services.Auth;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Chat.WebUI.Providers;
 
-public class JwtAuthenticationStateProvider : AuthenticationStateProvider
+public class JwtAuthenticationStateProvider : AuthenticationStateProvider, INotifyAuthenticationChanged
 {
-    public const string JwtTokenLocalStorageKey = "JwtToken";
     private readonly ILocalStorageService _localStorageService;
 
     public JwtAuthenticationStateProvider(ILocalStorageService localStorageService)
@@ -17,7 +17,7 @@ public class JwtAuthenticationStateProvider : AuthenticationStateProvider
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var jwtTokenFromLocalStorage = await _localStorageService.GetItemAsync<string>(JwtTokenLocalStorageKey);
+        var jwtTokenFromLocalStorage = await _localStorageService.GetItemAsync<string>(JwtAuthService.JwtLocalStorageKey);
         return string.IsNullOrEmpty(jwtTokenFromLocalStorage)
             ? new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()))
             : new AuthenticationState(new ClaimsPrincipal(
@@ -32,7 +32,7 @@ public class JwtAuthenticationStateProvider : AuthenticationStateProvider
     private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
     {
         var payload = ParseJwtPayload(jwt);
-        var jsonBytes = Convert.FromBase64String(payload);
+        var jsonBytes = ParseBase64WithoutPadding(payload);
         var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
         
         return keyValuePairs!.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()!));
@@ -44,5 +44,21 @@ public class JwtAuthenticationStateProvider : AuthenticationStateProvider
         const string sectionsSeparator = ".";
 
         return jwt.Split(sectionsSeparator)[payloadSectionIndex];
+    }
+    
+    // Padding is required for proper JWT parsing.
+    private byte[] ParseBase64WithoutPadding(string base64)
+    {
+        switch (base64.Length % 4)
+        {
+            case 2:
+                base64 += "==";
+                break;
+            case 3:
+                base64 += "=";
+                break;
+        }
+        
+        return Convert.FromBase64String(base64);
     }
 }

@@ -1,11 +1,9 @@
 ﻿@page "/registration"
 
-@using Blazored.LocalStorage
 @using Chat.Domain.DTOs
 @using Chat.WebUI.Layouts
 @using Chat.WebUI.Services.Auth
 
-@inject ILocalStorageService LocalStorage
 @inject NavigationManager Navigation
 @inject IJwtAuthService AuthService
 @layout AuthLayout
@@ -53,12 +51,20 @@
 @code {
     public RegistrationDto RegistrationData { get; set; } = new();
 
-    public void HandleSubmit()
+    public async Task HandleSubmit()
     {
         Console.WriteLine(RegistrationData.UserName);
         Console.WriteLine(RegistrationData.Email);
         Console.WriteLine(RegistrationData.Password);
         Console.WriteLine(RegistrationData.ConfirmPassword);
-        AuthService.RegisterAsync(RegistrationData);
+        var registrationResult = await AuthService!.RegisterAsync(RegistrationData);
+        if (registrationResult is not null)
+        {
+            Console.WriteLine($"Error during registration! {registrationResult.Message}");
+        }
+        else
+        {
+            Navigation!.NavigateTo("/");
+        }
     }
 }

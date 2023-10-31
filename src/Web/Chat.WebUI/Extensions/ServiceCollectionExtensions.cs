@@ -7,7 +7,7 @@ public static class ServiceCollectionExtensions
 {
     public static void AddHttpClient(this IServiceCollection services)
     {
-        services.AddScoped<DelegatingHandler, JwtAuthInterceptor>();
+        services.AddScoped<HttpMessageHandler, JwtAuthInterceptor>();
         services.AddScoped<HttpClient, BlazorHttpClient>();
     }
 
