@@ -5,7 +5,7 @@ namespace Chat.Domain.Models.Attachments;
 
 public class Attachment : EntityBase<int>
 {
-    public const int MaxSourceUrlLength = 10000;
+    public const int MaxSourceUrlLength = 4000;
     
     [MaxLength(MaxSourceUrlLength)]
     public string SourceUrl { get; set; } = string.Empty;
