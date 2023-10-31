@@ -12,9 +12,10 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddAuthorizationCore();
+
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
 builder.Services.AddScoped<INotifyAuthenticationChanged, JwtAuthenticationStateProvider>();
-builder.Services.AddAuthorizationCore();
 builder.Services.AddHttpClient();
 builder.Services.AddCustomServices();
 

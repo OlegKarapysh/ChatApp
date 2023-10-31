@@ -1,34 +1,38 @@
-﻿@inherits LayoutComponentBase
+﻿@using Chat.WebUI.Services.Auth
+@inherits LayoutComponentBase
+@inject IJwtAuthService AuthService
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+<CascadingAuthenticationState>
+    <div class="page">
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+    
+        <main>
+            <div>
+                <AuthorizeView>
+                    <Authorized>
+                        <p>@context.User.Claims.First().ToString()</p>
+                    </Authorized>
+                    <NotAuthorized>
+                        <p>Not authorized!</p>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+            <div class="top-row px-4">
+                <AuthorizeView>
+                    <Authorized>
+                        <NavLink class="nav-link" href="login" @onclick="async () => await AuthService!.Logout()">Logout</NavLink>
+                    </Authorized>
+                    <NotAuthorized>
+                        <NavLink class="nav-link" href="registration">Register</NavLink>
+                        <NavLink class="nav-link" href="login">Log in</NavLink>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
     </div>
-
-    <main>
-        <div>
-            <AuthorizeView>
-                <Authorized>
-                    <p>@context.User.Claims.First().ToString()</p>
-                </Authorized>
-                <NotAuthorized>
-                    <p>Not authorized!</p>
-                </NotAuthorized>
-            </AuthorizeView>
-        </div>
-        <div class="top-row px-4">
-            <AuthorizeView>
-                <Authorized>
-                    <NavLink class="nav-link" href="logout"></NavLink>
-                </Authorized>
-                <NotAuthorized>
-                    <NavLink class="nav-link" href="registration">Register</NavLink>
-                    <NavLink class="nav-link" href="login">Log in</NavLink>
-                </NotAuthorized>
-            </AuthorizeView>
-        </div>
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+</CascadingAuthenticationState>

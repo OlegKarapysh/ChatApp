@@ -56,6 +56,11 @@ public sealed class JwtAuthService : IJwtAuthService
         return default;
     }
 
+    public async Task Logout()
+    {
+        await _localStorage.RemoveItemsAsync(new[] { JwtLocalStorageKey, RefreshTokenLocalStorageKey });
+    }
+
     private async ValueTask SaveTokens(TokenPairDto? tokens)
     {
         await _localStorage.SetItemAsStringAsync(

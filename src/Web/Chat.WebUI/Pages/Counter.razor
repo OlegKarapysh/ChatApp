@@ -11,11 +11,15 @@
 <button class="btn btn-primary" @onclick="Act">Click me</button>
 
 @code {
-    public string Value { get; set; } = "Def";
 
-    private void Act()
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+    protected string Value { get; set; } = "Def";
+
+    private async Task Act()
     {
-        Value = HttpClient!.BaseAddress!.ToString();
+        var authState = await AuthStateTask;
+        Value = authState.User.Claims.First().Value;
         Console.WriteLine(HttpClient is BlazorHttpClient);
     }
 }

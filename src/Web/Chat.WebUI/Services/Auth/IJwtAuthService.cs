@@ -6,4 +6,5 @@ public interface IJwtAuthService
 {
     Task<ErrorDetailsDto?> RegisterAsync(RegistrationDto registerData);
     Task<ErrorDetailsDto?> LoginAsync(LoginDto loginData);
+    Task Logout();
 }
