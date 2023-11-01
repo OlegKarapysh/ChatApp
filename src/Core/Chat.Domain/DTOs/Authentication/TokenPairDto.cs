@@ -1,4 +1,4 @@
-﻿namespace Chat.Domain.DTOs;
+﻿namespace Chat.Domain.DTOs.Authentication;
 
 public sealed class TokenPairDto
 {
