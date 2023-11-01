@@ -1,7 +1,6 @@
-﻿using Chat.DomainServices.UnitsOfWork;
-using Chat.Persistence.Contexts;
-using Chat.Persistence.UnitsOfWork;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Chat.Application.Services.Authentication;
+using Chat.Domain.DTOs.Authentication;
 
 namespace Chat.WebAPI.Controllers;
 
@@ -9,18 +8,29 @@ namespace Chat.WebAPI.Controllers;
 [Route("api/[controller]")]
 public sealed class AuthController : ControllerBase
 {
-    private readonly ChatDbContext _unitOfWork;
+    private readonly IAuthService _authService;
 
-    public AuthController(ChatDbContext unitOfWork)
+    public AuthController(IAuthService authService)
     {
-        _unitOfWork = unitOfWork;
-        _unitOfWork.Database.EnsureCreated();
+        _authService = authService;
+    }
+    
+    [HttpPost("register")]
+    public async Task<ActionResult<TokenPairDto>> RegisterAsync([FromBody] RegistrationDto registerData)
+    {
+        return Ok(await _authService.RegisterAsync(registerData));
     }
 
-
-    [HttpGet("register")]
-    public async Task<IActionResult> Register()
+    [HttpPost("login")]
+    public async Task<ActionResult<TokenPairDto>> LoginAsync([FromBody] LoginDto loginData)
     {
+        return Ok(await _authService.LoginAsync(loginData));
+    }
+
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordDto changePasswordData)
+    {
+        await _authService.ChangePasswordAsync(changePasswordData);
         return Ok();
     }
 }

@@ -16,7 +16,7 @@ builder.Services.AddAuthorizationCore();
 
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
 builder.Services.AddScoped<INotifyAuthenticationChanged, JwtAuthenticationStateProvider>();
-builder.Services.AddHttpClient();
+builder.Services.AddCustomHttpClient(builder.Configuration);
 builder.Services.AddCustomServices();
 
 await builder.Build().RunAsync();

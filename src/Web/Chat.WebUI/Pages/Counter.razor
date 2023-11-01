@@ -1,6 +1,4 @@
 ﻿@page "/counter"
-@using Chat.WebUI.HttpHandlers
-@inject HttpClient HttpClient
 
 <PageTitle>Counter</PageTitle>
 
@@ -19,7 +17,6 @@
     private async Task Act()
     {
         var authState = await AuthStateTask;
-        Value = authState.User.Claims.First().Value;
-        Console.WriteLine(HttpClient is BlazorHttpClient);
+        Value = string.Join("\n", authState.User.Claims.Select(c => c.ToString()));
     }
 }

@@ -1,6 +1,6 @@
 ﻿@page "/registration"
 
-@using Chat.Domain.DTOs
+@using Chat.Domain.DTOs.Authentication
 @using Chat.WebUI.Layouts
 @using Chat.WebUI.Services.Auth
 
@@ -17,27 +17,27 @@
             <DataAnnotationsValidator />
             <ValidationSummary style="color:indianred" Model="@RegistrationData" />
             <div class="form-group">
-                <label for="name" class="form-label">Fullname</label>
+                <label for="name" class="form-label">Username:</label>
                 <InputText id="name" @bind-Value="@RegistrationData.UserName" class="form-control"></InputText>
                 <ValidationMessage For="() => RegistrationData.UserName"></ValidationMessage>
             </div>
 
             <div class="form-group mt-2">
-                <label for="Email" class="form-label">Email Address</label>
+                <label for="Email" class="form-label">Email address:</label>
                 <InputText id="Email" @bind-Value="@RegistrationData.Email" class="form-control"></InputText>
                 <ValidationMessage For="() => RegistrationData.Email"></ValidationMessage>
             </div>
 
             <div class="form-group mt-2">
-                <label for="Password" class="form-label">Password</label>
+                <label for="Password" class="form-label">Password:</label>
                 <InputText type="password" id="Password" @bind-Value="RegistrationData.Password" class="form-control"></InputText>
                 <ValidationMessage For="() => RegistrationData.Password"></ValidationMessage>
             </div>
 
             <div class="form-group mt-2">
-                <label for="ConfirmPassword" class="form-label">Confirm Password</label>
-                <InputText type="password" id="ConfirmPassword" @bind-Value="RegistrationData.ConfirmPassword" class="form-control"></InputText>
-                <ValidationMessage For="() => RegistrationData.ConfirmPassword"></ValidationMessage>
+                <label for="ConfirmPassword" class="form-label">Repeat password:</label>
+                <InputText type="password" id="ConfirmPassword" @bind-Value="RegistrationData.RepeatPassword" class="form-control"></InputText>
+                <ValidationMessage For="() => RegistrationData.RepeatPassword"></ValidationMessage>
             </div>
 
             <div class="form-group mt-2">
@@ -56,7 +56,7 @@
         Console.WriteLine(RegistrationData.UserName);
         Console.WriteLine(RegistrationData.Email);
         Console.WriteLine(RegistrationData.Password);
-        Console.WriteLine(RegistrationData.ConfirmPassword);
+        Console.WriteLine(RegistrationData.RepeatPassword);
         var registrationResult = await AuthService!.RegisterAsync(RegistrationData);
         if (registrationResult is not null)
         {
