@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using Chat.Domain.Errors;
 
-namespace Chat.WebAPI.RequestExceptions;
+namespace Chat.Application.RequestExceptions;
 
 public abstract class RequestException : Exception
 {

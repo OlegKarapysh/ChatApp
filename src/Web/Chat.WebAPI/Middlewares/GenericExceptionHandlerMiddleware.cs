@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Chat.WebAPI.RequestExceptions;
+using Chat.Application.RequestExceptions;
 
 namespace Chat.WebAPI.Middlewares;
 

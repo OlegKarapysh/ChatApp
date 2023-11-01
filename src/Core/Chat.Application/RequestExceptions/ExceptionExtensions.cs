@@ -2,7 +2,7 @@
 using Chat.Domain.DTOs;
 using Chat.Domain.Errors;
 
-namespace Chat.WebAPI.RequestExceptions;
+namespace Chat.Application.RequestExceptions;
 
 public static class ExceptionExtensions
 {
