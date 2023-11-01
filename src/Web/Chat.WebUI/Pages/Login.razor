@@ -1,8 +1,6 @@
 ﻿@page "/login"
-@using Chat.Domain.DTOs.Authentication
-@using Chat.WebUI.Layouts
-@using Chat.WebUI.Services.Auth
 
+@attribute [AllowAnonymous]
 @inject NavigationManager Navigation
 @inject IJwtAuthService AuthService
 @layout AuthLayout
@@ -29,7 +27,7 @@
             </div>
 
             <div class="form-group mt-2">
-                <button class="btn btn-outline-primary float-end" type="submit">Register</button>
+                <button class="btn btn-outline-primary float-center" disabled="@IsSubmitDisabled" type="submit">Login</button>
             </div>
         </EditForm>
     </div>
@@ -38,9 +36,11 @@
 
 @code {
     public LoginDto LoginData { get; set; } = new();
+    public bool IsSubmitDisabled = false;
 
     public async Task HandleSubmit()
     {
+        ToggleSubmitDisabled();
         Console.WriteLine(LoginData.Email);
         Console.WriteLine(LoginData.Password);
         var loginResult = await AuthService!.LoginAsync(LoginData);
@@ -52,5 +52,11 @@
         {
             Navigation!.NavigateTo("/");
         }
+        ToggleSubmitDisabled();
+    }
+
+    private void ToggleSubmitDisabled()
+    {
+        IsSubmitDisabled = !IsSubmitDisabled;
     }
 }

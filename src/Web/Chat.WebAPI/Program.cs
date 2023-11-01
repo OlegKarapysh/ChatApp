@@ -1,13 +1,11 @@
-using System.Text;
-using Chat.Domain.Models;
-using Chat.Persistence.Contexts;
-using Chat.WebAPI.Extensions;
-using Chat.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Chat.Domain.Models;
+using Chat.Persistence.Contexts;
+using Chat.WebAPI.Extensions;
+using Chat.WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 

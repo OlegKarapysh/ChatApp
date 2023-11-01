@@ -1,9 +1,6 @@
 ﻿@page "/registration"
 
-@using Chat.Domain.DTOs.Authentication
-@using Chat.WebUI.Layouts
-@using Chat.WebUI.Services.Auth
-
+@attribute [AllowAnonymous]
 @inject NavigationManager Navigation
 @inject IJwtAuthService AuthService
 @layout AuthLayout
