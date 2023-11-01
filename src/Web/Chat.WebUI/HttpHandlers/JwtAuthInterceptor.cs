@@ -10,7 +10,6 @@ public class JwtAuthInterceptor : DelegatingHandler
 
     public JwtAuthInterceptor(ILocalStorageService localStorage)
     {
-        InnerHandler = this;
         _localStorage = localStorage;
     }
 

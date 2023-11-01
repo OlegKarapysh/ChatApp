@@ -1,4 +1,5 @@
 ﻿using Chat.Domain.DTOs;
+using Chat.Domain.DTOs.Authentication;
 
 namespace Chat.WebUI.Services.Auth;
 

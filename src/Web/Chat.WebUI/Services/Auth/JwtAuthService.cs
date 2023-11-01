@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Chat.Domain.DTOs;
+using Chat.Domain.DTOs.Authentication;
 using Chat.WebUI.Providers;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -27,17 +28,15 @@ public sealed class JwtAuthService : IJwtAuthService
 
     public async Task<ErrorDetailsDto?> RegisterAsync(RegistrationDto registerData)
     {
-        // var response = await _httpService.RegisterAsync(registerData);
-        // if (!response.IsSuccessful)
-        // {
-        //     return response.ErrorDetails;
-        // }
-        //
-        // await SaveTokens(response.Content);
+        Console.WriteLine("Inside JwtAuthService register...");
+        var response = await _httpService.RegisterAsync(registerData);
+        if (!response.IsSuccessful)
+        {
+            return response.ErrorDetails;
+        }
         
-        // TODO: test
-        await _localStorage.SetItemAsStringAsync(JwtLocalStorageKey,
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
+        await SaveTokens(response.Content);
+        
         _authenticationState.NotifyAuthenticationChanged();
         
         return default;
@@ -59,6 +58,7 @@ public sealed class JwtAuthService : IJwtAuthService
     public async Task Logout()
     {
         await _localStorage.RemoveItemsAsync(new[] { JwtLocalStorageKey, RefreshTokenLocalStorageKey });
+        _authenticationState.NotifyAuthenticationChanged();
     }
 
     private async ValueTask SaveTokens(TokenPairDto? tokens)
