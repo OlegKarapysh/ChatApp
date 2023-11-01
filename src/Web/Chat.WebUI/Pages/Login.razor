@@ -3,6 +3,7 @@
 @attribute [AllowAnonymous]
 @inject NavigationManager Navigation
 @inject IJwtAuthService AuthService
+@inject INotificationService Notification
 @layout AuthLayout
 
 <div class="card col-md-6 offset-3">
@@ -47,6 +48,7 @@
         if (loginResult is not null)
         {
             Console.WriteLine($"Error during registration! {loginResult.Message}");
+            Notification!.ShowError(loginResult.Message);
         }
         else
         {

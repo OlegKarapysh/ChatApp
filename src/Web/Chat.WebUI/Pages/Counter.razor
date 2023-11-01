@@ -1,5 +1,7 @@
 ﻿@page "/counter"
 
+@inject INotificationService Notification
+
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
@@ -10,6 +12,7 @@
 
 @code {
 
+    public int Count { get; set; } = 1;
     [CascadingParameter]
     protected Task<AuthenticationState> AuthStateTask { get; set; } = default!;
     protected string Value { get; set; } = "Def";
@@ -18,5 +21,6 @@
     {
         var authState = await AuthStateTask;
         Value = string.Join("\n", authState.User.Claims.Select(c => c.ToString()));
+        Notification!.ShowError($"my message {Count++}");
     }
 }

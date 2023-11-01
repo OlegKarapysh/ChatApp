@@ -5,8 +5,11 @@ using Blazored.LocalStorage;
 using Chat.WebUI;
 using Chat.WebUI.Extensions;
 using Chat.WebUI.Providers;
+using Chat.WebUI.Services.Notifications;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
+builder.Services.AddSingleton<INotificationService, NotificationService>();
 
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
