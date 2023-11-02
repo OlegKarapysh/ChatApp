@@ -8,7 +8,7 @@
     flex-direction: row;
     animation: fadein 1.5s;
     bottom: 10%;
-    right: 7%;
+    right: 5%;
     padding: 1rem 1.25rem;
     color: #1D1D1B;
     width: 20rem;
@@ -31,7 +31,6 @@
 .blazored-toast-success .blazored-toast-icon {
     color: #16a34a;
 }
-
 
 .blazored-toast-error {
     border-top: 6px solid #dc2626;

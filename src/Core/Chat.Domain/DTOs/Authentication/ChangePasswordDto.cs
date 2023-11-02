@@ -5,7 +5,6 @@ namespace Chat.Domain.DTOs.Authentication;
 
 public class ChangePasswordDto
 {
-    public string Email { get; set; } = default!;
     [Required(ErrorMessage = "Password is required!")]
     [StringLength(16, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 16 characters long!")]
     public string CurrentPassword { get; set; } = default!;

@@ -1,4 +1,5 @@
-﻿using Chat.Domain.DTOs;
+﻿using System.Net.Http.Json;
+using Chat.Domain.DTOs;
 using Chat.Domain.DTOs.Authentication;
 using Chat.Domain.Web;
 
@@ -20,9 +21,16 @@ public sealed class AuthWebApiService : WebApiServiceBase, IAuthWebApiService
     
     public async Task<WebApiResponse<TokenPairDto>> RegisterAsync(RegistrationDto registerData)
     {
-        Console.WriteLine("Inside WebApiService register...");
         const string registerRoute = "/register";
 
         return await PostAsync<TokenPairDto, RegistrationDto>(registerRoute, registerData);
+    }
+
+    public async Task<ErrorDetailsDto?> ChangePasswordAsync(ChangePasswordDto changePasswordData)
+    {
+        const string changePasswordRoute = "/change-password";
+        var response = await HttpClient.PostAsJsonAsync($"{FullRoute}{changePasswordRoute}", changePasswordData);
+
+        return await response.Content.ReadFromJsonAsync<ErrorDetailsDto>();
     }
 }

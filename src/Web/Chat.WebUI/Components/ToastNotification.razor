@@ -21,9 +21,9 @@
 </div>
 
 @code {
+    public const string DefaultMessage = "Something went wrong";
     [Parameter]
-    public string Message { get; set; } = "Something went wrong!";
-
+    public string Message { get; set; } = DefaultMessage;
     public bool IsShown = false;
 
     public void ShowMessage(string message)
@@ -36,6 +36,7 @@
     public void Close()
     {
         IsShown = false;
+        Message = DefaultMessage;
         StateHasChanged();
     }
 }

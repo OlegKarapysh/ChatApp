@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject IJwtAuthService AuthService
+@inject NavigationManager Navigation
 
 <CascadingAuthenticationState>
     <div class="page">
@@ -21,7 +22,8 @@
             <div class="top-row px-4">
                 <AuthorizeView>
                     <Authorized>
-                        <NavLink class="nav-link" href="login" @onclick="async () => await AuthService!.Logout()">Logout</NavLink>
+                        <NavLink class="nav-link" @onclick="RedirectToChangePassword">Change password</NavLink>
+                        <NavLink class="nav-link" href="login" @onclick="async () => await AuthService!.Logout()">Log out</NavLink>
                     </Authorized>
                     <NotAuthorized>
                         <NavLink class="nav-link" href="registration">Register</NavLink>
@@ -35,3 +37,11 @@
         </main>
     </div>
 </CascadingAuthenticationState>
+
+@code {
+
+    public void RedirectToChangePassword()
+    {
+        Navigation!.NavigateTo("/change-password");
+    }
+}

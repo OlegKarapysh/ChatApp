@@ -60,10 +60,10 @@ public sealed class AuthService : IAuthService
         return CreateTokenPair(await _userManager.FindByEmailAsync(user.Email), refreshToken);
     }
 
-    public async Task ChangePasswordAsync(ChangePasswordDto changePasswordData)
+    public async Task ChangePasswordAsync(ChangePasswordDto changePasswordData, int id)
     {
-        var user = await _userManager.FindByEmailAsync(changePasswordData.Email)
-                   ?? throw new EntityNotFoundException(nameof(User), nameof(changePasswordData.Email));
+        var user = await _userManager.FindByIdAsync(id.ToString())
+                   ?? throw new EntityNotFoundException(nameof(User), nameof(id));
         var changePasswordResult = await _userManager.ChangePasswordAsync(
             user, changePasswordData.CurrentPassword, changePasswordData.NewPassword);
 

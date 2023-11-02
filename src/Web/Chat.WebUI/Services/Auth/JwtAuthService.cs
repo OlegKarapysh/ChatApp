@@ -2,7 +2,6 @@
 using Chat.Domain.DTOs;
 using Chat.Domain.DTOs.Authentication;
 using Chat.WebUI.Providers;
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Chat.WebUI.Services.Auth;
 
@@ -28,7 +27,6 @@ public sealed class JwtAuthService : IJwtAuthService
 
     public async Task<ErrorDetailsDto?> RegisterAsync(RegistrationDto registerData)
     {
-        Console.WriteLine("Inside JwtAuthService register...");
         var response = await _httpService.RegisterAsync(registerData);
         if (!response.IsSuccessful)
         {
@@ -53,6 +51,11 @@ public sealed class JwtAuthService : IJwtAuthService
         await SaveTokens(response.Content);
         
         return default;
+    }
+
+    public async Task<ErrorDetailsDto?> ChangePasswordAsync(ChangePasswordDto changePasswordData)
+    {
+        return await _httpService.ChangePasswordAsync(changePasswordData);
     }
 
     public async Task Logout()

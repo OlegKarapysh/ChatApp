@@ -9,8 +9,6 @@ namespace Chat.Application.Services.JWT;
 
 public sealed class JwtService : IJwtService
 {
-    private const string IdClaimName = "id";
-    private const string UserNameClaimName = "username";
     private readonly JwtOptions _jwtOptions;
     private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new();
 
@@ -28,8 +26,10 @@ public sealed class JwtService : IJwtService
             new Claim(JwtRegisteredClaimNames.Sub, userName),
             new Claim(JwtRegisteredClaimNames.Email, email),
             new Claim(JwtRegisteredClaimNames.Jti, _jwtOptions.JtiGenerator.Invoke()),
-            new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(_jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64),
-            identity.FindFirst(IdClaimName)
+            new Claim(JwtRegisteredClaimNames.Iat,
+                ToUnixEpochDate(_jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64),
+            identity.FindFirst(IJwtService.IdClaimName),
+            identity.FindFirst(IJwtService.UserNameClaimName)
         };
 
         var jwt = new JwtSecurityToken(
@@ -57,8 +57,8 @@ public sealed class JwtService : IJwtService
     {
         return new ClaimsIdentity(new GenericIdentity(userName, "Token"), new[]
         {
-            new Claim(IdClaimName, id.ToString()),
-            new Claim(UserNameClaimName, userName)
+            new Claim(IJwtService.IdClaimName, id.ToString()),
+            new Claim(IJwtService.UserNameClaimName, userName)
         });
     }
 

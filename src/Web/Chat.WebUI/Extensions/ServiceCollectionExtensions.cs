@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
     public static void AddCustomHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<JwtAuthInterceptor>();
-        services.AddHttpClient<WebApiServiceBase>(httpClient =>
+        services.AddHttpClient<AuthWebApiService>(httpClient =>
         {
             httpClient.BaseAddress = new Uri(configuration["ApiUrl"]!);
         }).AddHttpMessageHandler<JwtAuthInterceptor>();

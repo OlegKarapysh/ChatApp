@@ -8,4 +8,5 @@ public interface IAuthWebApiService
 {
     Task<WebApiResponse<TokenPairDto>> LoginAsync(LoginDto loginData);
     Task<WebApiResponse<TokenPairDto>> RegisterAsync(RegistrationDto registerData);
+    Task<ErrorDetailsDto?> ChangePasswordAsync(ChangePasswordDto changePasswordData);
 }

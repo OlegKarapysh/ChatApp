@@ -19,11 +19,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDefaultCors(builder.Configuration);
 builder.Services.AddAndConfigureJwtAuthentication(builder.Configuration);
-builder.Services.AddAuthorization(policy =>
-{
-    policy.DefaultPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
-                           .RequireAuthenticatedUser().Build();
-});
+builder.Services.AddAuthorization();
 builder.Services.AddIdentity<User, IdentityRole<int>>()
        .AddEntityFrameworkStores<ChatDbContext>()
        .AddUserManager<UserManager<User>>()
@@ -42,9 +38,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseMiddleware<GenericExceptionHandlerMiddleware>();
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors();
 
 app.MapControllers();
 

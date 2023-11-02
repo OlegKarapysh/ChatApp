@@ -18,7 +18,9 @@ public class JwtAuthInterceptor : DelegatingHandler
     {
         var jwt = await _localStorage.GetItemAsStringAsync(
             JwtAuthService.JwtLocalStorageKey, cancellation);
+        Console.WriteLine(jwt);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        Console.WriteLine(request.Headers.Authorization);
 
         return await base.SendAsync(request, cancellation);
     }
