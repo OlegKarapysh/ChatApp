@@ -13,10 +13,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddCors(b => b.AddDefaultPolicy(policyBuilder =>
         {
-            policyBuilder.AllowAnyHeader()
+            policyBuilder.WithOrigins(configuration["Cors:AllowedOrigin"]!)
+                         .AllowAnyHeader()
                          .AllowAnyMethod()
-                         .AllowCredentials()
-                         .WithOrigins(configuration["Cors:AllowedOrigin"]!)
+                         //.AllowCredentials()
                          .WithExposedHeaders(configuration["Cors:TokenExpiredHeader"]!);
         }));
     }
@@ -40,19 +40,16 @@ public static class ServiceCollectionExtensions
             options.SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
         });
         
-        services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(options =>
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
         {
             options.ClaimsIssuer = jwtOptions[nameof(JwtOptions.Issuer)];
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = false,
+                ValidateIssuer = true,
                 ValidIssuer = jwtOptions[nameof(JwtOptions.Issuer)],
 
-                ValidateAudience = false,
+                ValidateAudience = true,
                 ValidAudience = jwtOptions[nameof(JwtOptions.Audience)],
 
                 ValidateLifetime = true,
@@ -62,7 +59,6 @@ public static class ServiceCollectionExtensions
                 IssuerSigningKey = signingKey,
                 ClockSkew = TimeSpan.Zero
             };
-            options.SaveToken = true;
             options.Events = new JwtBearerEvents
             {
                 OnAuthenticationFailed = context =>

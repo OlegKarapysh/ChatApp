@@ -29,7 +29,7 @@ public sealed class AuthController : ControllerBase
         return Ok(await _authService.LoginAsync(loginData));
     }
 
-    [AllowAnonymous, HttpPost("change-password")]
+    [Authorize(AuthenticationSchemes = "Bearer"), HttpPost("change-password")]
     public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordDto changePasswordData)
     {
         var user = User.Claims.ToList();

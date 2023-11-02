@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using Blazored.LocalStorage;
 using Chat.Domain.DTOs;
 using Chat.Domain.DTOs.Authentication;
 using Chat.Domain.Web;
@@ -7,7 +8,8 @@ namespace Chat.WebUI.Services.Auth;
 
 public sealed class AuthWebApiService : WebApiServiceBase, IAuthWebApiService
 {
-    public AuthWebApiService(HttpClient httpClient, IConfiguration configuration) : base(httpClient, configuration)
+    public AuthWebApiService(HttpClient httpClient, ILocalStorageService localStorage)
+        : base(httpClient, localStorage)
     {
         BaseRoute = "/auth";
     }
@@ -28,9 +30,17 @@ public sealed class AuthWebApiService : WebApiServiceBase, IAuthWebApiService
 
     public async Task<ErrorDetailsDto?> ChangePasswordAsync(ChangePasswordDto changePasswordData)
     {
+        await TryAddAuthorization();
         const string changePasswordRoute = "/change-password";
         var response = await HttpClient.PostAsJsonAsync($"{FullRoute}{changePasswordRoute}", changePasswordData);
 
-        return await response.Content.ReadFromJsonAsync<ErrorDetailsDto>();
+        try
+        {
+            return await response.Content.ReadFromJsonAsync<ErrorDetailsDto>();
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

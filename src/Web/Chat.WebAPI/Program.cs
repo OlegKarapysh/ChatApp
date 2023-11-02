@@ -17,13 +17,14 @@ builder.Services.AddDbContext<ChatDbContext>(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDefaultCors(builder.Configuration);
-builder.Services.AddAndConfigureJwtAuthentication(builder.Configuration);
-builder.Services.AddAuthorization();
 builder.Services.AddIdentity<User, IdentityRole<int>>()
        .AddEntityFrameworkStores<ChatDbContext>()
        .AddUserManager<UserManager<User>>()
        .AddSignInManager<SignInManager<User>>();
+builder.Services.AddDefaultCors(builder.Configuration);
+builder.Services.AddAndConfigureJwtAuthentication(builder.Configuration);
+builder.Services.AddAuthorization();
+
 builder.Services.AddCustomServices();
 
 var app = builder.Build();
