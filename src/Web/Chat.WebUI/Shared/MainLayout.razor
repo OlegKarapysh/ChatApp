@@ -5,20 +5,10 @@
 <CascadingAuthenticationState>
     <div class="page">
         <div class="sidebar">
-            <NavMenu />
+            <NavMenu/>
         </div>
     
         <main>
-            <div>
-                <AuthorizeView>
-                    <Authorized>
-                        <p>@context.User.Claims.First().ToString()</p>
-                    </Authorized>
-                    <NotAuthorized>
-                        <p>Not authorized!</p>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </div>
             <div class="top-row px-4">
                 <AuthorizeView>
                     <Authorized>
