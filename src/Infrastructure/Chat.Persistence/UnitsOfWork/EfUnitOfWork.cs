@@ -17,7 +17,7 @@ public sealed class EfUnitOfWork : IUnitOfWork
     }
 
     public IRepository<T, TId> GetRepository<T, TId>()
-        where T : EntityBase<TId>
+        where T : class, IEntity<TId>
         where TId : struct
     {
         var entityType = typeof(T);

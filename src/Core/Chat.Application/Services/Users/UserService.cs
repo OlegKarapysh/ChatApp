@@ -7,7 +7,7 @@ using Chat.DomainServices.UnitsOfWork;
 
 namespace Chat.Application.Services.Users;
 
-public sealed class UserService
+public sealed class UserService : IUserService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IRepository<User, int> _userRepository;

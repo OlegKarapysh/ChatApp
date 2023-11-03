@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chat.Persistence.Repositories;
 
 public sealed class EfRepository<T, TId> : IRepository<T, TId>
-    where T : EntityBase<TId>
+    where T : class, IEntity<TId>
     where TId : struct
 {
     private readonly ChatDbContext _dbContext;

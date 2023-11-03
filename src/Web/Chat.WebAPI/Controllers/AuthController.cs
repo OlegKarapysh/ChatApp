@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Chat.Application.Services.Authentication;
 using Chat.Application.Services.JWT;
@@ -11,10 +10,12 @@ namespace Chat.WebAPI.Controllers;
 public sealed class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IJwtService _jwtService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IJwtService jwtService)
     {
         _authService = authService;
+        _jwtService = jwtService;
     }
 
     [AllowAnonymous, HttpPost("register")]
@@ -32,13 +33,7 @@ public sealed class AuthController : ControllerBase
     [Authorize, HttpPost("change-password")]
     public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordDto changePasswordData)
     {
-        var isParsed = int.TryParse(User.FindFirstValue(IJwtService.IdClaimName), out var id);
-        if (!isParsed)
-        {
-            throw new Exception("Cannot parse 'id' claim from current user!");
-        }
-        
-        await _authService.ChangePasswordAsync(changePasswordData, id);
+        await _authService.ChangePasswordAsync(changePasswordData, _jwtService.GetIdClaim(User));
         return Ok();
     }
 }
