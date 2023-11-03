@@ -1,10 +1,10 @@
-﻿using Chat.Domain.Models;
-using Chat.Domain.Models.Attachments;
-using Chat.Domain.Models.Conversations;
-using Chat.Persistence.EntityConfigurations;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Chat.Domain.Entities;
+using Chat.Domain.Entities.Attachments;
+using Chat.Domain.Entities.Conversations;
+using Chat.Persistence.EntityConfigurations;
 
 namespace Chat.Persistence.Contexts;
 

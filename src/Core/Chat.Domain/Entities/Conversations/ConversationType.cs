@@ -1,4 +1,4 @@
-﻿namespace Chat.Domain.Models.Conversations;
+﻿namespace Chat.Domain.Entities.Conversations;
 
 public enum ConversationType
 {

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Chat.Domain.Models;
 using Chat.Persistence.Contexts;
+using Chat.Domain.Entities;
 using Chat.WebAPI.Extensions;
 using Chat.WebAPI.Middlewares;
 

@@ -1,4 +1,4 @@
-﻿using Chat.Domain.Models.Conversations;
+﻿using Chat.Domain.Entities.Conversations;
 using Chat.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
