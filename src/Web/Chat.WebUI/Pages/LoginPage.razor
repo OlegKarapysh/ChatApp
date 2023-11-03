@@ -35,19 +35,18 @@
 </div>
 
 
-@code {
+@code 
+{
+    public const string Path = "/login";
     public LoginDto LoginData { get; set; } = new();
-    public bool IsSubmitDisabled = false;
+    public bool IsSubmitDisabled;
 
     public async Task HandleSubmit()
     {
         IsSubmitDisabled = true;
-        Console.WriteLine(LoginData.Email);
-        Console.WriteLine(LoginData.Password);
         var loginResult = await AuthService!.LoginAsync(LoginData);
         if (loginResult is not null)
         {
-            Console.WriteLine($"Error during registration! {loginResult.Message}");
             Notification!.ShowError(loginResult.Message);
             IsSubmitDisabled = false;
         }
@@ -55,10 +54,5 @@
         {
             Navigation!.NavigateTo("/");
         }
-    }
-
-    private void ToggleSubmitDisabled()
-    {
-        IsSubmitDisabled = !IsSubmitDisabled;
     }
 }

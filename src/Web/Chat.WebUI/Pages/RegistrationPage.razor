@@ -46,21 +46,18 @@
 </div>
 
 
-@code {
+@code 
+{
+    public const string Path = "/registration";
     public RegistrationDto RegistrationData { get; set; } = new();
-    public bool IsSubmitDisabled = false;
+    public bool IsSubmitDisabled;
 
     public async Task HandleSubmit()
     {
         IsSubmitDisabled = true;
-        Console.WriteLine(RegistrationData.UserName);
-        Console.WriteLine(RegistrationData.Email);
-        Console.WriteLine(RegistrationData.Password);
-        Console.WriteLine(RegistrationData.RepeatPassword);
         var registrationResult = await AuthService!.RegisterAsync(RegistrationData);
         if (registrationResult is not null)
         {
-            Console.WriteLine($"Error during registration! {registrationResult.Message}");
             Notification!.ShowError(registrationResult.Message);
             IsSubmitDisabled = false;
         }

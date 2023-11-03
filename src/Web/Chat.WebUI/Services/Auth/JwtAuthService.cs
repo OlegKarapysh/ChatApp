@@ -34,7 +34,6 @@ public sealed class JwtAuthService : IJwtAuthService
         }
         
         await SaveTokens(response.Content);
-        
         _authenticationState.NotifyAuthenticationChanged();
         
         return default;

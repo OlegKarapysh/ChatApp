@@ -1,23 +1,33 @@
 ﻿@inject INotificationService Notification
 
-<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(App).Assembly">
-        <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-            <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
-        </Found>
-        <NotFound>
-            <PageTitle>Not found</PageTitle>
-            <LayoutView>
-                <p role="alert">Sorry, there's nothing at this address.</p>
-            </LayoutView>
-        </NotFound>
-    </Router>
-</CascadingAuthenticationState>
-<ToastNotification @ref=Toast></ToastNotification>
+<ErrorBoundary @ref="ErrorBoundary">
+    <ChildContent>
+        <CascadingAuthenticationState>
+            <Router AppAssembly="@typeof(App).Assembly">
+                <Found Context="routeData">
+                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+                    <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
+                </Found>
+                <NotFound>
+                    <PageTitle>Not found</PageTitle>
+                    <LayoutView>
+                        <p role="alert">Sorry, there's nothing at this address.</p>
+                    </LayoutView>
+                </NotFound>
+            </Router>
+        </CascadingAuthenticationState>
+        <ToastNotification @ref=Toast></ToastNotification>
+    </ChildContent>
+    <ErrorContent>
+        <p>Oops, something went wrong...</p>
+        <button @onclick="() => ErrorBoundary.Recover()">Reload</button>
+    </ErrorContent>
+</ErrorBoundary>
+
 
 @code {
-    public ToastNotification Toast { get; set; }
+    public ToastNotification Toast { get; set; } = default!;
+    public ErrorBoundary ErrorBoundary { get; set; } = default!;
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {

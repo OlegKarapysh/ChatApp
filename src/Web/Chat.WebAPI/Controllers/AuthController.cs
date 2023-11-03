@@ -29,13 +29,9 @@ public sealed class AuthController : ControllerBase
         return Ok(await _authService.LoginAsync(loginData));
     }
 
-    [Authorize(AuthenticationSchemes = "Bearer"), HttpPost("change-password")]
+    [Authorize, HttpPost("change-password")]
     public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordDto changePasswordData)
     {
-        var user = User.Claims.ToList();
-        var b = HttpContext.Request;
-        
-        var a = HttpContext.Request.Headers.Authorization;
         var isParsed = int.TryParse(User.FindFirstValue(IJwtService.IdClaimName), out var id);
         if (!isParsed)
         {

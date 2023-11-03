@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
             policyBuilder.WithOrigins(configuration["Cors:AllowedOrigin"]!)
                          .AllowAnyHeader()
                          .AllowAnyMethod()
-                         //.AllowCredentials()
+                         .AllowCredentials()
                          .WithExposedHeaders(configuration["Cors:TokenExpiredHeader"]!);
         }));
     }
@@ -40,18 +40,23 @@ public static class ServiceCollectionExtensions
             options.SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
         });
         
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
         {
             options.ClaimsIssuer = jwtOptions[nameof(JwtOptions.Issuer)];
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidIssuer = jwtOptions[nameof(JwtOptions.Issuer)],
-
+        
                 ValidateAudience = true,
                 ValidAudience = jwtOptions[nameof(JwtOptions.Audience)],
-
+        
                 ValidateLifetime = true,
                 RequireExpirationTime = false,
         
@@ -67,7 +72,7 @@ public static class ServiceCollectionExtensions
                     {
                         context.Response.Headers.Add(configuration["Cors:TokenExpiredHeader"]!, "true");
                     }
-
+        
                     return Task.CompletedTask;
                 }
             };

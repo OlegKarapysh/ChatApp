@@ -9,12 +9,12 @@ public static class ServiceCollectionExtensions
     public static void AddCustomHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(configuration["ApiUrl"]!) });
-        //services.AddTransient<JwtAuthInterceptor>();
-        // services.AddHttpClient(httpClient =>
-        // {
-        //     httpClient.BaseAddress = new Uri(configuration["ApiUrl"]!);
-        // });
-        //.AddHttpMessageHandler<JwtAuthInterceptor>();
+        //  services.AddTransient<JwtAuthInterceptor>();
+        //  services.AddHttpClient<HttpClient>(httpClient =>
+        //  {
+        //      httpClient.BaseAddress = new Uri(configuration["ApiUrl"]!);
+        //  });
+        // .AddHttpMessageHandler<JwtAuthInterceptor>();
     }
 
     public static void AddCustomServices(this IServiceCollection services)
