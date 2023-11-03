@@ -6,6 +6,7 @@
     display: flex;
     position: fixed;
     flex-direction: row;
+    z-index: 1000;
     animation: fadein 1.5s;
     bottom: 10%;
     right: 5%;

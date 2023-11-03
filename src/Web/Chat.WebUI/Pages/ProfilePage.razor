@@ -1,0 +1,16 @@
+﻿@page "/profile"
+
+@attribute [Authorize]
+
+<PageTitle>Profile</PageTitle>
+
+<h1>Profile</h1>
+
+@code 
+{
+    public const string Path = "/profile";
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+}

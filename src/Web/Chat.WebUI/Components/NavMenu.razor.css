@@ -1,7 +1,3 @@
-.nav-link {
-    cursor: pointer;
-}
-
 .navbar-toggler {
     background-color: rgba(255, 255, 255, 0.1);
 }
@@ -23,6 +19,7 @@
 }
 
 .nav-item {
+    cursor: pointer;
     font-size: 0.9rem;
     padding-bottom: 0.5rem;
 }
