@@ -1,13 +1,12 @@
 ﻿using Chat.Domain.Abstract;
+using Microsoft.AspNetCore.Identity;
 
 namespace Chat.Domain.Models;
 
-public class User : EntityBase<int>, ICreatableEntity<int>
+public class User : IdentityUser<int>, ICreatableEntity
 {
-    public string Name { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string AvatarUrl { get; set; } = string.Empty;
-    public string PasswordHash { get; set; } = string.Empty;
-    public string PasswordSalt { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; } = DateTime.MinValue;
+    public string? AvatarUrl { get; set; }
+    public string? RefreshToken { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public IList<Message> Messages { get; set; } = new List<Message>();
 }

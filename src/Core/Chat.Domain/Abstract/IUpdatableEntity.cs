@@ -1,7 +1,6 @@
 ﻿namespace Chat.Domain.Abstract;
 
-public interface IUpdatableEntity<T>
+public interface IUpdatableEntity
 {
-    public T Id { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

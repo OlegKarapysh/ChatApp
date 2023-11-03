@@ -1,0 +1,32 @@
+﻿using Chat.Domain.Models;
+using Chat.Domain.Models.Attachments;
+using Chat.Domain.Models.Conversations;
+using Chat.Persistence.EntityConfigurations;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace Chat.Persistence.Contexts;
+
+public class ChatDbContext : IdentityDbContext<User, IdentityRole<int>, int>
+{
+    public const string SqlGetDateFunction = "getutcdate()";
+    
+    public DbSet<Conversation> Conversations => Set<Conversation>();
+    public DbSet<Message> Messages => Set<Message>();
+    public DbSet<Attachment> Attachments => Set<Attachment>();
+    
+    public ChatDbContext()
+    {
+    }
+    public ChatDbContext(DbContextOptions<ChatDbContext> options)
+        : base(options)
+    {
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(MessageConfig).Assembly);
+    }
+}
