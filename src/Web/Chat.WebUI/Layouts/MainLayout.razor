@@ -13,12 +13,12 @@
             <div class="top-row px-4">
                 <AuthorizeView>
                     <Authorized>
-                        <NavLink class="nav-link" @onclick="RedirectToChangePassword">Change password</NavLink>
+                        <NavLink class="nav-link" href="@ChangePasswordPage.Path" @onclick="RedirectToChangePassword">Change password</NavLink>
                         <NavLink class="nav-link" href="login" @onclick="async () => await AuthService!.Logout()">Log out</NavLink>
                     </Authorized>
                     <NotAuthorized>
-                        <NavLink class="nav-link" href="registration">Register</NavLink>
-                        <NavLink class="nav-link" href="login">Log in</NavLink>
+                        <NavLink class="nav-link" href="@RegistrationPage.Path">Register</NavLink>
+                        <NavLink class="nav-link" href="@LoginPage.Path">Log in</NavLink>
                     </NotAuthorized>
                 </AuthorizeView>
             </div>
@@ -33,6 +33,6 @@
 
     public void RedirectToChangePassword()
     {
-        Navigation!.NavigateTo("/change-password");
+        Navigation!.NavigateTo(ChangePasswordPage.Path);
     }
 }
