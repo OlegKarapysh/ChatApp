@@ -11,11 +11,12 @@
 <h1>People</h1>
 
 <RadzenTextBox Placeholder="Type to search..." @bind-Value="SearchFilter"></RadzenTextBox>
-<RadzenDropDown TValue="string" Data="UserProperties" @bind-Value="SortingProperty"></RadzenDropDown>
-<RadzenRadioButtonList @bind-Value="SortingOrder" TValue="int" class="mb-5">
+<RadzenDropDown TValue="string" Data="UserProperties" @bind-Value="SortingProperty" Change="OnSortingPropertyChanged">
+</RadzenDropDown>
+<RadzenRadioButtonList @bind-Value="SortingOrder" TValue="SortingOrder" class="mb-5" Change="OnSortingOrderChanged">
     <Items>
-        <RadzenRadioButtonListItem Text="Ascending" Value="1" />
-        <RadzenRadioButtonListItem Text="Descending" Value="2" />
+        <RadzenRadioButtonListItem Text="Ascending" Value="SortingOrder.Ascending" />
+        <RadzenRadioButtonListItem Text="Descending" Value="SortingOrder.Descending" />
     </Items>
 </RadzenRadioButtonList>
 <RadzenButton Click="OnSearch">Search</RadzenButton>
@@ -53,7 +54,7 @@
     public string SortingProperty { get; set; } = nameof(UserDto.UserName);
 
     [QueryStringParameter]
-    public int SortingOrder { get; set; } = 1;
+    public SortingOrder SortingOrder { get; set; } = SortingOrder.Ascending;
     
     public RadzenDataGrid<UserDto> DataGrid { get; set; } = default!;
     public RadzenPager Pager { get; set; } = default!;
@@ -107,7 +108,17 @@
 
     private async Task OnSearch()
     {
-        await this.UpdateQueryString(Navigation!, JsRuntime!);
+        await UpdateQueryStringParameters();
+    }
+
+    private async Task OnSortingPropertyChanged()
+    {
+        await UpdateQueryStringParameters();
+    }
+
+    private async Task OnSortingOrderChanged()
+    {
+        await UpdateQueryStringParameters();
     }
     
     private async Task OnPageChanged(PagerEventArgs args)
@@ -133,5 +144,10 @@
             Console.WriteLine(us.FirstName);
         }
         UsersOnPage = usersPagedView;
+    }
+
+    private async Task UpdateQueryStringParameters()
+    {
+        await this.UpdateQueryString(Navigation!, JsRuntime!);
     }
 }
