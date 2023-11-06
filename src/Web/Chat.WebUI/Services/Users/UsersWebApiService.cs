@@ -15,6 +15,8 @@ public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
         BaseRoute = "/users";
     }
 
+    public async Task<WebApiResponse<IList<UserDto>>> GetAllUsers() => await GetAsync<IList<UserDto>>("/all");
+
     public async Task<WebApiResponse<UserDto>> GetCurrentUserInfoAsync() => await GetAsync<UserDto>();
 
     public async Task<ErrorDetailsDto?> UpdateUserInfoAsync(UserDto userData) => await PutAsync(userData);

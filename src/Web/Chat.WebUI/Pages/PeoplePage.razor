@@ -1,0 +1,137 @@
+﻿@page "/people"
+
+@attribute [Authorize]
+
+@inject IUsersWebApiService UserService
+@inject IToastService ToastNotification
+@inject IJSRuntime JsRuntime
+@inject SpinnerService Spinner
+@inject NavigationManager Navigation
+
+<h1>People</h1>
+
+<RadzenTextBox Placeholder="Type to search..." @bind-Value="SearchFilter"></RadzenTextBox>
+<RadzenDropDown TValue="string" Data="UserProperties" @bind-Value="SortingProperty"></RadzenDropDown>
+<RadzenRadioButtonList @bind-Value="SortingOrder" TValue="int" class="mb-5">
+    <Items>
+        <RadzenRadioButtonListItem Text="Ascending" Value="1" />
+        <RadzenRadioButtonListItem Text="Descending" Value="2" />
+    </Items>
+</RadzenRadioButtonList>
+<RadzenButton Click="OnSearch">Search</RadzenButton>
+
+<RadzenDataGrid @ref="DataGrid" TItem="UserDto" Data="UsersOnPage" ColumnWidth="300px"
+                AllowColumnResize="true" AllowAlternatingRows="false">
+    <Columns>
+        <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="Username" Width="120px" />
+        <RadzenDataGridColumn TItem="UserDto" Property="FirstName" Title="First name" Frozen="true" Width="160px"/>
+        <RadzenDataGridColumn TItem="UserDto" Property="LastName" Title="Last name" Width="160px"/>
+        <RadzenDataGridColumn TItem="UserDto" Property="PhoneNumber" Title="Phone number" Width="200px"/>
+        <RadzenDataGridColumn TItem="UserDto" Property="Email" Title="Email" Width="120px"/>
+    </Columns>
+</RadzenDataGrid>
+<RadzenPager @ref="Pager" PageSize="DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
+             AlwaysVisible="true" Count="UsersCount" PageChanged="OnPageChanged"></RadzenPager>
+
+@code 
+{
+    public const string Path = "/people";
+    public const int DefaultPageSize = 5;
+    public const int DefaultPageNumbersCount = 3;
+    
+    [QueryStringParameter]
+    public string SearchFilter { get; set; } = string.Empty;
+
+    [QueryStringParameter]
+    public int Page
+    {
+        get => _page;
+        set => _page = value < 1 ? 1 : value;
+    }
+    
+    [QueryStringParameter]
+    public string SortingProperty { get; set; } = nameof(UserDto.UserName);
+
+    [QueryStringParameter]
+    public int SortingOrder { get; set; } = 1;
+    
+    public RadzenDataGrid<UserDto> DataGrid { get; set; } = default!;
+    public RadzenPager Pager { get; set; } = default!;
+    public int UsersCount { get; set; }
+    public string[] UserProperties = {
+        nameof(UserDto.UserName),
+        nameof(UserDto.FirstName),
+        nameof(UserDto.LastName),
+        nameof(UserDto.Email),
+        nameof(UserDto.PhoneNumber)
+    };
+    public IList<UserDto> UsersOnPage { get; set; } = new List<UserDto>();
+    protected IList<UserDto> AllUsers;
+    private int _page;
+
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        this.SetParametersFromQueryString(Navigation!);
+        return base.SetParametersAsync(parameters);
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Spinner!.Show();
+        AllUsers = Enumerable.Range(1, 12).Select(x => new UserDto()
+        {
+            Email = "email" + x,
+            UserName = "Username" + x,
+            FirstName = "Firstname" + x,
+            LastName = "LastName" + x,
+            PhoneNumber = "Phone" + x
+        }).ToList();
+        UsersCount = AllUsers.Count;
+        Spinner.Hide();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool isFirstRender)
+    {
+        if (isFirstRender)
+        {
+            var pageIndex = Page - 1;
+            await Pager.GoToPage(pageIndex);
+            await OnPageChanged(new PagerEventArgs
+            {
+                Skip = pageIndex * DefaultPageSize,
+                Top = DefaultPageSize,
+                PageIndex = pageIndex
+            });
+        }
+    }
+
+    private async Task OnSearch()
+    {
+        await this.UpdateQueryString(Navigation!, JsRuntime!);
+    }
+    
+    private async Task OnPageChanged(PagerEventArgs args)
+    {
+        Console.WriteLine("Skip: " + args.Skip);
+        Console.WriteLine("PageIndex: " + args.PageIndex);
+        Console.WriteLine("Top: " + args.Top);
+        UpdatePage(args.PageIndex);
+        UpdateUsers(args.Skip, args.Top);
+        await this.UpdateQueryString(Navigation!, JsRuntime!);
+    }
+
+    private void UpdatePage(int pageIndex)
+    {
+        Page = pageIndex + 1;
+    }
+
+    private void UpdateUsers(int skip, int take)
+    {
+        var usersPagedView = AllUsers.Skip(skip).Take(take).ToList();
+        foreach (var us in usersPagedView)
+        {
+            Console.WriteLine(us.FirstName);
+        }
+        UsersOnPage = usersPagedView;
+    }
+}

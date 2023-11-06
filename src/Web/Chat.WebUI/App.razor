@@ -1,15 +1,15 @@
-﻿<Spinner></Spinner>
-<ErrorBoundary @ref="ErrorBoundary">
+﻿<ErrorBoundary @ref="ErrorBoundary">
     <ChildContent>
+        <Spinner></Spinner>
         <CascadingAuthenticationState>
             <Router AppAssembly="@typeof(App).Assembly">
                 <Found Context="routeData">
                     <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                        <NotAuthorized>  
-                            <h4>Not authorized.</h4>  
-                        </NotAuthorized>  
-                        <Authorizing>  
-                            <h4>Authentication in progress...</h4>  
+                        <NotAuthorized>
+                            <h4>Not authorized.</h4>
+                        </NotAuthorized>
+                        <Authorizing>
+                            <h4>Authentication in progress...</h4>
                         </Authorizing>
                     </AuthorizeRouteView>
                     <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
@@ -27,7 +27,7 @@
                         IconType="IconType.FontAwesome"
                         SuccessClass="success-toast-override"
                         SuccessIcon="fa fa-thumbs-up"
-                        ErrorIcon="fa fa-bug" />
+                        ErrorIcon="fa fa-bug"/>
     </ChildContent>
     <ErrorContent>
         <p>Oops, something went wrong...</p>
