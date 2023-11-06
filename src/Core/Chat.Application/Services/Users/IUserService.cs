@@ -7,4 +7,5 @@ public interface IUserService
     Task<IList<UserDto>> GetAllUsersAsync();
     Task<UserDto> GetUserByIdAsync(int id);
     Task UpdateUserAsync(UserDto userData, int id);
+    Task<IList<UserDto>> SearchUsersTest(string searchFilter);
 }

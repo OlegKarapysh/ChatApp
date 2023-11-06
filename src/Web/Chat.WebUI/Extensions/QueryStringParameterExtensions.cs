@@ -86,7 +86,7 @@ public static class QueryStringParameterExtensions
 
     private static PropertyInfo[] GetProperties<T>()
     {
-        return typeof(T).GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        return typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
     }
 
     private static string? GetQueryStringParameterName(PropertyInfo property)

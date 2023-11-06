@@ -59,7 +59,7 @@
     public RadzenDataGrid<UserDto> DataGrid { get; set; } = default!;
     public RadzenPager Pager { get; set; } = default!;
     public int UsersCount { get; set; }
-    public string[] UserProperties = {
+    public readonly string[] UserProperties = {
         nameof(UserDto.UserName),
         nameof(UserDto.FirstName),
         nameof(UserDto.LastName),

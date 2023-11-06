@@ -30,6 +30,13 @@ public sealed class UsersController : ControllerBase
         return Ok(await _userService.GetUserByIdAsync(_jwtService.GetIdClaim(User)));
     }
 
+    [AllowAnonymous, HttpGet("search")]
+    public async Task<ActionResult<IList<UserDto>>> SearchUsers()
+    {
+        var search = "Oleh";
+        return Ok(await _userService.SearchUsersTest(search));
+    }
+
     [HttpPut]
     public async Task<IActionResult> UpdateUserInfoAsync(UserDto userData)
     {
