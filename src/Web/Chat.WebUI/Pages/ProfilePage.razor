@@ -1,16 +1,80 @@
 ﻿@page "/profile"
 
 @attribute [Authorize]
+@inject IToastService ToastNotification
+@inject IUsersWebApiService UserService
+@inject SpinnerService Spinner
 
 <PageTitle>Profile</PageTitle>
 
 <h1>Profile</h1>
 
+<div class="card">
+    <EditForm Model="UserData" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator/>
+        <div class="form-group">
+            <label class="form-label" for="username">Username:</label>
+            <InputText class="form-control" id="username" @bind-Value="UserData.UserName"></InputText>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="first-name">First name:</label>
+            <InputText class="form-control" id="first-name" @bind-Value="UserData.FirstName"></InputText>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="last-name">Last name:</label>
+            <InputText class="form-control" id="last-name" @bind-Value="UserData.LastName"></InputText>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="email">Email:</label>
+            <InputText class="form-control" id="email" @bind-Value="UserData.Email"></InputText>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="phone-number">Phone number:</label>
+            <InputText class="form-control" id="phone-number" @bind-Value="UserData.PhoneNumber"></InputText>
+        </div>
+        
+        <div class="form-group mt-2">
+            <button class="btn btn-outline-primary float-end" disabled="@IsSubmitDisabled" type="submit">Save changes</button>
+        </div>
+    </EditForm>
+</div>
+
+
 @code 
 {
     public const string Path = "/profile";
+    public UserDto UserData { get; set; } = new();
+    public bool IsSubmitDisabled;
 
     protected override async Task OnInitializedAsync()
     {
+        Spinner!.Show();
+        var response = await UserService!.GetCurrentUserInfoAsync();
+        if (!response.IsSuccessful)
+        {
+            ToastNotification!.ShowError(response.ErrorDetails?.Message ?? "Something went wrong...");
+            return;
+        }
+        
+        UserData = response.Content ?? UserData;
+        Spinner.Hide();
+    }
+    
+    public async Task HandleSubmit()
+    {
+        Spinner!.Show();
+        IsSubmitDisabled = true;
+        var response = await UserService!.UpdateUserInfoAsync(UserData);
+        if (response is not null)
+        {
+            ToastNotification!.ShowError(response.Message);
+        }
+        else
+        {
+            ToastNotification!.ShowSuccess("Your profile information is successfully updated!");
+        }
+        
+        IsSubmitDisabled = false;
+        Spinner.Hide();
     }
 }

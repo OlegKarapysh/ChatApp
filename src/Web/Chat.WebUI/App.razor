@@ -1,4 +1,5 @@
-﻿<ErrorBoundary @ref="ErrorBoundary">
+﻿<Spinner></Spinner>
+<ErrorBoundary @ref="ErrorBoundary">
     <ChildContent>
         <CascadingAuthenticationState>
             <Router AppAssembly="@typeof(App).Assembly">
@@ -33,7 +34,6 @@
         <button @onclick="() => ErrorBoundary.Recover()">Reload</button>
     </ErrorContent>
 </ErrorBoundary>
-
 
 @code 
 {

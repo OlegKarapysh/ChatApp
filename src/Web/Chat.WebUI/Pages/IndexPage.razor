@@ -1,27 +1,16 @@
 ﻿@page "/"
 @using System.Security.Claims
-@inject IToastService toastService
 
 
-<PageTitle>IndexPage</PageTitle>
+<PageTitle>Home</PageTitle>
 
-<RadzenButton Text="Hi"></RadzenButton>
-
-
-<h1>Toast Demo</h1>
-
-To show a toast just click one of the buttons below.
-
-<button class="btn btn-info" @onclick="@(() => toastService.ShowInfo("I'm an INFO message"))">Info Toast</button>
-<button class="btn btn-success" @onclick="@(() => toastService.ShowSuccess("I'm a SUCCESS message with a custom title"))">Success Toast</button>
-<button class="btn btn-warning" @onclick="@(() => toastService.ShowWarning("I'm a WARNING message"))">Warning Toast</button>
-<button class="btn btn-danger" @onclick="@(() => toastService.ShowError("I'm an ERROR message"))">Error Toast</button>
+<h1>Home</h1>
 
 <AuthorizeView>
     <Authorized>
-        <h1>Hello, @context.User.FindFirstValue("sub")</h1>
+        <h1>Hello, @(context.User.FindFirstValue("sub") ?? "Unknown")!</h1>
     </Authorized>
     <NotAuthorized>
-        <h1>Hello, anonymous</h1>
+        <h1>Hello, anonymous!</h1>
     </NotAuthorized>
 </AuthorizeView>

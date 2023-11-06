@@ -12,8 +12,7 @@ public abstract class WebApiServiceBase
     private protected readonly HttpClient HttpClient;
     private readonly ILocalStorageService _localStorage;
     private protected readonly string ApiUrl;
-    private protected string BaseRoute { get; init; }
-    private protected string FullRoute => $"{ApiUrl}{BaseRoute}";
+    private protected abstract string BaseRoute { get; init; }
     
     public WebApiServiceBase(HttpClient httpClient, ILocalStorageService localStorage)
     {
@@ -22,11 +21,55 @@ public abstract class WebApiServiceBase
         ApiUrl = HttpClient.BaseAddress?.ToString() ?? string.Empty;
     }
 
+    private protected async Task<WebApiResponse<TResponse>> GetAsync<TResponse>(string route = "")
+    {
+        var httpResponse = await SendRequestWithAuthorizationHeader(
+            () => HttpClient.GetAsync(BuildFullRoute(route)));
+
+        return await ParseWebApiResponse<TResponse>(httpResponse);
+    }
+
     private protected async Task<WebApiResponse<TResponse>> PostAsync<TResponse, TData>(string route, TData data)
     {
-        await TryAddAuthorization();
-        var httpResponse = await HttpClient.PostAsJsonAsync($"{FullRoute}{route}", data);
+        var httpResponse = await SendRequestWithAuthorizationHeader(
+            () => HttpClient.PostAsJsonAsync(BuildFullRoute(route), data));
+
+        return await ParseWebApiResponse<TResponse>(httpResponse);
+    }
+
+    private protected async Task<ErrorDetailsDto?> PutAsync<TData>(TData data, string route = "")
+    {
+        var httpResponse = await SendRequestWithAuthorizationHeader(
+            () => HttpClient.PutAsJsonAsync(BuildFullRoute(route), data));
+
+        return httpResponse.IsSuccessStatusCode
+            ? default
+            : await httpResponse.Content.ReadFromJsonAsync<ErrorDetailsDto>();
+    }
+    
+    private protected async Task<HttpResponseMessage> SendRequestWithAuthorizationHeader(
+        Func<Task<HttpResponseMessage>> httpRequest)
+    {
+        await TryAddAuthorizationHeader();
+        return await httpRequest.Invoke();
+    }
+    
+    private protected async Task<bool> TryAddAuthorizationHeader()
+    {
+        var jwt = await _localStorage.GetItemAsStringAsync(JwtAuthService.JwtLocalStorageKey);
+        if (string.IsNullOrEmpty(jwt))
+        {
+            return false;
+        }
         
+        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        return true;
+    }
+
+    private protected string BuildFullRoute(string relativeRoute) => $"{ApiUrl}{BaseRoute}{relativeRoute}";
+
+    private async Task<WebApiResponse<TResponse>> ParseWebApiResponse<TResponse>(HttpResponseMessage httpResponse)
+    {
         return httpResponse.IsSuccessStatusCode
             ? new WebApiResponse<TResponse>
             {
@@ -38,18 +81,5 @@ public abstract class WebApiServiceBase
                 IsSuccessful = false,
                 ErrorDetails = await httpResponse.Content.ReadFromJsonAsync<ErrorDetailsDto>()
             };
-    }
-
-    private protected async Task<bool> TryAddAuthorization()
-    {
-        var jwt = await _localStorage.GetItemAsStringAsync(JwtAuthService.JwtLocalStorageKey);
-        if (string.IsNullOrEmpty(jwt))
-        {
-            return false;
-        }
-        Console.WriteLine(jwt);
-        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-        Console.WriteLine(HttpClient.DefaultRequestHeaders.Authorization);
-        return true;
     }
 }
