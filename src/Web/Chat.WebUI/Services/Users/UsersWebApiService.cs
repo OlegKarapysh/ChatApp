@@ -29,8 +29,7 @@ public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
             { nameof(UsersPagedSearchFilterDto.SortingProperty), searchData.SortingProperty },
             { nameof(UsersPagedSearchFilterDto.SortingOrder), ((int)searchData.SortingOrder).ToString() },
         };
-        var a = QueryHelpers.AddQueryString("/search/", queryParams);
-        Console.WriteLine(a);
+        
         return await GetAsync<PagedUsersDto>(QueryHelpers.AddQueryString("/search/", queryParams));
     }
 

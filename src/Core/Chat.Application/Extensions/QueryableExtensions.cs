@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
-using Chat.Domain.Enums;
 using LinqKit;
+using Chat.Domain.Enums;
 
 namespace Chat.Application.Extensions;
 
