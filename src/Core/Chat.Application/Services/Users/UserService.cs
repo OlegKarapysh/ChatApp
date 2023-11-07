@@ -1,5 +1,4 @@
-﻿using LinqKit;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Chat.Application.Mappings;
 using Chat.Application.RequestExceptions;
 using Chat.Application.Extensions;
@@ -16,13 +15,11 @@ public sealed class UserService : IUserService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IRepository<User, int> _userRepository;
     private readonly UserManager<User> _userManager;
-    private readonly PredicateFactory _predicateFactory;
 
-    public UserService(IUnitOfWork unitOfWork, UserManager<User> userManager, PredicateFactory predicateFactory)
+    public UserService(IUnitOfWork unitOfWork, UserManager<User> userManager)
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
-        _predicateFactory = predicateFactory;
         _userRepository = _unitOfWork.GetRepository<User, int>();
     }
 
@@ -46,13 +43,7 @@ public sealed class UserService : IUserService
 
     public async Task<PagedUsersDto> SearchUsersPagedAsync(UsersPagedSearchFilterDto searchData)
     {
-        var foundUsers = _userManager.Users;
-        if (!string.IsNullOrEmpty(searchData.SearchFilter))
-        {
-            var searchPredicate = _predicateFactory.CreateSearchPredicate(searchData.SearchFilter);
-            foundUsers = _userManager.Users.AsExpandable().Where(x => searchPredicate.Invoke(x));
-        }
-        
+        var foundUsers = _userManager.Users.SearchWhere<User, UserDto>(searchData.SearchFilter);
         var usersCount = foundUsers.Count();
         var pageSize = PageInfo.DefaultPageSize;
         var foundUsersPage = foundUsers

@@ -31,7 +31,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
-        services.AddScoped<PredicateFactory>();
     }
     
     public static void AddAndConfigureJwtAuthentication(this IServiceCollection services, IConfiguration configuration)

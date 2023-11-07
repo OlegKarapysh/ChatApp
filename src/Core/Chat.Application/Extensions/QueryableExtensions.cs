@@ -1,29 +1,67 @@
 ﻿using System.Linq.Expressions;
-using Chat.Domain.Entities;
+using System.Reflection;
 using Chat.Domain.Enums;
+using LinqKit;
 
 namespace Chat.Application.Extensions;
 
 public static class QueryableExtensions
 {
-    public static IQueryable<User> OrderBy(this IQueryable<User> users, string propertyName, SortingOrder order)
+    public static IQueryable<TEntity> OrderBy<TEntity>(
+        this IQueryable<TEntity> entities, string sortingPropertyName, SortingOrder sortingOrder)
     {
-        return propertyName switch
-        {
-            nameof(User.UserName) => users.OrderBy(x => x.UserName, order),
-            nameof(User.FirstName) => users.OrderBy(x => x.FirstName, order),
-            nameof(User.LastName) => users.OrderBy(x => x.LastName, order),
-            nameof(User.Email) => users.OrderBy(x => x.Email, order),
-            nameof(User.PhoneNumber) => users.OrderBy(x => x.PhoneNumber, order),
-            _ => users.OrderBy(x => x.UserName, order),
-        };
+        var sortingMethod = sortingOrder == SortingOrder.Ascending ? "OrderBy" : "OrderByDescending";
+        var sortingProperty = typeof(TEntity).GetProperty(sortingPropertyName);
+        var parameter = Expression.Parameter(typeof(TEntity), "entity");
+        var propertyAccess = Expression.MakeMemberAccess(parameter, sortingProperty);
+        var orderByLambda = Expression.Lambda(propertyAccess, parameter);
+        var resultExpression = Expression.Call(
+            typeof(Queryable), sortingMethod, new[] { typeof(TEntity), sortingProperty.PropertyType },
+            entities.Expression, Expression.Quote(orderByLambda));
+        
+        return entities.Provider.CreateQuery<TEntity>(resultExpression);
     }
 
-    private static IQueryable<User> OrderBy(
-        this IQueryable<User> users, Expression<Func<User, string?>> sortExpression, SortingOrder order)
+    public static IQueryable<TEntity> SearchWhere<TEntity, TSearch>(
+        this IQueryable<TEntity> entities, string? searchValues)
     {
-        return order == SortingOrder.Ascending
-            ? users.OrderBy(sortExpression)
-            : users.OrderByDescending(sortExpression);
+        if (string.IsNullOrEmpty(searchValues))
+        {
+            return entities;
+        }
+        
+        var words = searchValues.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var predicate = PredicateBuilder.New<TEntity>(true);
+
+        foreach (var property in GetStringProperties<TEntity, TSearch>())
+        {
+            foreach (var word in words)
+            {
+                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                var entity = Expression.Parameter(typeof(TEntity), "entity");
+                var propertyAccessor = Expression.PropertyOrField(entity, property.Name);
+                var searchWordConstant = Expression.Constant(word);
+                var containsCall = Expression.Call(propertyAccessor, containsMethod, searchWordConstant);
+                var lambdaPredicate = Expression.Lambda<Func<TEntity, bool>>(containsCall, entity);
+                predicate = predicate.Or(lambdaPredicate);
+            }
+        }
+
+        return entities.AsExpandable().Where(x => ((Expression<Func<TEntity, bool>>)predicate).Invoke(x));
+    }
+    
+    private static IEnumerable<PropertyInfo> GetStringProperties<T>(string[] propertyNames)
+    {
+        return typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                        .Where(x => x.PropertyType == typeof(string) && propertyNames.Contains(x.Name));
+    }
+
+    private static IEnumerable<PropertyInfo> GetStringProperties<T, U>()
+    {
+        var targetProperties = typeof(U).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                        .Where(x => x.PropertyType == typeof(string))
+                                        .Select(x => x.Name)
+                                        .ToArray();
+        return GetStringProperties<T>(targetProperties);
     }
 }
