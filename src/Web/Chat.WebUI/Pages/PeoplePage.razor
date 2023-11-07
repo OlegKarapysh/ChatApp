@@ -1,0 +1,163 @@
+﻿@page "/people"
+@using Chat.Domain.Web
+
+@attribute [Authorize]
+
+@inject IUsersWebApiService UserService
+@inject IToastService ToastNotification
+@inject IJSRuntime JsRuntime
+@inject SpinnerService Spinner
+@inject NavigationManager Navigation
+
+<h1>People</h1>
+
+<RadzenTextBox Placeholder="Type to search..." @bind-Value="SearchFilter"></RadzenTextBox>
+<RadzenDropDown TValue="string" Data="UserProperties" @bind-Value="SortingProperty" Change="OnSortingPropertyChanged">
+</RadzenDropDown>
+<RadzenRadioButtonList @bind-Value="SortingOrder" TValue="int" class="mb-5" Change="OnSortingOrderChanged">
+    <Items>
+        <RadzenRadioButtonListItem Text="Ascending" Value="1" />
+        <RadzenRadioButtonListItem Text="Descending" Value="2" />
+    </Items>
+</RadzenRadioButtonList>
+<RadzenButton Click="OnSearch">Search</RadzenButton>
+
+<RadzenDataGrid @ref="DataGrid" TItem="UserDto" Data="UsersOnPage" ColumnWidth="300px"
+                AllowColumnResize="true" AllowAlternatingRows="false">
+    <Columns>
+        <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="Username" Width="120px" />
+        <RadzenDataGridColumn TItem="UserDto" Property="FirstName" Title="First name" Frozen="true" Width="160px"/>
+        <RadzenDataGridColumn TItem="UserDto" Property="LastName" Title="Last name" Width="160px"/>
+        <RadzenDataGridColumn TItem="UserDto" Property="PhoneNumber" Title="Phone number" Width="200px"/>
+        <RadzenDataGridColumn TItem="UserDto" Property="Email" Title="Email" Width="120px"/>
+    </Columns>
+</RadzenDataGrid>
+<RadzenPager @ref="Pager" PageSize="DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
+             AlwaysVisible="true" Count="UsersCount" PageChanged="OnPageChanged"></RadzenPager>
+
+@code 
+{
+    public const string Path = "/people";
+    public const int DefaultPageSize = 5;
+    public const int DefaultPageNumbersCount = 3;
+    
+    [QueryStringParameter]
+    public string SearchFilter { get; set; } = string.Empty;
+
+    [QueryStringParameter]
+    public int Page
+    {
+        get => _page;
+        set => _page = value < 1 ? 1 : value;
+    }
+    
+    [QueryStringParameter]
+    public string SortingProperty { get; set; } = nameof(UserDto.UserName);
+
+    [QueryStringParameter]
+    public int SortingOrder { get; set; } = (int)Chat.Domain.Enums.SortingOrder.Ascending;
+    
+    public RadzenDataGrid<UserDto> DataGrid { get; set; } = default!;
+    public RadzenPager Pager { get; set; } = default!;
+    public int UsersCount { get; set; }
+    public readonly string[] UserProperties = {
+        nameof(UserDto.UserName),
+        nameof(UserDto.FirstName),
+        nameof(UserDto.LastName),
+        nameof(UserDto.Email),
+        nameof(UserDto.PhoneNumber)
+    };
+    public IList<UserDto> UsersOnPage { get; set; } = new List<UserDto>();
+    private int _page;
+
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        this.SetParametersFromQueryString(Navigation!);
+        return base.SetParametersAsync(parameters);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool isFirstRender)
+    {
+        if (isFirstRender)
+        {
+            var pageIndex = Page - 1;
+            await Pager.GoToPage(pageIndex, true);
+        }
+    }
+
+    private async Task OnSearch()
+    {
+        Page = 1;
+        var pageIndex = Page - 1;
+        await Pager.GoToPage(pageIndex, true);
+        await UpdateQueryStringParameters();
+    }
+
+    private async Task OnSortingPropertyChanged()
+    {
+        await SendAndHandleSearchRequest();
+        await UpdateQueryStringParameters();
+    }
+
+    private async Task OnSortingOrderChanged()
+    {
+        await SendAndHandleSearchRequest();
+        await UpdateQueryStringParameters();
+    }
+    
+    private async Task OnPageChanged(PagerEventArgs args)
+    {
+        UpdatePage(args.PageIndex);
+        await SendAndHandleSearchRequest();
+        await this.UpdateQueryString(Navigation!, JsRuntime!);
+    }
+
+    private void UpdatePagerItemsCount(PageInfo pageInfo)
+    {
+        UsersCount = pageInfo.TotalCount;
+    }
+    
+    private void UpdatePage(int pageIndex)
+    {
+        Page = pageIndex + 1;
+    }
+
+    private void UpdateUsers(UserDto[] users)
+    {
+        UsersOnPage = users;
+    }
+
+    private async Task UpdateQueryStringParameters()
+    {
+        await this.UpdateQueryString(Navigation!, JsRuntime!);
+    }
+
+    private async Task SendAndHandleSearchRequest()
+    {
+        Spinner!.Show();
+        var searchResult = await SendSearchRequest();
+        if (!searchResult.IsSuccessful)
+        {
+            ToastNotification!.ShowError(searchResult.ErrorDetails!.Message);
+        }
+        else
+        {
+            UpdateUsers(searchResult.Content!.Users);
+            UpdatePagerItemsCount(searchResult.Content.PageInfo);
+        }
+        Spinner.Hide();
+    }
+
+    private UsersPagedSearchFilterDto ParseQueryModel() => new()
+    {
+        Page = Page,
+        SearchFilter = SearchFilter,
+        SortingProperty = SortingProperty,
+        SortingOrder = (Chat.Domain.Enums.SortingOrder)SortingOrder
+    };
+
+    private async Task<WebApiResponse<PagedUsersDto>> SendSearchRequest()
+    {
+        return await UserService!.GetSearchedUsersPage(ParseQueryModel());
+    }
+}

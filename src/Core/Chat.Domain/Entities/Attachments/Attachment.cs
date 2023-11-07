@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Chat.Domain.Abstract;
 
-namespace Chat.Domain.Models.Attachments;
+namespace Chat.Domain.Entities.Attachments;
 
 public class Attachment : EntityBase<int>
 {

@@ -1,11 +1,17 @@
-﻿@inject INotificationService Notification
-
-<ErrorBoundary @ref="ErrorBoundary">
+﻿<ErrorBoundary @ref="ErrorBoundary">
     <ChildContent>
+        <Spinner></Spinner>
         <CascadingAuthenticationState>
             <Router AppAssembly="@typeof(App).Assembly">
                 <Found Context="routeData">
-                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                        <NotAuthorized>
+                            <h4>Not authorized.</h4>
+                        </NotAuthorized>
+                        <Authorizing>
+                            <h4>Authentication in progress...</h4>
+                        </Authorizing>
+                    </AuthorizeRouteView>
                     <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
                 </Found>
                 <NotFound>
@@ -16,7 +22,12 @@
                 </NotFound>
             </Router>
         </CascadingAuthenticationState>
-        <ToastNotification @ref=Toast></ToastNotification>
+        <BlazoredToasts Position="ToastPosition.BottomRight"
+                        Timeout="10"
+                        IconType="IconType.FontAwesome"
+                        SuccessClass="success-toast-override"
+                        SuccessIcon="fa fa-thumbs-up"
+                        ErrorIcon="fa fa-bug"/>
     </ChildContent>
     <ErrorContent>
         <p>Oops, something went wrong...</p>
@@ -24,14 +35,7 @@
     </ErrorContent>
 </ErrorBoundary>
 
-
-@code {
-    public ToastNotification Toast { get; set; } = default!;
+@code 
+{
     public ErrorBoundary ErrorBoundary { get; set; } = default!;
-
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        Notification!.NotificationRaised += Toast.ShowMessage;
-        return Task.CompletedTask;
-    }
 }

@@ -1,4 +1,4 @@
-﻿using Chat.Domain.Models.Attachments;
+﻿using Chat.Domain.Entities.Attachments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -1,7 +1,11 @@
 ﻿using System.Text;
 using Chat.Application.JWT;
+using Chat.Application.Services;
 using Chat.Application.Services.Authentication;
 using Chat.Application.Services.JWT;
+using Chat.Application.Services.Users;
+using Chat.DomainServices.UnitsOfWork;
+using Chat.Persistence.UnitsOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -23,9 +27,12 @@ public static class ServiceCollectionExtensions
 
     public static void AddCustomServices(this IServiceCollection services)
     {
+        services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserService, UserService>();
     }
+    
     public static void AddAndConfigureJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtOptions = configuration.GetSection(nameof(JwtOptions));

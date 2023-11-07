@@ -1,13 +1,13 @@
 ﻿@page "/"
 @using System.Security.Claims
 
-<PageTitle>IndexPage</PageTitle>
+<PageTitle>Home</PageTitle>
 
 <AuthorizeView>
     <Authorized>
-        <h1>Hello, @context.User.FindFirstValue("sub")</h1>
+        <h1>Hello, @(context.User.FindFirstValue("sub") ?? "Unknown")!</h1>
     </Authorized>
     <NotAuthorized>
-        <h1>Hello, anonymous</h1>
+        <h1>Hello, anonymous!</h1>
     </NotAuthorized>
 </AuthorizeView>

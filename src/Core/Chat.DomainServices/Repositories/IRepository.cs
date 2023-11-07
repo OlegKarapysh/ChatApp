@@ -4,7 +4,7 @@ using Chat.Domain.Abstract;
 namespace Chat.DomainServices.Repositories;
 
 public interface IRepository<T, TId>
-    where T : EntityBase<TId>
+    where T : IEntity<TId>
     where TId : struct
 {
     Task<T?> GetByIdAsync(TId id);

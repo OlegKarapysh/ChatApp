@@ -1,4 +1,4 @@
-﻿namespace Chat.Domain.Models.Attachments;
+﻿namespace Chat.Domain.Entities.Attachments;
 
 public enum AttachmentType
 {

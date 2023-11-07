@@ -8,6 +8,8 @@ namespace Chat.WebUI.Services.Auth;
 
 public sealed class AuthWebApiService : WebApiServiceBase, IAuthWebApiService
 {
+    private protected override string BaseRoute { get; init; }
+
     public AuthWebApiService(HttpClient httpClient, ILocalStorageService localStorage)
         : base(httpClient, localStorage)
     {
@@ -30,9 +32,9 @@ public sealed class AuthWebApiService : WebApiServiceBase, IAuthWebApiService
 
     public async Task<ErrorDetailsDto?> ChangePasswordAsync(ChangePasswordDto changePasswordData)
     {
-        await TryAddAuthorization();
+        await TryAddAuthorizationHeader();
         const string changePasswordRoute = "/change-password";
-        var response = await HttpClient.PostAsJsonAsync($"{FullRoute}{changePasswordRoute}", changePasswordData);
+        var response = await HttpClient.PostAsJsonAsync(BuildFullRoute(changePasswordRoute), changePasswordData);
 
         try
         {

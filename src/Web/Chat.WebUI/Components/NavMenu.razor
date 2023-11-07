@@ -1,6 +1,4 @@
-﻿@inject NavigationManager Navigation
-
-<CascadingAuthenticationState>
+﻿<CascadingAuthenticationState>
     <div class="top-row ps-3 navbar navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="">Chat App</a>
@@ -21,9 +19,15 @@
             <AuthorizeView>
                 <Authorized>
                     <div class="nav-item px-3">
-                        <NavLink class="nav-link" @onclick="RedirectToProfile">
-                            <span class="oi oi-avatar" aria-hidden="true"></span> 
+                        <NavLink class="nav-link" href="@ProfilePage.Path">
+                            <span class="oi oi-person" aria-hidden="true"></span> 
                             Profile
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="@PeoplePage.Path">
+                            <span class="oi oi-people" aria-hidden="true"></span> 
+                            People
                         </NavLink>
                     </div>
                 </Authorized>  
@@ -40,10 +44,5 @@
     private void ToggleNavMenu()
     {
         _collapseNavMenu = !_collapseNavMenu;
-    }
-
-    private void RedirectToProfile()
-    {
-        Navigation!.NavigateTo(ProfilePage.Path);
     }
 }

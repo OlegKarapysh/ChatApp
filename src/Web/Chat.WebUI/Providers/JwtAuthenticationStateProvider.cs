@@ -17,7 +17,6 @@ public class JwtAuthenticationStateProvider : AuthenticationStateProvider, INoti
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        Console.WriteLine("Gets auth state!!");
         var jwtTokenFromLocalStorage = await _localStorageService.GetItemAsync<string>(JwtAuthService.JwtLocalStorageKey);
         
         return string.IsNullOrEmpty(jwtTokenFromLocalStorage)

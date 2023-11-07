@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Chat.Domain.ValidationAttributes;
 
+[AttributeUsage(AttributeTargets.Property)]
 public class IdentityPasswordAttribute : ValidationAttribute
 {
     public override bool IsValid(object? value)

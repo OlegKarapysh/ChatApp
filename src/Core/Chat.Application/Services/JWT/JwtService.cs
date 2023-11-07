@@ -2,8 +2,9 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
-using Chat.Application.JWT;
 using Microsoft.Extensions.Options;
+using Chat.Application.JWT;
+using Chat.Application.RequestExceptions;
 
 namespace Chat.Application.Services.JWT;
 
@@ -51,6 +52,17 @@ public sealed class JwtService : IJwtService
         randomNumberGenerator.GetBytes(salt);
 
         return Convert.ToBase64String(salt);
+    }
+
+    public int GetIdClaim(ClaimsPrincipal claimsPrincipal)
+    {
+        var isParsed = int.TryParse(claimsPrincipal.FindFirstValue(IJwtService.IdClaimName), out var id);
+        if (!isParsed)
+        {
+            throw new MissingClaimException("id");
+        }
+
+        return id;
     }
 
     private static ClaimsIdentity GenerateClaimsIdentity(int id, string userName)

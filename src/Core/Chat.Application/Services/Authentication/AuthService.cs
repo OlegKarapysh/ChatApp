@@ -2,7 +2,7 @@
 using Chat.Application.RequestExceptions;
 using Chat.Application.Services.JWT;
 using Chat.Domain.DTOs.Authentication;
-using Chat.Domain.Models;
+using Chat.Domain.Entities;
 
 namespace Chat.Application.Services.Authentication;
 

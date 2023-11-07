@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Chat.Domain.Abstract;
-using Chat.Domain.Models.Attachments;
-using Chat.Domain.Models.Conversations;
+using Chat.Domain.Entities.Attachments;
+using Chat.Domain.Entities.Conversations;
 
-namespace Chat.Domain.Models;
+namespace Chat.Domain.Entities;
 
 public class Message : AuditableEntityBase<int>
 {
