@@ -5,7 +5,7 @@ using LinqKit;
 
 namespace Chat.Application.Services;
 
-public sealed class SearchPredicateFactory
+public sealed class PredicateFactory
 {
     public Expression<Func<T, bool>> CreateSearchPredicate<T>(string searchValues)
     {
@@ -28,14 +28,14 @@ public sealed class SearchPredicateFactory
         var words = searchValues.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var predicate = PredicateBuilder.New<User>(true);
 
-        words.ForEach(word =>
+        foreach (var word in words)
         {
             predicate = predicate.Or(x => x.UserName!.Contains(word))
                                  .Or(x => x.Email.Contains(word))
                                  .Or(x => x.FirstName.Contains(word))
                                  .Or(x => x.LastName.Contains(word))
                                  .Or(x => x.PhoneNumber.Contains(word));
-        });
+        }
 
         return predicate;
     }

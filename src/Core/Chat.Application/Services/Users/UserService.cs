@@ -1,12 +1,11 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
-using LinqKit;
+﻿using LinqKit;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Chat.Application.Mappings;
 using Chat.Application.RequestExceptions;
+using Chat.Application.Extensions;
 using Chat.Domain.DTOs.Users;
 using Chat.Domain.Entities;
+using Chat.Domain.Web;
 using Chat.DomainServices.Repositories;
 using Chat.DomainServices.UnitsOfWork;
 
@@ -17,11 +16,13 @@ public sealed class UserService : IUserService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IRepository<User, int> _userRepository;
     private readonly UserManager<User> _userManager;
+    private readonly PredicateFactory _predicateFactory;
 
-    public UserService(IUnitOfWork unitOfWork, UserManager<User> userManager)
+    public UserService(IUnitOfWork unitOfWork, UserManager<User> userManager, PredicateFactory predicateFactory)
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
+        _predicateFactory = predicateFactory;
         _userRepository = _unitOfWork.GetRepository<User, int>();
     }
 
@@ -43,25 +44,21 @@ public sealed class UserService : IUserService
         await _unitOfWork.SaveChangesAsync();
     }
 
-    public Task<IList<UserDto>> SearchUsersTest(string searchFilter)
+    public async Task<PagedList<UserDto>> SearchUsersPagedAsync(UsersPagedSearchFilterDto searchData)
     {
-        var factory = new SearchPredicateFactory();
-        var predicate = factory
-            .CreateSearchPredicate<User>(searchFilter).Compile();
-        //var predicate = factory.CreateSearchPredicate(searchFilter);
-        var users = _userManager.Users.AsExpandable();
-        var foundUsers = users
-                         .ToList()
-                               .Where(x => predicate.Invoke(x))
-                               .ToList()
-                               .Select(x => x.MapToDto())
-                               .ToList();
-        // var props = typeof(User).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        // var a = string.Join(' ', props.Select(x => x.Name));
-        // foundUsers.First().FirstName = a;
-        // var user = _userManager.Users.First();
-        // foundUsers.First().PhoneNumber = props.First().GetValue(user).ToString();
-        return Task.FromResult((IList<UserDto>)foundUsers);
+        var searchPredicate = _predicateFactory.CreateSearchPredicate(searchData.SearchFilter);
+        var foundUsers = string.IsNullOrEmpty(searchData.SearchFilter)
+            ? _userManager.Users
+            : _userManager.Users.AsExpandable()
+                          .Where(x => searchPredicate.Invoke(x));
+        var usersCount = foundUsers.Count();
+        var pageSize = PagedList<User>.DefaultPageSize;
+        var foundUsersPage = foundUsers.Skip((searchData.Page - 1) * pageSize)
+                                       .Take(pageSize)
+                                       .OrderBy(searchData.SortingProperty, searchData.SortingOrder)
+                                       .Select(x => x.MapToDto());
+        
+        return await Task.FromResult(new PagedList<UserDto>(foundUsersPage, usersCount, searchData.Page));
     }
 
     private async Task<User> TryGetUserByIdAsync(int id)

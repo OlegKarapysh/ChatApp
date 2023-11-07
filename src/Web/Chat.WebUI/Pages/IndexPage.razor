@@ -3,8 +3,6 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Home</h1>
-
 <AuthorizeView>
     <Authorized>
         <h1>Hello, @(context.User.FindFirstValue("sub") ?? "Unknown")!</h1>

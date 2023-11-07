@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Chat.Application.JWT;
+using Chat.Application.Services;
 using Chat.Application.Services.Authentication;
 using Chat.Application.Services.JWT;
 using Chat.Application.Services.Users;
@@ -30,6 +31,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<PredicateFactory>();
     }
     
     public static void AddAndConfigureJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
