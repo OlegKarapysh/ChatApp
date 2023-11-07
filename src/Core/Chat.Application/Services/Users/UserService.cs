@@ -44,21 +44,29 @@ public sealed class UserService : IUserService
         await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task<PagedList<UserDto>> SearchUsersPagedAsync(UsersPagedSearchFilterDto searchData)
+    public async Task<PagedUsersDto> SearchUsersPagedAsync(UsersPagedSearchFilterDto searchData)
     {
-        var searchPredicate = _predicateFactory.CreateSearchPredicate(searchData.SearchFilter);
-        var foundUsers = string.IsNullOrEmpty(searchData.SearchFilter)
-            ? _userManager.Users
-            : _userManager.Users.AsExpandable()
-                          .Where(x => searchPredicate.Invoke(x));
-        var usersCount = foundUsers.Count();
-        var pageSize = PagedList<User>.DefaultPageSize;
-        var foundUsersPage = foundUsers.Skip((searchData.Page - 1) * pageSize)
-                                       .Take(pageSize)
-                                       .OrderBy(searchData.SortingProperty, searchData.SortingOrder)
-                                       .Select(x => x.MapToDto());
+        var foundUsers = _userManager.Users;
+        if (!string.IsNullOrEmpty(searchData.SearchFilter))
+        {
+            var searchPredicate = _predicateFactory.CreateSearchPredicate(searchData.SearchFilter);
+            foundUsers = _userManager.Users.AsExpandable().Where(x => searchPredicate.Invoke(x));
+        }
         
-        return await Task.FromResult(new PagedList<UserDto>(foundUsersPage, usersCount, searchData.Page));
+        var usersCount = foundUsers.Count();
+        var pageSize = PageInfo.DefaultPageSize;
+        var foundUsersPage = foundUsers
+                             .OrderBy(searchData.SortingProperty, searchData.SortingOrder)
+                             .Skip((searchData.Page - 1) * pageSize)
+                             .Take(pageSize)
+                             .Select(x => x.MapToDto());
+        var pageInfo = new PageInfo(usersCount, searchData.Page);
+        
+        return await Task.FromResult(new PagedUsersDto
+        {
+            PageInfo = pageInfo,
+            Users = foundUsersPage.ToArray()
+        });
     }
 
     private async Task<User> TryGetUserByIdAsync(int id)

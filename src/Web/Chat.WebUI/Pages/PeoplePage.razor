@@ -1,4 +1,5 @@
 ﻿@page "/people"
+@using Chat.Domain.Web
 
 @attribute [Authorize]
 
@@ -13,10 +14,10 @@
 <RadzenTextBox Placeholder="Type to search..." @bind-Value="SearchFilter"></RadzenTextBox>
 <RadzenDropDown TValue="string" Data="UserProperties" @bind-Value="SortingProperty" Change="OnSortingPropertyChanged">
 </RadzenDropDown>
-<RadzenRadioButtonList @bind-Value="SortingOrder" TValue="SortingOrder" class="mb-5" Change="OnSortingOrderChanged">
+<RadzenRadioButtonList @bind-Value="SortingOrder" TValue="int" class="mb-5" Change="OnSortingOrderChanged">
     <Items>
-        <RadzenRadioButtonListItem Text="Ascending" Value="SortingOrder.Ascending" />
-        <RadzenRadioButtonListItem Text="Descending" Value="SortingOrder.Descending" />
+        <RadzenRadioButtonListItem Text="Ascending" Value="1" />
+        <RadzenRadioButtonListItem Text="Descending" Value="2" />
     </Items>
 </RadzenRadioButtonList>
 <RadzenButton Click="OnSearch">Search</RadzenButton>
@@ -54,7 +55,7 @@
     public string SortingProperty { get; set; } = nameof(UserDto.UserName);
 
     [QueryStringParameter]
-    public SortingOrder SortingOrder { get; set; } = SortingOrder.Ascending;
+    public int SortingOrder { get; set; } = (int)Chat.Domain.Enums.SortingOrder.Ascending;
     
     public RadzenDataGrid<UserDto> DataGrid { get; set; } = default!;
     public RadzenPager Pager { get; set; } = default!;
@@ -67,7 +68,6 @@
         nameof(UserDto.PhoneNumber)
     };
     public IList<UserDto> UsersOnPage { get; set; } = new List<UserDto>();
-    protected IList<UserDto> AllUsers;
     private int _page;
 
     public override Task SetParametersAsync(ParameterView parameters)
@@ -75,79 +75,89 @@
         this.SetParametersFromQueryString(Navigation!);
         return base.SetParametersAsync(parameters);
     }
-    
-    protected override async Task OnInitializedAsync()
-    {
-        Spinner!.Show();
-        AllUsers = Enumerable.Range(1, 12).Select(x => new UserDto()
-        {
-            Email = "email" + x,
-            UserName = "Username" + x,
-            FirstName = "Firstname" + x,
-            LastName = "LastName" + x,
-            PhoneNumber = "Phone" + x
-        }).ToList();
-        UsersCount = AllUsers.Count;
-        Spinner.Hide();
-    }
 
     protected override async Task OnAfterRenderAsync(bool isFirstRender)
     {
         if (isFirstRender)
         {
             var pageIndex = Page - 1;
-            await Pager.GoToPage(pageIndex);
-            await OnPageChanged(new PagerEventArgs
-            {
-                Skip = pageIndex * DefaultPageSize,
-                Top = DefaultPageSize,
-                PageIndex = pageIndex
-            });
+            await Pager.GoToPage(pageIndex, true);
         }
     }
 
     private async Task OnSearch()
     {
+        Page = 1;
+        var pageIndex = Page - 1;
+        await Pager.GoToPage(pageIndex, true);
         await UpdateQueryStringParameters();
     }
 
     private async Task OnSortingPropertyChanged()
     {
+        await SendAndHandleSearchRequest();
         await UpdateQueryStringParameters();
     }
 
     private async Task OnSortingOrderChanged()
     {
+        await SendAndHandleSearchRequest();
         await UpdateQueryStringParameters();
     }
     
     private async Task OnPageChanged(PagerEventArgs args)
     {
-        Console.WriteLine("Skip: " + args.Skip);
-        Console.WriteLine("PageIndex: " + args.PageIndex);
-        Console.WriteLine("Top: " + args.Top);
         UpdatePage(args.PageIndex);
-        UpdateUsers(args.Skip, args.Top);
+        await SendAndHandleSearchRequest();
         await this.UpdateQueryString(Navigation!, JsRuntime!);
     }
 
+    private void UpdatePagerItemsCount(PageInfo pageInfo)
+    {
+        UsersCount = pageInfo.TotalCount;
+    }
+    
     private void UpdatePage(int pageIndex)
     {
         Page = pageIndex + 1;
     }
 
-    private void UpdateUsers(int skip, int take)
+    private void UpdateUsers(UserDto[] users)
     {
-        var usersPagedView = AllUsers.Skip(skip).Take(take).ToList();
-        foreach (var us in usersPagedView)
-        {
-            Console.WriteLine(us.FirstName);
-        }
-        UsersOnPage = usersPagedView;
+        UsersOnPage = users;
     }
 
     private async Task UpdateQueryStringParameters()
     {
         await this.UpdateQueryString(Navigation!, JsRuntime!);
+    }
+
+    private async Task SendAndHandleSearchRequest()
+    {
+        Spinner!.Show();
+        var searchResult = await SendSearchRequest();
+        if (!searchResult.IsSuccessful)
+        {
+            ToastNotification!.ShowError(searchResult.ErrorDetails!.Message);
+        }
+        else
+        {
+            UpdateUsers(searchResult.Content!.Users);
+            UpdatePagerItemsCount(searchResult.Content.PageInfo);
+        }
+        Spinner.Hide();
+    }
+
+    private UsersPagedSearchFilterDto ParseQueryModel() => new()
+    {
+        Page = Page,
+        SearchFilter = SearchFilter,
+        SortingProperty = SortingProperty,
+        SortingOrder = (Chat.Domain.Enums.SortingOrder)SortingOrder
+    };
+
+    private async Task<WebApiResponse<PagedUsersDto>> SendSearchRequest()
+    {
+        return await UserService!.GetSearchedUsersPage(ParseQueryModel());
     }
 }

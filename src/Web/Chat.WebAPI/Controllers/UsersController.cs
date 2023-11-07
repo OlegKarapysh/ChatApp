@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Chat.Application.Services.JWT;
 using Chat.Application.Services.Users;
 using Chat.Domain.DTOs.Users;
-using Chat.Domain.Web;
 
 namespace Chat.WebAPI.Controllers;
 
@@ -31,8 +30,8 @@ public sealed class UsersController : ControllerBase
         return Ok(await _userService.GetUserByIdAsync(_jwtService.GetIdClaim(User)));
     }
 
-    [AllowAnonymous, HttpGet("search")]
-    public async Task<ActionResult<PagedList<UserDto>>> SearchUsersPagedAsync(
+    [HttpGet("search")]
+    public async Task<ActionResult<PagedUsersDto>> SearchUsersPagedAsync(
         [FromQuery] UsersPagedSearchFilterDto searchData)
     {
         return Ok(await _userService.SearchUsersPagedAsync(searchData));
