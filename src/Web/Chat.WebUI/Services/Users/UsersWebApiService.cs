@@ -22,15 +22,8 @@ public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
 
     public async Task<WebApiResponse<UsersPageDto>> GetSearchedUsersPage(PagedSearchDto searchData)
     {
-        var queryParams = new Dictionary<string, string>
-        {
-            { nameof(PagedSearchDto.SearchFilter), searchData.SearchFilter },
-            { nameof(PagedSearchDto.Page), searchData.Page.ToString() },
-            { nameof(PagedSearchDto.SortingProperty), searchData.SortingProperty },
-            { nameof(PagedSearchDto.SortingOrder), ((int)searchData.SortingOrder).ToString() },
-        };
-        
-        return await GetAsync<UsersPageDto>(QueryHelpers.AddQueryString("/search/", queryParams));
+        return await GetAsync<UsersPageDto>(
+            QueryHelpers.AddQueryString("/search/", GetQueryParamsForPagedSearch(searchData)));
     }
 
     public async Task<ErrorDetailsDto?> UpdateUserInfoAsync(UserDto userData) => await PutAsync(userData);

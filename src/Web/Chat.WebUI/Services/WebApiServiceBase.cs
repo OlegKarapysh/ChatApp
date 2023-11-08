@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using Blazored.LocalStorage;
 using Chat.Domain.DTOs;
+using Chat.Domain.DTOs.Users;
 using Chat.Domain.Web;
 using Chat.WebUI.Services.Auth;
 
@@ -81,5 +82,16 @@ public abstract class WebApiServiceBase
                 IsSuccessful = false,
                 ErrorDetails = await httpResponse.Content.ReadFromJsonAsync<ErrorDetailsDto>()
             };
+    }
+
+    private protected Dictionary<string, string> GetQueryParamsForPagedSearch(PagedSearchDto searchData)
+    {
+        return new Dictionary<string, string>
+        {
+            { nameof(PagedSearchDto.SearchFilter), searchData.SearchFilter },
+            { nameof(PagedSearchDto.Page), searchData.Page.ToString() },
+            { nameof(PagedSearchDto.SortingProperty), searchData.SortingProperty },
+            { nameof(PagedSearchDto.SortingOrder), ((int)searchData.SortingOrder).ToString() },
+        };
     }
 }
