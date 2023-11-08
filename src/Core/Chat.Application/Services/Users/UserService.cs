@@ -41,7 +41,7 @@ public sealed class UserService : IUserService
         await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task<PagedUsersDto> SearchUsersPagedAsync(UsersPagedSearchFilterDto searchData)
+    public async Task<UsersPageDto> SearchUsersPagedAsync(UsersPagedSearchFilterDto searchData)
     {
         var foundUsers = _userManager.Users.SearchWhere<User, UserDto>(searchData.SearchFilter);
         var usersCount = foundUsers.Count();
@@ -53,7 +53,7 @@ public sealed class UserService : IUserService
                              .Select(x => x.MapToDto());
         var pageInfo = new PageInfo(usersCount, searchData.Page);
         
-        return await Task.FromResult(new PagedUsersDto
+        return await Task.FromResult(new UsersPageDto
         {
             PageInfo = pageInfo,
             Users = foundUsersPage.ToArray()

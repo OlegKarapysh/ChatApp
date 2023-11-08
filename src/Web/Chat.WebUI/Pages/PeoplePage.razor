@@ -156,7 +156,7 @@
         SortingOrder = (Chat.Domain.Enums.SortingOrder)SortingOrder
     };
 
-    private async Task<WebApiResponse<PagedUsersDto>> SendSearchRequest()
+    private async Task<WebApiResponse<UsersPageDto>> SendSearchRequest()
     {
         return await UserService!.GetSearchedUsersPage(ParseQueryModel());
     }

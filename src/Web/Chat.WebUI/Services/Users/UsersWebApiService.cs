@@ -20,7 +20,7 @@ public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
 
     public async Task<WebApiResponse<UserDto>> GetCurrentUserInfoAsync() => await GetAsync<UserDto>();
 
-    public async Task<WebApiResponse<PagedUsersDto>> GetSearchedUsersPage(UsersPagedSearchFilterDto searchData)
+    public async Task<WebApiResponse<UsersPageDto>> GetSearchedUsersPage(UsersPagedSearchFilterDto searchData)
     {
         var queryParams = new Dictionary<string, string>
         {
@@ -30,7 +30,7 @@ public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
             { nameof(UsersPagedSearchFilterDto.SortingOrder), ((int)searchData.SortingOrder).ToString() },
         };
         
-        return await GetAsync<PagedUsersDto>(QueryHelpers.AddQueryString("/search/", queryParams));
+        return await GetAsync<UsersPageDto>(QueryHelpers.AddQueryString("/search/", queryParams));
     }
 
     public async Task<ErrorDetailsDto?> UpdateUserInfoAsync(UserDto userData) => await PutAsync(userData);
