@@ -41,7 +41,7 @@ public sealed class UserService : IUserService
         await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task<UsersPageDto> SearchUsersPagedAsync(UsersPagedSearchFilterDto searchData)
+    public async Task<UsersPageDto> SearchUsersPagedAsync(PagedSearchDto searchData)
     {
         var foundUsers = _userManager.Users.SearchWhere<User, UserDto>(searchData.SearchFilter);
         var usersCount = foundUsers.Count();

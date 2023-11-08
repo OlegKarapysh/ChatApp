@@ -20,14 +20,14 @@ public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
 
     public async Task<WebApiResponse<UserDto>> GetCurrentUserInfoAsync() => await GetAsync<UserDto>();
 
-    public async Task<WebApiResponse<UsersPageDto>> GetSearchedUsersPage(UsersPagedSearchFilterDto searchData)
+    public async Task<WebApiResponse<UsersPageDto>> GetSearchedUsersPage(PagedSearchDto searchData)
     {
         var queryParams = new Dictionary<string, string>
         {
-            { nameof(UsersPagedSearchFilterDto.SearchFilter), searchData.SearchFilter },
-            { nameof(UsersPagedSearchFilterDto.Page), searchData.Page.ToString() },
-            { nameof(UsersPagedSearchFilterDto.SortingProperty), searchData.SortingProperty },
-            { nameof(UsersPagedSearchFilterDto.SortingOrder), ((int)searchData.SortingOrder).ToString() },
+            { nameof(PagedSearchDto.SearchFilter), searchData.SearchFilter },
+            { nameof(PagedSearchDto.Page), searchData.Page.ToString() },
+            { nameof(PagedSearchDto.SortingProperty), searchData.SortingProperty },
+            { nameof(PagedSearchDto.SortingOrder), ((int)searchData.SortingOrder).ToString() },
         };
         
         return await GetAsync<UsersPageDto>(QueryHelpers.AddQueryString("/search/", queryParams));

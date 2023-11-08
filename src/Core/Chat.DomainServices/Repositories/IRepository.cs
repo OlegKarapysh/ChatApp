@@ -9,6 +9,7 @@ public interface IRepository<T, TId>
 {
     Task<T?> GetByIdAsync(TId id);
     Task<IList<T>> GetAllAsync();
+    IQueryable<T> GetAsQueryable();
     Task<IList<T>> FindAllAsync(Expression<Func<T, bool>> predicate);
     Task AddAsync(T entity);
     Task<bool> RemoveAsync(TId id);

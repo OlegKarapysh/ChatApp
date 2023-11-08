@@ -32,7 +32,7 @@ public sealed class UsersController : ControllerBase
 
     [HttpGet("search")]
     public async Task<ActionResult<UsersPageDto>> SearchUsersPagedAsync(
-        [FromQuery] UsersPagedSearchFilterDto searchData)
+        [FromQuery] PagedSearchDto searchData)
     {
         return Ok(await _userService.SearchUsersPagedAsync(searchData));
     }

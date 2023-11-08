@@ -1,5 +1,4 @@
 ﻿@page "/people"
-@using Chat.Domain.Web
 
 @attribute [Authorize]
 
@@ -22,7 +21,7 @@
 </RadzenRadioButtonList>
 <RadzenButton Click="OnSearch">Search</RadzenButton>
 
-<RadzenDataGrid @ref="DataGrid" TItem="UserDto" Data="UsersOnPage" ColumnWidth="300px"
+<RadzenDataGrid TItem="UserDto" Data="UsersOnPage" ColumnWidth="300px"
                 AllowColumnResize="true" AllowAlternatingRows="false">
     <Columns>
         <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="Username" Width="120px" />
@@ -32,13 +31,12 @@
         <RadzenDataGridColumn TItem="UserDto" Property="Email" Title="Email" Width="120px"/>
     </Columns>
 </RadzenDataGrid>
-<RadzenPager @ref="Pager" PageSize="DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
+<RadzenPager @ref="Pager" PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
              AlwaysVisible="true" Count="UsersCount" PageChanged="OnPageChanged"></RadzenPager>
 
 @code 
 {
     public const string Path = "/people";
-    public const int DefaultPageSize = 5;
     public const int DefaultPageNumbersCount = 3;
     
     [QueryStringParameter]
@@ -57,7 +55,6 @@
     [QueryStringParameter]
     public int SortingOrder { get; set; } = (int)Chat.Domain.Enums.SortingOrder.Ascending;
     
-    public RadzenDataGrid<UserDto> DataGrid { get; set; } = default!;
     public RadzenPager Pager { get; set; } = default!;
     public int UsersCount { get; set; }
     public readonly string[] UserProperties = {
@@ -148,7 +145,7 @@
         Spinner.Hide();
     }
 
-    private UsersPagedSearchFilterDto ParseQueryModel() => new()
+    private PagedSearchDto ParseQueryModel() => new()
     {
         Page = Page,
         SearchFilter = SearchFilter,
