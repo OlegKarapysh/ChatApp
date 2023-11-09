@@ -20,15 +20,13 @@ public sealed class ConversationService : IConversationService
     public async Task<ConversationsPageDto> SearchUsersPagedAsync(PagedSearchDto searchData)
     {
         var repository = _unitOfWork.GetRepository<Conversation, int>();
-        var foundConversations = repository.GetAsQueryable().SearchWhere<Conversation, ConversationDto>(searchData.SearchFilter);
+        var foundConversations = repository.SearchWhere<ConversationDto>(searchData.SearchFilter);
         var conversationsCount = foundConversations.Count();
         var pageSize = PageInfo.DefaultPageSize;
-        var foundConversationsPage = foundConversations
-                             .OrderBy(searchData.SortingProperty, searchData.SortingOrder)
-                             .Skip((searchData.Page - 1) * pageSize)
-                             .Take(pageSize)
-                             .Select(x => x.MapToDto());
         var pageInfo = new PageInfo(conversationsCount, searchData.Page);
+        var foundConversationsPage = foundConversations
+                                     .ToSortedPage(searchData.SortingProperty, searchData.SortingOrder, searchData.Page, pageSize)
+                                     .Select(x => x.MapToDto());
         
         return await Task.FromResult(new ConversationsPageDto
         {

@@ -53,6 +53,14 @@ public static class QueryableExtensions
 
         return entities.AsExpandable().Where(x => ((Expression<Func<TEntity, bool>>)predicate).Invoke(x));
     }
+    
+    public static IQueryable<T> ToSortedPage<T>(this IQueryable<T> entities,
+        string sortingProperty, SortingOrder sortingOrder, int page, int pageSize)
+    {
+        return entities.OrderBy(sortingProperty, sortingOrder)
+                         .Skip((page - 1) * pageSize)
+                         .Take(pageSize);
+    }
 
     private static IEnumerable<PropertyInfo> GetStringableProperties<TEntity, TSearch>()
     {
