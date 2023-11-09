@@ -17,7 +17,7 @@ public sealed class ConversationService : IConversationService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<ConversationsPageDto> SearchUsersPagedAsync(PagedSearchDto searchData)
+    public async Task<ConversationsPageDto> SearchConversationsPagedAsync(PagedSearchDto searchData)
     {
         var repository = _unitOfWork.GetRepository<Conversation, int>();
         var foundConversations = repository.SearchWhere<ConversationDto>(searchData.SearchFilter);

@@ -20,6 +20,6 @@ public sealed class ConversationsController : ControllerBase
     public async Task<ActionResult<ConversationsPageDto>> SearchConversationsPagedAsync(
         [FromQuery] PagedSearchDto searchData)
     {
-        return Ok(await _conversationService.SearchUsersPagedAsync(searchData));
+        return Ok(await _conversationService.SearchConversationsPagedAsync(searchData));
     }
 }

@@ -5,5 +5,5 @@ namespace Chat.Application.Services.Conversations;
 
 public interface IConversationService
 {
-    Task<ConversationsPageDto> SearchUsersPagedAsync(PagedSearchDto searchData);
+    Task<ConversationsPageDto> SearchConversationsPagedAsync(PagedSearchDto searchData);
 }

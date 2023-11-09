@@ -2,6 +2,7 @@
 using Chat.WebUI.Services;
 using Chat.WebUI.Services.Auth;
 using Chat.WebUI.Services.Conversations;
+using Chat.WebUI.Services.Messages;
 using Chat.WebUI.Services.Users;
 
 namespace Chat.WebUI.Extensions;
@@ -25,5 +26,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IJwtAuthService, JwtAuthService>();
         services.AddScoped<IUsersWebApiService, UsersWebApiService>();
         services.AddScoped<IConversationsWebApiService, ConversationsWebApiService>();
+        services.AddScoped<IMessagesWebApiService, MessagesWebApiService>();
     }
 }
