@@ -1,9 +1,8 @@
 ﻿@page "/conversations"
-@using Chat.Domain.DTOs.Conversations
-@using System.Reflection
 
 @attribute [Authorize]
 
+@inject IConversationsWebApiService ConversationService
 @inject IToastService ToastNotification
 @inject IJSRuntime JsRuntime
 @inject SpinnerService Spinner
@@ -27,7 +26,7 @@
     <Columns>
         <RadzenDataGridColumn TItem="ConversationDto" Property="Title" Title="Title" />
         <RadzenDataGridColumn TItem="ConversationDto" Property="CreatedAt" Title="Created at"/>
-        <RadzenDataGridColumn TItem="ConversationDto" Property="UpdatedAt" Title="Updated at"/>
+        <RadzenDataGridColumn TItem="ConversationDto" Property="UpdatedAt" Title="Last updated at"/>
     </Columns>
 </RadzenDataGrid>
 <RadzenPager @ref="Pager" PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
@@ -35,7 +34,7 @@
 
 @code 
 {
-    public const string Path = "/people";
+    public const string Path = "/conversations";
     public const int DefaultPageNumbersCount = 3;
     
     [QueryStringParameter]
@@ -124,16 +123,16 @@
     private async Task SendAndHandleSearchRequest()
     {
         Spinner!.Show();
-        // var searchResult = await SendSearchRequest();
-        // if (!searchResult.IsSuccessful)
-        // {
-        //     ToastNotification!.ShowError(searchResult.ErrorDetails!.Message);
-        // }
-        // else
-        // {
-        //     UpdateConversations(searchResult.Content!.Users);
-        //     UpdatePagerItemsCount(searchResult.Content.PageInfo);
-        // }
+        var searchResult = await SendSearchRequest();
+        if (!searchResult.IsSuccessful)
+        {
+            ToastNotification!.ShowError(searchResult.ErrorDetails!.Message);
+        }
+        else
+        {
+            UpdateConversations(searchResult.Content!.Conversations);
+            UpdatePagerItemsCount(searchResult.Content.PageInfo);
+        }
         Spinner.Hide();
     }
 
@@ -145,9 +144,8 @@
         SortingOrder = (Chat.Domain.Enums.SortingOrder)SortingOrder
     };
 
-    private async Task<WebApiResponse<UsersPageDto>> SendSearchRequest()
+    private async Task<WebApiResponse<ConversationsPageDto>> SendSearchRequest()
     {
-        //return await UserService!.GetSearchedUsersPage(ParseQueryModel());
-        return null;
+        return await ConversationService!.GetSearchedConversationsPage(ParseQueryModel());
     }
 }
