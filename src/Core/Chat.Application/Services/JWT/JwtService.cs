@@ -2,9 +2,12 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
+using System.Text;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Chat.Application.JWT;
 using Chat.Application.RequestExceptions;
+using Chat.Domain.Entities;
 
 namespace Chat.Application.Services.JWT;
 
@@ -44,14 +47,14 @@ public sealed class JwtService : IJwtService
         return _jwtSecurityTokenHandler.WriteToken(jwt)!;
     }
 
-    public string CreateRefreshToken()
+    public RefreshToken CreateRefreshToken()
     {
         const int saltLength = 32;
         var salt = new byte[saltLength];
         using var randomNumberGenerator = RandomNumberGenerator.Create();
         randomNumberGenerator.GetBytes(salt);
 
-        return Convert.ToBase64String(salt);
+        return new RefreshToken(Convert.ToBase64String(salt));
     }
 
     public int GetIdClaim(ClaimsPrincipal claimsPrincipal)
@@ -63,6 +66,24 @@ public sealed class JwtService : IJwtService
         }
 
         return id;
+    }
+
+    public int GetIdClaim(string accessToken)
+    {
+        var claimsPrincipal = _jwtSecurityTokenHandler.ValidateToken(accessToken, new TokenValidationParameters
+        {
+            ValidateAudience = false,
+            ValidateIssuer = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey)),
+            ValidateLifetime = false
+        }, out _);
+        if (claimsPrincipal is null)
+        {
+            throw new InvalidTokenException("Access");
+        }
+
+        return GetIdClaim(claimsPrincipal);
     }
 
     private static ClaimsIdentity GenerateClaimsIdentity(int id, string userName)

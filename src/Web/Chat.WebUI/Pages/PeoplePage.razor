@@ -5,7 +5,6 @@
 @inject IUsersWebApiService UserService
 @inject IToastService ToastNotification
 @inject IJSRuntime JsRuntime
-@inject SpinnerService Spinner
 @inject NavigationManager Navigation
 
 <h1>People</h1>
@@ -131,7 +130,6 @@
 
     private async Task SendAndHandleSearchRequest()
     {
-        Spinner!.Show();
         var searchResult = await SendSearchRequest();
         if (!searchResult.IsSuccessful)
         {
@@ -142,7 +140,6 @@
             UpdateUsers(searchResult.Content!.Users);
             UpdatePagerItemsCount(searchResult.Content.PageInfo);
         }
-        Spinner.Hide();
     }
 
     private PagedSearchDto ParseQueryModel() => new()

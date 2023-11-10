@@ -5,7 +5,6 @@
 @inject IConversationsWebApiService ConversationService
 @inject IToastService ToastNotification
 @inject IJSRuntime JsRuntime
-@inject SpinnerService Spinner
 @inject NavigationManager Navigation
 
 <h1>Conversations</h1>
@@ -122,7 +121,6 @@
 
     private async Task SendAndHandleSearchRequest()
     {
-        Spinner!.Show();
         var searchResult = await SendSearchRequest();
         if (!searchResult.IsSuccessful)
         {
@@ -133,7 +131,6 @@
             UpdateConversations(searchResult.Content!.Conversations);
             UpdatePagerItemsCount(searchResult.Content.PageInfo);
         }
-        Spinner.Hide();
     }
 
     private PagedSearchDto ParseQueryModel() => new()

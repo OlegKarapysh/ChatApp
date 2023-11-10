@@ -30,8 +30,10 @@
                         ErrorIcon="fa fa-bug"/>
     </ChildContent>
     <ErrorContent>
-        <p>Oops, something went wrong...</p>
-        <button @onclick="() => ErrorBoundary.Recover()">Reload</button>
+        <div class="card col-md-6 offset-3">
+            <p>Oops, something went wrong...</p>
+            <button @onclick="() => ErrorBoundary.Recover()">Reload</button>
+        </div>
     </ErrorContent>
 </ErrorBoundary>
 

@@ -23,11 +23,13 @@ public sealed class AuthService : IAuthService
     {
         var user = await _userManager.FindByEmailAsync(loginData.Email) ?? throw new InvalidEmailException();
         var signInResult = await _signInManager.CheckPasswordSignInAsync(user, loginData.Password, false);
-
         if (!signInResult.Succeeded)
         {
             throw new InvalidPasswordException();
         }
+
+        var refreshToken = _jwtService.CreateRefreshToken();
+        await UpdateUserRefreshToken(user, refreshToken);
 
         return CreateTokenPair(user);
     }
@@ -49,7 +51,8 @@ public sealed class AuthService : IAuthService
         {
             UserName = registerData.UserName,
             Email = registerData.Email,
-            RefreshToken = refreshToken
+            RefreshToken = refreshToken.Token,
+            TokenExpiresAt = refreshToken.ExpirationTime
         };
         var identityResult = await _userManager.CreateAsync(user, registerData.Password);
         if (!identityResult.Succeeded)
@@ -57,7 +60,7 @@ public sealed class AuthService : IAuthService
             throw new BadRegistrationException();
         }
 
-        return CreateTokenPair(await _userManager.FindByEmailAsync(user.Email), refreshToken);
+        return CreateTokenPair(await _userManager.FindByEmailAsync(user.Email), refreshToken.Token);
     }
 
     public async Task ChangePasswordAsync(ChangePasswordDto changePasswordData, int id)
@@ -73,6 +76,41 @@ public sealed class AuthService : IAuthService
         }
     }
 
+    public async Task<TokenPairDto> RefreshTokenPair(TokenPairDto tokens)
+    {
+        var userId = _jwtService.GetIdClaim(tokens.AccessToken);
+        var user = _userManager.Users.FirstOrDefault(x => x.Id == userId);
+        if (user is null)
+        {
+            throw new EntityNotFoundException("User", "Id");
+        }
+
+        if (user.RefreshToken is null)
+        {
+            throw new EntityNotFoundException("Refresh token");
+        }
+        
+        CheckIfRefreshTokenExpired(user.TokenExpiresAt);
+        if (tokens.RefreshToken != user.RefreshToken)
+        {
+            throw new InvalidTokenException("Refresh");
+        }
+
+        var newRefreshToken = _jwtService.CreateRefreshToken();
+        await UpdateUserRefreshToken(user, newRefreshToken);
+        var newTokens = CreateTokenPair(user, newRefreshToken.Token);
+
+        return newTokens;
+    }
+
+    private void CheckIfRefreshTokenExpired(DateTime expiration)
+    {
+        if (expiration <= DateTime.UtcNow)
+        {
+            throw new RefreshTokenExpiredException();
+        }
+    }
+
     private TokenPairDto CreateTokenPair(User user, string? refreshToken = default)
     {
         return new TokenPairDto
@@ -80,5 +118,12 @@ public sealed class AuthService : IAuthService
             AccessToken = _jwtService.CreateAccessToken(user.Id, user.UserName!, user.Email!),
             RefreshToken = refreshToken ?? user.RefreshToken ?? throw new Exception("Refresh token is not set!")
         };
+    }
+
+    private async Task UpdateUserRefreshToken(User user, RefreshToken refreshToken)
+    {
+        user.RefreshToken = refreshToken.Token;
+        user.TokenExpiresAt = refreshToken.ExpirationTime;
+        await _userManager.UpdateAsync(user);
     }
 }

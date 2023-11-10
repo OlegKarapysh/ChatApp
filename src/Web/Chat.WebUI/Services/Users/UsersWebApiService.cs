@@ -1,8 +1,8 @@
-﻿using Blazored.LocalStorage;
+﻿using Microsoft.AspNetCore.WebUtilities;
 using Chat.Domain.DTOs;
 using Chat.Domain.DTOs.Users;
 using Chat.Domain.Web;
-using Microsoft.AspNetCore.WebUtilities;
+using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.Services.Users;
 
@@ -10,8 +10,8 @@ public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
 {
     private protected override string BaseRoute { get; init; }
 
-    public UsersWebApiService(HttpClient httpClient, ILocalStorageService localStorage)
-        : base(httpClient, localStorage)
+    public UsersWebApiService(IHttpClientFactory httpClientFactory, ITokenService tokenService)
+        : base(httpClientFactory, tokenService)
     {
         BaseRoute = "/users";
     }

@@ -1,8 +1,8 @@
-﻿using Blazored.LocalStorage;
+﻿using Microsoft.AspNetCore.WebUtilities;
 using Chat.Domain.DTOs.Messages;
 using Chat.Domain.DTOs.Users;
 using Chat.Domain.Web;
-using Microsoft.AspNetCore.WebUtilities;
+using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.Services.Messages;
 
@@ -10,9 +10,11 @@ public class MessagesWebApiService : WebApiServiceBase, IMessagesWebApiService
 {
     private protected override string BaseRoute { get; init; }
 
-    public MessagesWebApiService(HttpClient httpClient, ILocalStorageService localStorage) : base(httpClient, localStorage)
+    public MessagesWebApiService(IHttpClientFactory httpClientFactory, ITokenService tokenService)
+        : base(httpClientFactory, tokenService)
     {
         BaseRoute = "/messages";
+        Console.WriteLine("Messages web api service with httpClient type: " + httpClientFactory.GetType().FullName);
     }
 
     

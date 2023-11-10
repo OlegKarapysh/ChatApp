@@ -1,5 +1,7 @@
-﻿using Chat.WebUI.HttpHandlers;
-using Chat.WebUI.Services;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using BlazorSpinner;
+using Chat.WebUI.HttpHandlers;
+using Chat.WebUI.Providers;
 using Chat.WebUI.Services.Auth;
 using Chat.WebUI.Services.Conversations;
 using Chat.WebUI.Services.Messages;
@@ -9,19 +11,17 @@ namespace Chat.WebUI.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddCustomHttpClient(this IServiceCollection services, IConfiguration configuration)
+    public static void AddCustomServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(configuration["ApiUrl"]!) });
-        //  services.AddTransient<JwtAuthInterceptor>();
-        //  services.AddHttpClient<HttpClient>(httpClient =>
-        //  {
-        //      httpClient.BaseAddress = new Uri(configuration["ApiUrl"]!);
-        //  });
-        // .AddHttpMessageHandler<JwtAuthInterceptor>();
-    }
-
-    public static void AddCustomServices(this IServiceCollection services)
-    {
+        services.AddScoped<SpinnerService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
+        services.AddScoped<INotifyAuthenticationChanged, JwtAuthenticationStateProvider>();
+        services.AddTransient<JwtAuthInterceptor>();
+        services.AddHttpClient(JwtAuthInterceptor.HttpClientWithJwtInterceptorName, httpClient =>
+        {
+            httpClient.BaseAddress = new Uri(configuration["ApiUrl"]!);
+        }).AddHttpMessageHandler<JwtAuthInterceptor>();
         services.AddScoped<IAuthWebApiService, AuthWebApiService>();
         services.AddScoped<IJwtAuthService, JwtAuthService>();
         services.AddScoped<IUsersWebApiService, UsersWebApiService>();

@@ -30,6 +30,12 @@ public sealed class AuthController : ControllerBase
         return Ok(await _authService.LoginAsync(loginData));
     }
 
+    [AllowAnonymous, HttpPost("refresh")]
+    public async Task<ActionResult<TokenPairDto>> RefreshTokenPairAsync([FromBody] TokenPairDto tokens)
+    {
+        return Ok(await _authService.RefreshTokenPair(tokens));
+    }
+
     [Authorize, HttpPost("change-password")]
     public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordDto changePasswordData)
     {

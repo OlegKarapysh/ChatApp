@@ -1,80 +1,79 @@
 ﻿using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Chat.Domain.DTOs.Authentication;
-using Chat.WebUI.Pages;
 using Chat.WebUI.Providers;
 using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.HttpHandlers;
 
-public sealed class JwtAuthInterceptor : DelegatingHandler
+public class HttpClientPwa : HttpClient
 {
-    public const string HttpClientWithJwtInterceptorName = "HttpClientJwt";
-    public const string BearerAuthScheme = "Bearer";
-    private readonly string _apiUrl;
     private readonly NavigationManager _navigationManager;
     private readonly ITokenService _tokenService;
     private readonly INotifyAuthenticationChanged _notifyAuthenticationService;
 
-    public JwtAuthInterceptor(
+    public HttpClientPwa(
         IConfiguration configuration,
-        ITokenService localStorage,
         NavigationManager navigationManager,
+        ITokenService tokenService,
         INotifyAuthenticationChanged notifyAuthenticationService)
     {
-        _tokenService = localStorage;
         _navigationManager = navigationManager;
+        _tokenService = tokenService;
         _notifyAuthenticationService = notifyAuthenticationService;
-        _apiUrl = configuration["ApiUrl"]!;
+        BaseAddress = new Uri(configuration["ApiUrl"]!);
+        Console.WriteLine($"Created: {BaseAddress}");
     }
     
-     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    public override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var jwt = (await _tokenService.GetTokens()).AccessToken;
-        AddBearerHeader(request, jwt);
+        Console.WriteLine("Sent request...");
         var response = await base.SendAsync(request, cancellationToken);
+        Console.WriteLine($"Received response with status code {response.StatusCode}");
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            Console.WriteLine($"Received Unauthorized, performing logout...");
+
+            await LogoutAndRedirectToLogin();
+            return response;
+        }
+        
 
         if (response.StatusCode == HttpStatusCode.Forbidden)
         {
+            Console.WriteLine($"Received Forbidden, performing logout...");
+
             await LogoutAndRedirectToLogin();
             return response;
         }
 
         if (response.StatusCode == HttpStatusCode.Unauthorized && response.Headers.Contains("Token-Expired"))
         {
+            Console.WriteLine($"Received Unauthorized, performing refresh request...");
+
             var tokenPair = await _tokenService.GetTokens();
-            var tokenPairJson = JsonSerializer.Serialize(tokenPair);
-            var jsonContent = new StringContent(tokenPairJson, System.Text.Encoding.UTF8, "application/json");
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_apiUrl}/auth/refresh") { Content = jsonContent };
-            var refreshTokensResult = await base.SendAsync(httpRequestMessage, cancellationToken);
+            var refreshTokensResult = await this.PostAsJsonAsync("/auth/refresh", tokenPair);
             if (!refreshTokensResult.IsSuccessStatusCode)
             {
+                Console.WriteLine($"Failed to refresh");
                 await LogoutAndRedirectToLogin();
                 return refreshTokensResult;
             }
 
-            var tokens = await refreshTokensResult.Content.ReadFromJsonAsync<TokenPairDto>();
-            await _tokenService.SaveTokens(tokens);
+            await _tokenService.SaveTokens(await refreshTokensResult.Content.ReadFromJsonAsync<TokenPairDto>());
             _notifyAuthenticationService.NotifyAuthenticationChanged();
-            AddBearerHeader(request, tokens?.AccessToken ?? string.Empty);
+            Console.WriteLine($"Successfully refreshed tokens, performing repeated request.");
             return await base.SendAsync(request, cancellationToken);
         }
         
         return response;
     }
-
-    private void AddBearerHeader(HttpRequestMessage httpRequestMessage, string token)
-    {
-        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue(BearerAuthScheme, token);
-    }
-
+    
     private async Task LogoutAndRedirectToLogin()
     {
         await _tokenService.RemoveTokens();
         _notifyAuthenticationService.NotifyAuthenticationChanged();
-        _navigationManager.NavigateTo(LoginPage.Path, true);
+        _navigationManager.NavigateTo("/login");
     }
 }

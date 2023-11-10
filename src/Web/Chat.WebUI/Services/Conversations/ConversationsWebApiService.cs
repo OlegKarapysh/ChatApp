@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
-using Blazored.LocalStorage;
 using Chat.Domain.DTOs.Conversations;
 using Chat.Domain.DTOs.Users;
 using Chat.Domain.Web;
+using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.Services.Conversations;
 
@@ -10,7 +10,8 @@ public class ConversationsWebApiService : WebApiServiceBase, IConversationsWebAp
 {
     private protected override string BaseRoute { get; init; }
     
-    public ConversationsWebApiService(HttpClient httpClient, ILocalStorageService localStorage) : base(httpClient, localStorage)
+    public ConversationsWebApiService(IHttpClientFactory httpClientFactory, ITokenService tokenService)
+        : base(httpClientFactory, tokenService)
     {
         BaseRoute = "/conversations";
     }

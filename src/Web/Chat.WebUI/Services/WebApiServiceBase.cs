@@ -1,24 +1,25 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Blazored.LocalStorage;
 using Chat.Domain.DTOs;
 using Chat.Domain.DTOs.Users;
+using Chat.Domain.Errors;
 using Chat.Domain.Web;
+using Chat.WebUI.HttpHandlers;
 using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.Services;
 
 public abstract class WebApiServiceBase
 {
-    private protected readonly HttpClient HttpClient;
-    private readonly ILocalStorageService _localStorage;
     private protected readonly string ApiUrl;
+    private protected readonly HttpClient HttpClient;
+    private protected readonly ITokenService TokenService;
     private protected abstract string BaseRoute { get; init; }
     
-    public WebApiServiceBase(HttpClient httpClient, ILocalStorageService localStorage)
+    public WebApiServiceBase(IHttpClientFactory httpClientFactory, ITokenService tokenService)
     {
-        HttpClient = httpClient;
-        _localStorage = localStorage;
+        HttpClient = httpClientFactory.CreateClient(JwtAuthInterceptor.HttpClientWithJwtInterceptorName);
+        TokenService = tokenService;
         ApiUrl = HttpClient.BaseAddress?.ToString() ?? string.Empty;
     }
 
@@ -51,13 +52,13 @@ public abstract class WebApiServiceBase
     private protected async Task<HttpResponseMessage> SendRequestWithAuthorizationHeader(
         Func<Task<HttpResponseMessage>> httpRequest)
     {
-        await TryAddAuthorizationHeader();
+        //await TryAddAuthorizationHeader();
         return await httpRequest.Invoke();
     }
     
     private protected async Task<bool> TryAddAuthorizationHeader()
     {
-        var jwt = await _localStorage.GetItemAsStringAsync(JwtAuthService.JwtLocalStorageKey);
+        var jwt = (await TokenService.GetTokens()).AccessToken;
         if (string.IsNullOrEmpty(jwt))
         {
             return false;
@@ -71,24 +72,38 @@ public abstract class WebApiServiceBase
 
     private async Task<WebApiResponse<TResponse>> ParseWebApiResponse<TResponse>(HttpResponseMessage httpResponse)
     {
-        return httpResponse.IsSuccessStatusCode
-            ? new WebApiResponse<TResponse>
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            return new WebApiResponse<TResponse>
             {
                 IsSuccessful = true,
                 Content = await httpResponse.Content.ReadFromJsonAsync<TResponse>()
-            }
-            : new WebApiResponse<TResponse>
+            };
+        }
+
+        try
+        {
+            return new WebApiResponse<TResponse>
             {
                 IsSuccessful = false,
                 ErrorDetails = await httpResponse.Content.ReadFromJsonAsync<ErrorDetailsDto>()
             };
+        }
+        catch (Exception e)
+        {
+            return new WebApiResponse<TResponse>
+            {
+                IsSuccessful = false,
+                ErrorDetails = new ErrorDetailsDto($"Unexpected error: {e.Message}", ErrorType.Unknown)
+            };
+        }
     }
 
     private protected Dictionary<string, string> GetQueryParamsForPagedSearch(PagedSearchDto searchData)
     {
         return new Dictionary<string, string>
         {
-            { nameof(PagedSearchDto.SearchFilter), searchData.SearchFilter },
+            { nameof(PagedSearchDto.SearchFilter), searchData.SearchFilter ?? string.Empty },
             { nameof(PagedSearchDto.Page), searchData.Page.ToString() },
             { nameof(PagedSearchDto.SortingProperty), searchData.SortingProperty },
             { nameof(PagedSearchDto.SortingOrder), ((int)searchData.SortingOrder).ToString() },
