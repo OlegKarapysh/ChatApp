@@ -12,4 +12,7 @@ public class Conversation : AuditableEntityBase<int>
 
     public ConversationType Type { get; set; } = ConversationType.Dialog;
     public IList<Message> Messages { get; set; } = new List<Message>();
+    public IList<User> Members { get; set; } = new List<User>();
+    public IList<ConversationParticipants> ConversationParticipants { get; set; } =
+        new List<ConversationParticipants>();
 }
