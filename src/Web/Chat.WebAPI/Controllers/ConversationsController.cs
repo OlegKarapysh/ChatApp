@@ -1,4 +1,5 @@
-﻿using Chat.Application.Services.Conversations;
+﻿using Chat.Application.Extensions;
+using Chat.Application.Services.Conversations;
 using Chat.Domain.DTOs.Conversations;
 using Chat.Domain.DTOs.Users;
 using Microsoft.AspNetCore.Authorization;
@@ -21,5 +22,22 @@ public sealed class ConversationsController : ControllerBase
         [FromQuery] PagedSearchDto searchData)
     {
         return Ok(await _conversationService.SearchConversationsPagedAsync(searchData));
+    }
+
+    [HttpGet("all")]
+    public async Task<ActionResult<IList<ConversationDto>>> GetAllUserConversationAsync()
+    {
+        return Ok(await _conversationService.GetAllUserConversationsAsync(default));
+    }
+
+    [HttpPost("dialogs")]
+    public async Task<ActionResult<DialogDto>> CreateDialogAsync(NewDialogDto newDialogData)
+    {
+        if (newDialogData.CreatorId == default)
+        {
+            newDialogData.CreatorId = HttpContext.User.GetIdClaim();
+        }
+        
+        return Ok(await _conversationService.CreateOrGetDialogAsync(newDialogData));
     }
 }

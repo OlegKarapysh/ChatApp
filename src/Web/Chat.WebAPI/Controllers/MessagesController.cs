@@ -1,6 +1,4 @@
-﻿using Chat.Application.Services.Conversations;
-using Chat.Application.Services.Messages;
-using Chat.Domain.DTOs.Conversations;
+﻿using Chat.Application.Services.Messages;
 using Chat.Domain.DTOs.Messages;
 using Chat.Domain.DTOs.Users;
 using Microsoft.AspNetCore.Authorization;
@@ -22,5 +20,11 @@ public sealed class MessagesController : ControllerBase
     public async Task<ActionResult<MessagesPageDto>> SearchMessagesPagedAsync([FromQuery] PagedSearchDto searchData)
     {
         return Ok(await _messageService.SearchMessagesPagedAsync(searchData));
+    }
+
+    [HttpPost]
+    public async Task<ActionResult> CreateMessageAsync(MessageDto messageData)
+    {
+        return Ok(await _messageService.CreateMessageAsync(messageData));
     }
 }

@@ -2,5 +2,5 @@
 
 public class ConversationsPageDto : PageDto
 {
-    public ConversationDto[]? Conversations { get; set; }
+    public ConversationBasicInfoDto[]? Conversations { get; set; }
 }

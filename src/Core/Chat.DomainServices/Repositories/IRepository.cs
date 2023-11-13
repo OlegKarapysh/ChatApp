@@ -13,7 +13,7 @@ public interface IRepository<T, TId>
     IQueryable<T> SearchWhere<TSearch>(string? searchFilter);
     IQueryable<T> ToSortedPage(string sortingProperty, SortingOrder sortingOrder, int page, int pageSize);
     Task<IList<T>> FindAllAsync(Expression<Func<T, bool>> predicate);
-    Task AddAsync(T entity);
+    Task<T> AddAsync(T entity);
     Task<bool> RemoveAsync(TId id);
     void Update(T entity);
 }

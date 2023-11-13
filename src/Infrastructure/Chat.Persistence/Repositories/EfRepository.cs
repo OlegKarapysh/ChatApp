@@ -38,7 +38,7 @@ public sealed class EfRepository<T, TId> : IRepository<T, TId>
     public async Task<IList<T>> FindAllAsync(Expression<Func<T, bool>> predicate)
         => await _dbContext.Set<T>().Where(predicate).ToListAsync();
 
-    public async Task AddAsync(T entity) => await _dbContext.Set<T>().AddAsync(entity);
+    public async Task<T> AddAsync(T entity) => (await _dbContext.Set<T>().AddAsync(entity)).Entity;
 
     public void Update(T entity) => _dbContext.Set<T>().Update(entity);
 

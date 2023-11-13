@@ -16,7 +16,7 @@ public sealed class ChatHub : Hub<IChatClient>, IChatHub
     }
 
     // TODO: create single Dto for all information
-    public void SendMessage(ConversationDto conversation, MessageDto message)
+    public void SendMessage(ConversationBasicInfoDto conversation, MessageBasicInfoDto message)
     {
         //Clients.Group(conversation.Id).ReceiveMessage(message);
     }
