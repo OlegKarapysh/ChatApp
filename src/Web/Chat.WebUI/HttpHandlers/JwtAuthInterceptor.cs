@@ -34,7 +34,7 @@ public sealed class JwtAuthInterceptor : DelegatingHandler
      protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var jwt = (await _tokenService.GetTokens()).AccessToken;
-        AddBearerHeader(request, jwt);
+        TryAddBearerHeader(request, jwt);
         var response = await base.SendAsync(request, cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.Forbidden)
@@ -56,18 +56,23 @@ public sealed class JwtAuthInterceptor : DelegatingHandler
                 return refreshTokensResult;
             }
 
-            var tokens = await refreshTokensResult.Content.ReadFromJsonAsync<TokenPairDto>();
+            var tokens = await refreshTokensResult.Content.ReadFromJsonAsync<TokenPairDto>(cancellationToken: cancellationToken);
             await _tokenService.SaveTokens(tokens);
             _notifyAuthenticationService.NotifyAuthenticationChanged();
-            AddBearerHeader(request, tokens?.AccessToken ?? string.Empty);
+            TryAddBearerHeader(request, tokens?.AccessToken ?? string.Empty);
             return await base.SendAsync(request, cancellationToken);
         }
         
         return response;
     }
 
-    private void AddBearerHeader(HttpRequestMessage httpRequestMessage, string token)
+    private void TryAddBearerHeader(HttpRequestMessage httpRequestMessage, string token)
     {
+        if (string.IsNullOrEmpty(token))
+        {
+            return;
+        }
+        
         httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue(BearerAuthScheme, token);
     }
 

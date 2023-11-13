@@ -4,11 +4,16 @@ using Chat.Persistence.Contexts;
 using Chat.Domain.Entities;
 using Chat.WebAPI.Extensions;
 using Chat.WebAPI.Middlewares;
+using Chat.WebAPI.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = long.MaxValue;
+});
 builder.Services.AddDbContext<ChatDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ChatDb")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -35,5 +40,6 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ChatHub>(app.Configuration["SignalR:HubRoute"]!);
 
 app.Run();
