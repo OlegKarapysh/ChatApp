@@ -1,9 +1,9 @@
 ﻿@page "/profile"
 
 @attribute [Authorize]
+
 @inject IToastService ToastNotification
 @inject IUsersWebApiService UserService
-@inject SpinnerService Spinner
 
 <PageTitle>Profile</PageTitle>
 
@@ -48,7 +48,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Spinner!.Show();
         var response = await UserService!.GetCurrentUserInfoAsync();
         if (!response.IsSuccessful)
         {
@@ -57,12 +56,10 @@
         }
         
         UserData = response.Content ?? UserData;
-        Spinner.Hide();
     }
     
     public async Task HandleSubmit()
     {
-        Spinner!.Show();
         IsSubmitDisabled = true;
         var response = await UserService!.UpdateUserInfoAsync(UserData);
         if (response is not null)
@@ -75,6 +72,5 @@
         }
         
         IsSubmitDisabled = false;
-        Spinner.Hide();
     }
 }

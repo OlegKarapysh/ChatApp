@@ -1,16 +1,16 @@
-﻿@page "/people"
+﻿@page "/messages"
 
 @attribute [Authorize]
 
-@inject IUsersWebApiService UserService
+@inject IMessagesWebApiService MessageService
 @inject IToastService ToastNotification
 @inject IJSRuntime JsRuntime
 @inject NavigationManager Navigation
 
-<h1>People</h1>
+<h1>Messages</h1>
 
 <RadzenTextBox Placeholder="Type to search..." @bind-Value="SearchFilter"></RadzenTextBox>
-<RadzenDropDown TValue="string" Data="UserProperties" @bind-Value="SortingProperty" Change="OnSortingPropertyChanged">
+<RadzenDropDown TValue="string" Data="MessagesProperties" @bind-Value="SortingProperty" Change="OnSortingPropertyChanged">
 </RadzenDropDown>
 <RadzenRadioButtonList @bind-Value="SortingOrder" TValue="int" class="mb-5" Change="OnSortingOrderChanged">
     <Items>
@@ -20,50 +20,41 @@
 </RadzenRadioButtonList>
 <RadzenButton Click="OnSearch">Search</RadzenButton>
 
-<RadzenDataGrid TItem="UserDto" Data="UsersOnPage" ColumnWidth="300px"
+<RadzenDataGrid TItem="MessageDto" Data="MessagesOnPage" ColumnWidth="300px"
                 AllowColumnResize="true" AllowAlternatingRows="false">
     <Columns>
-        <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="Username" Width="120px" />
-        <RadzenDataGridColumn TItem="UserDto" Property="FirstName" Title="First name" Frozen="true" Width="160px"/>
-        <RadzenDataGridColumn TItem="UserDto" Property="LastName" Title="Last name" Width="160px"/>
-        <RadzenDataGridColumn TItem="UserDto" Property="PhoneNumber" Title="Phone number" Width="200px"/>
-        <RadzenDataGridColumn TItem="UserDto" Property="Email" Title="Email" Width="120px"/>
+        <RadzenDataGridColumn TItem="MessageDto" Property="TextContent" Title="Text" />
+        <RadzenDataGridColumn TItem="MessageDto" Property="CreatedAt" Title="Created at"/>
+        <RadzenDataGridColumn TItem="MessageDto" Property="UpdatedAt" Title="Last updated at"/>
     </Columns>
 </RadzenDataGrid>
 <RadzenPager @ref="Pager" PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
-             AlwaysVisible="true" Count="UsersCount" PageChanged="OnPageChanged"></RadzenPager>
+             AlwaysVisible="true" Count="MessagesCount" PageChanged="OnPageChanged"></RadzenPager>
 
 @code 
 {
-    public const string Path = "/people";
+    public const string Path = "/messages";
     public const int DefaultPageNumbersCount = 3;
     
     [QueryStringParameter]
     public string SearchFilter { get; set; } = string.Empty;
-
     [QueryStringParameter]
     public int Page
     {
         get => _page;
         set => _page = value < 1 ? 1 : value;
     }
-    
     [QueryStringParameter]
-    public string SortingProperty { get; set; } = nameof(UserDto.UserName);
-
+    public string SortingProperty { get; set; } = nameof(MessageDto.CreatedAt);
     [QueryStringParameter]
     public int SortingOrder { get; set; } = (int)Chat.Domain.Enums.SortingOrder.Ascending;
     
     public RadzenPager Pager { get; set; } = default!;
-    public int UsersCount { get; set; }
-    public readonly string[] UserProperties = {
-        nameof(UserDto.UserName),
-        nameof(UserDto.FirstName),
-        nameof(UserDto.LastName),
-        nameof(UserDto.Email),
-        nameof(UserDto.PhoneNumber)
-    };
-    public IList<UserDto> UsersOnPage { get; set; } = new List<UserDto>();
+    public int MessagesCount { get; set; }
+    public readonly string[] MessagesProperties = typeof(MessageDto)
+        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+        .Select(x => x.Name).ToArray();
+    public IList<MessageDto> MessagesOnPage { get; set; } = new List<MessageDto>();
     private int _page;
 
     public override Task SetParametersAsync(ParameterView parameters)
@@ -110,7 +101,7 @@
 
     private void UpdatePagerItemsCount(PageInfo pageInfo)
     {
-        UsersCount = pageInfo.TotalCount;
+        MessagesCount = pageInfo.TotalCount;
     }
     
     private void UpdatePage(int pageIndex)
@@ -118,9 +109,9 @@
         Page = pageIndex + 1;
     }
 
-    private void UpdateUsers(UserDto[] users)
+    private void UpdateConversations(MessageDto[] conversations)
     {
-        UsersOnPage = users;
+        MessagesOnPage = conversations;
     }
 
     private async Task UpdateQueryStringParameters()
@@ -137,7 +128,7 @@
         }
         else
         {
-            UpdateUsers(searchResult.Content!.Users);
+            UpdateConversations(searchResult.Content!.Messages);
             UpdatePagerItemsCount(searchResult.Content.PageInfo);
         }
     }
@@ -150,8 +141,8 @@
         SortingOrder = (Chat.Domain.Enums.SortingOrder)SortingOrder
     };
 
-    private async Task<WebApiResponse<UsersPageDto>> SendSearchRequest()
+    private async Task<WebApiResponse<MessagesPageDto>> SendSearchRequest()
     {
-        return await UserService!.GetSearchedUsersPage(ParseQueryModel());
+        return await MessageService!.GetSearchedMessagesPage(ParseQueryModel());
     }
 }

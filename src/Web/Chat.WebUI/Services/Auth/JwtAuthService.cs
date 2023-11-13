@@ -1,5 +1,4 @@
-﻿using Blazored.LocalStorage;
-using Chat.Domain.DTOs;
+﻿using Chat.Domain.DTOs;
 using Chat.Domain.DTOs.Authentication;
 using Chat.WebUI.Providers;
 
@@ -7,24 +6,20 @@ namespace Chat.WebUI.Services.Auth;
 
 public sealed class JwtAuthService : IJwtAuthService
 {
-    public const string JwtLocalStorageKey = "JwtToken";
-    public const string RefreshTokenLocalStorageKey = "RefreshToken";
-
     private readonly IAuthWebApiService _httpService;
-    private readonly ILocalStorageService _localStorage;
+    private readonly ITokenService _tokenService;
     private readonly INotifyAuthenticationChanged _authenticationState;
 
     public JwtAuthService(
         IAuthWebApiService httpService,
-        ILocalStorageService localStorage,
-        INotifyAuthenticationChanged authenticationState)
+        INotifyAuthenticationChanged authenticationState,
+        ITokenService tokenService)
     {
         _httpService = httpService;
-        _localStorage = localStorage;
         _authenticationState = authenticationState;
+        _tokenService = tokenService;
     }
-
-
+    
     public async Task<ErrorDetailsDto?> RegisterAsync(RegistrationDto registerData)
     {
         var response = await _httpService.RegisterAsync(registerData);
@@ -33,7 +28,7 @@ public sealed class JwtAuthService : IJwtAuthService
             return response.ErrorDetails;
         }
         
-        await SaveTokens(response.Content);
+        await _tokenService.SaveTokens(response.Content);
         _authenticationState.NotifyAuthenticationChanged();
         
         return default;
@@ -47,7 +42,7 @@ public sealed class JwtAuthService : IJwtAuthService
             return response.ErrorDetails;
         }
 
-        await SaveTokens(response.Content);
+        await _tokenService.SaveTokens(response.Content);
         
         return default;
     }
@@ -59,15 +54,7 @@ public sealed class JwtAuthService : IJwtAuthService
 
     public async Task Logout()
     {
-        await _localStorage.RemoveItemsAsync(new[] { JwtLocalStorageKey, RefreshTokenLocalStorageKey });
+        await _tokenService.RemoveTokens();
         _authenticationState.NotifyAuthenticationChanged();
-    }
-
-    private async ValueTask SaveTokens(TokenPairDto? tokens)
-    {
-        await _localStorage.SetItemAsStringAsync(
-            JwtLocalStorageKey, tokens?.AccessToken ?? string.Empty);
-        await _localStorage.SetItemAsStringAsync(
-            RefreshTokenLocalStorageKey, tokens?.RefreshToken ?? string.Empty);
     }
 }

@@ -31,8 +31,8 @@ public sealed class UsersController : ControllerBase
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<PagedUsersDto>> SearchUsersPagedAsync(
-        [FromQuery] UsersPagedSearchFilterDto searchData)
+    public async Task<ActionResult<UsersPageDto>> SearchUsersPagedAsync(
+        [FromQuery] PagedSearchDto searchData)
     {
         return Ok(await _userService.SearchUsersPagedAsync(searchData));
     }

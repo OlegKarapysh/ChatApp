@@ -1,9 +1,10 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using Chat.Application.Extensions;
 using Chat.Domain.Abstract;
+using Chat.Domain.Enums;
 using Chat.DomainServices.Repositories;
 using Chat.Persistence.Contexts;
-using Chat.Persistence.UnitsOfWork;
-using Microsoft.EntityFrameworkCore;
 
 namespace Chat.Persistence.Repositories;
 
@@ -22,6 +23,18 @@ public sealed class EfRepository<T, TId> : IRepository<T, TId>
 
     public async Task<IList<T>> GetAllAsync() => await _dbContext.Set<T>().ToListAsync();
 
+    public IQueryable<T> SearchWhere<TSearch>(string? searchFilter)
+    {
+        return _dbContext.Set<T>().SearchWhere<T, TSearch>(searchFilter);
+    }
+
+    public IQueryable<T> ToSortedPage(string sortingProperty, SortingOrder sortingOrder, int page, int pageSize)
+    {
+        return _dbContext.Set<T>().OrderBy(sortingProperty, sortingOrder)
+                         .Skip((page - 1) * pageSize)
+                         .Take(pageSize);
+    }
+    
     public async Task<IList<T>> FindAllAsync(Expression<Func<T, bool>> predicate)
         => await _dbContext.Set<T>().Where(predicate).ToListAsync();
 

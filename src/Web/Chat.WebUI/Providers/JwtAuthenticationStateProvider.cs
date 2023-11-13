@@ -1,23 +1,22 @@
 ﻿using System.Security.Claims;
 using System.Text.Json;
-using Blazored.LocalStorage;
-using Chat.WebUI.Services.Auth;
 using Microsoft.AspNetCore.Components.Authorization;
+using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.Providers;
 
 public class JwtAuthenticationStateProvider : AuthenticationStateProvider, INotifyAuthenticationChanged
 {
-    private readonly ILocalStorageService _localStorageService;
+    private readonly ITokenService _tokenService;
 
-    public JwtAuthenticationStateProvider(ILocalStorageService localStorageService)
+    public JwtAuthenticationStateProvider(ITokenService tokenService)
     {
-        _localStorageService = localStorageService;
+        _tokenService = tokenService;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var jwtTokenFromLocalStorage = await _localStorageService.GetItemAsync<string>(JwtAuthService.JwtLocalStorageKey);
+        var jwtTokenFromLocalStorage = (await _tokenService.GetTokens()).AccessToken;
         
         return string.IsNullOrEmpty(jwtTokenFromLocalStorage)
             ? new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()))

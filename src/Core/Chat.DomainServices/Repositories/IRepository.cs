@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Chat.Domain.Abstract;
+using Chat.Domain.Enums;
 
 namespace Chat.DomainServices.Repositories;
 
@@ -9,6 +10,8 @@ public interface IRepository<T, TId>
 {
     Task<T?> GetByIdAsync(TId id);
     Task<IList<T>> GetAllAsync();
+    IQueryable<T> SearchWhere<TSearch>(string? searchFilter);
+    IQueryable<T> ToSortedPage(string sortingProperty, SortingOrder sortingOrder, int page, int pageSize);
     Task<IList<T>> FindAllAsync(Expression<Func<T, bool>> predicate);
     Task AddAsync(T entity);
     Task<bool> RemoveAsync(TId id);

@@ -32,17 +32,21 @@ public static class QueryableExtensions
         
         var words = searchValues.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var predicate = PredicateBuilder.New<TEntity>(true);
-
-        foreach (var property in GetStringProperties<TEntity, TSearch>())
+        foreach (var property in GetStringableProperties<TEntity, TSearch>())
         {
             foreach (var word in words)
             {
                 var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
                 var entity = Expression.Parameter(typeof(TEntity), "entity");
-                var propertyAccessor = Expression.PropertyOrField(entity, property.Name);
-                var searchWordConstant = Expression.Constant(word);
-                var containsCall = Expression.Call(propertyAccessor, containsMethod, searchWordConstant);
-                var lambdaPredicate = Expression.Lambda<Func<TEntity, bool>>(containsCall, entity);
+                var propertyAccessor = Expression.Property(entity, property);
+                var propertyAsObject = Expression.Convert(propertyAccessor, typeof(object));
+                var nullCheck = Expression.ReferenceEqual(propertyAsObject, Expression.Constant(null));
+                Expression stringifiedProperty = property.PropertyType == typeof(string)
+                    ? propertyAccessor
+                    : Expression.Call(propertyAccessor, TryGetToStringMethod(property));
+                var containsCall = Expression.Call(stringifiedProperty, containsMethod, Expression.Constant(word));
+                var conditionalExpression = Expression.Condition(nullCheck, Expression.Constant(false), containsCall);
+                var lambdaPredicate = Expression.Lambda<Func<TEntity, bool>>(conditionalExpression, entity);
                 predicate = predicate.Or(lambdaPredicate);
             }
         }
@@ -50,18 +54,25 @@ public static class QueryableExtensions
         return entities.AsExpandable().Where(x => ((Expression<Func<TEntity, bool>>)predicate).Invoke(x));
     }
     
-    private static IEnumerable<PropertyInfo> GetStringProperties<T>(string[] propertyNames)
+    public static IQueryable<T> ToSortedPage<T>(this IQueryable<T> entities,
+        string sortingProperty, SortingOrder sortingOrder, int page, int pageSize)
     {
-        return typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                        .Where(x => x.PropertyType == typeof(string) && propertyNames.Contains(x.Name));
+        return entities.OrderBy(sortingProperty, sortingOrder)
+                         .Skip((page - 1) * pageSize)
+                         .Take(pageSize);
     }
 
-    private static IEnumerable<PropertyInfo> GetStringProperties<T, U>()
+    private static IEnumerable<PropertyInfo> GetStringableProperties<TEntity, TSearch>()
     {
-        var targetProperties = typeof(U).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                        .Where(x => x.PropertyType == typeof(string))
-                                        .Select(x => x.Name)
-                                        .ToArray();
-        return GetStringProperties<T>(targetProperties);
+        var targetProperties = typeof(TSearch).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                              .Select(x => x.Name)
+                                              .ToArray();
+        return typeof(TEntity).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                        .Where(x => targetProperties.Contains(x.Name) && TryGetToStringMethod(x) is not null);
+    }
+
+    private static MethodInfo? TryGetToStringMethod(PropertyInfo? propertyInfo)
+    {
+        return propertyInfo?.PropertyType.GetMethod("ToString", Type.EmptyTypes);
     }
 }

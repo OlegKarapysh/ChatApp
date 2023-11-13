@@ -2,7 +2,7 @@
 
 namespace Chat.Domain.DTOs.Users;
 
-public class UsersPagedSearchFilterDto
+public class PagedSearchDto
 {
     public int Page { get; set; } = 1;
     public string? SearchFilter { get; set; } = string.Empty;

@@ -1,8 +1,8 @@
-﻿using Blazored.LocalStorage;
+﻿using Microsoft.AspNetCore.WebUtilities;
 using Chat.Domain.DTOs;
 using Chat.Domain.DTOs.Users;
 using Chat.Domain.Web;
-using Microsoft.AspNetCore.WebUtilities;
+using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.Services.Users;
 
@@ -10,8 +10,8 @@ public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
 {
     private protected override string BaseRoute { get; init; }
 
-    public UsersWebApiService(HttpClient httpClient, ILocalStorageService localStorage)
-        : base(httpClient, localStorage)
+    public UsersWebApiService(IHttpClientFactory httpClientFactory, ITokenService tokenService)
+        : base(httpClientFactory, tokenService)
     {
         BaseRoute = "/users";
     }
@@ -20,17 +20,10 @@ public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
 
     public async Task<WebApiResponse<UserDto>> GetCurrentUserInfoAsync() => await GetAsync<UserDto>();
 
-    public async Task<WebApiResponse<PagedUsersDto>> GetSearchedUsersPage(UsersPagedSearchFilterDto searchData)
+    public async Task<WebApiResponse<UsersPageDto>> GetSearchedUsersPage(PagedSearchDto searchData)
     {
-        var queryParams = new Dictionary<string, string>
-        {
-            { nameof(UsersPagedSearchFilterDto.SearchFilter), searchData.SearchFilter },
-            { nameof(UsersPagedSearchFilterDto.Page), searchData.Page.ToString() },
-            { nameof(UsersPagedSearchFilterDto.SortingProperty), searchData.SortingProperty },
-            { nameof(UsersPagedSearchFilterDto.SortingOrder), ((int)searchData.SortingOrder).ToString() },
-        };
-        
-        return await GetAsync<PagedUsersDto>(QueryHelpers.AddQueryString("/search/", queryParams));
+        return await GetAsync<UsersPageDto>(
+            QueryHelpers.AddQueryString("/search/", GetQueryParamsForPagedSearch(searchData)));
     }
 
     public async Task<ErrorDetailsDto?> UpdateUserInfoAsync(UserDto userData) => await PutAsync(userData);

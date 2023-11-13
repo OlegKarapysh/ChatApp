@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Chat.Domain.Entities;
 
 namespace Chat.Application.Services.JWT;
 
@@ -7,6 +8,7 @@ public interface IJwtService
     public const string IdClaimName = "id";
     public const string UserNameClaimName = "username";
     string CreateAccessToken(int id, string userName, string email);
-    string CreateRefreshToken();
+    RefreshToken CreateRefreshToken();
     int GetIdClaim(ClaimsPrincipal claimsPrincipal);
+    int GetIdClaim(string accessToken);
 }

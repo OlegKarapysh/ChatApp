@@ -1,16 +1,16 @@
-﻿@page "/people"
+﻿@page "/conversations"
 
 @attribute [Authorize]
 
-@inject IUsersWebApiService UserService
+@inject IConversationsWebApiService ConversationService
 @inject IToastService ToastNotification
 @inject IJSRuntime JsRuntime
 @inject NavigationManager Navigation
 
-<h1>People</h1>
+<h1>Conversations</h1>
 
 <RadzenTextBox Placeholder="Type to search..." @bind-Value="SearchFilter"></RadzenTextBox>
-<RadzenDropDown TValue="string" Data="UserProperties" @bind-Value="SortingProperty" Change="OnSortingPropertyChanged">
+<RadzenDropDown TValue="string" Data="ConversationsProperties" @bind-Value="SortingProperty" Change="OnSortingPropertyChanged">
 </RadzenDropDown>
 <RadzenRadioButtonList @bind-Value="SortingOrder" TValue="int" class="mb-5" Change="OnSortingOrderChanged">
     <Items>
@@ -20,50 +20,41 @@
 </RadzenRadioButtonList>
 <RadzenButton Click="OnSearch">Search</RadzenButton>
 
-<RadzenDataGrid TItem="UserDto" Data="UsersOnPage" ColumnWidth="300px"
+<RadzenDataGrid TItem="ConversationDto" Data="ConversationsOnPage" ColumnWidth="300px"
                 AllowColumnResize="true" AllowAlternatingRows="false">
     <Columns>
-        <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="Username" Width="120px" />
-        <RadzenDataGridColumn TItem="UserDto" Property="FirstName" Title="First name" Frozen="true" Width="160px"/>
-        <RadzenDataGridColumn TItem="UserDto" Property="LastName" Title="Last name" Width="160px"/>
-        <RadzenDataGridColumn TItem="UserDto" Property="PhoneNumber" Title="Phone number" Width="200px"/>
-        <RadzenDataGridColumn TItem="UserDto" Property="Email" Title="Email" Width="120px"/>
+        <RadzenDataGridColumn TItem="ConversationDto" Property="Title" Title="Title" />
+        <RadzenDataGridColumn TItem="ConversationDto" Property="CreatedAt" Title="Created at"/>
+        <RadzenDataGridColumn TItem="ConversationDto" Property="UpdatedAt" Title="Last updated at"/>
     </Columns>
 </RadzenDataGrid>
 <RadzenPager @ref="Pager" PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
-             AlwaysVisible="true" Count="UsersCount" PageChanged="OnPageChanged"></RadzenPager>
+             AlwaysVisible="true" Count="ConversationsCount" PageChanged="OnPageChanged"></RadzenPager>
 
 @code 
 {
-    public const string Path = "/people";
+    public const string Path = "/conversations";
     public const int DefaultPageNumbersCount = 3;
     
     [QueryStringParameter]
     public string SearchFilter { get; set; } = string.Empty;
-
     [QueryStringParameter]
     public int Page
     {
         get => _page;
         set => _page = value < 1 ? 1 : value;
     }
-    
     [QueryStringParameter]
-    public string SortingProperty { get; set; } = nameof(UserDto.UserName);
-
+    public string SortingProperty { get; set; } = nameof(ConversationDto.Title);
     [QueryStringParameter]
     public int SortingOrder { get; set; } = (int)Chat.Domain.Enums.SortingOrder.Ascending;
     
     public RadzenPager Pager { get; set; } = default!;
-    public int UsersCount { get; set; }
-    public readonly string[] UserProperties = {
-        nameof(UserDto.UserName),
-        nameof(UserDto.FirstName),
-        nameof(UserDto.LastName),
-        nameof(UserDto.Email),
-        nameof(UserDto.PhoneNumber)
-    };
-    public IList<UserDto> UsersOnPage { get; set; } = new List<UserDto>();
+    public int ConversationsCount { get; set; }
+    public readonly string[] ConversationsProperties = typeof(ConversationDto)
+        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+        .Select(x => x.Name).ToArray();
+    public IList<ConversationDto> ConversationsOnPage { get; set; } = new List<ConversationDto>();
     private int _page;
 
     public override Task SetParametersAsync(ParameterView parameters)
@@ -110,7 +101,7 @@
 
     private void UpdatePagerItemsCount(PageInfo pageInfo)
     {
-        UsersCount = pageInfo.TotalCount;
+        ConversationsCount = pageInfo.TotalCount;
     }
     
     private void UpdatePage(int pageIndex)
@@ -118,9 +109,9 @@
         Page = pageIndex + 1;
     }
 
-    private void UpdateUsers(UserDto[] users)
+    private void UpdateConversations(ConversationDto[] conversations)
     {
-        UsersOnPage = users;
+        ConversationsOnPage = conversations;
     }
 
     private async Task UpdateQueryStringParameters()
@@ -137,7 +128,7 @@
         }
         else
         {
-            UpdateUsers(searchResult.Content!.Users);
+            UpdateConversations(searchResult.Content!.Conversations);
             UpdatePagerItemsCount(searchResult.Content.PageInfo);
         }
     }
@@ -150,8 +141,8 @@
         SortingOrder = (Chat.Domain.Enums.SortingOrder)SortingOrder
     };
 
-    private async Task<WebApiResponse<UsersPageDto>> SendSearchRequest()
+    private async Task<WebApiResponse<ConversationsPageDto>> SendSearchRequest()
     {
-        return await UserService!.GetSearchedUsersPage(ParseQueryModel());
+        return await ConversationService!.GetSearchedConversationsPage(ParseQueryModel());
     }
 }
