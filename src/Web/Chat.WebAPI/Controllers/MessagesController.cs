@@ -27,6 +27,12 @@ public sealed class MessagesController : ControllerBase
         return Ok(await _messageService.SearchMessagesPagedAsync(searchData));
     }
 
+    [HttpGet("all/{conversationId:int}")]
+    public async Task<ActionResult<IList<MessageWithSenderDto>>> GetAllConversationMessagesAsync(int conversationId)
+    {
+        return Ok(await _messageService.GetAllConversationMessagesAsync(conversationId));
+    }
+
     [HttpPost]
     public async Task<ActionResult<MessageWithSenderDto>> CreateMessageAsync(MessageDto messageData)
     {

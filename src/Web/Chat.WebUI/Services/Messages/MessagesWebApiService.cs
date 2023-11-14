@@ -16,12 +16,16 @@ public class MessagesWebApiService : WebApiServiceBase, IMessagesWebApiService
         BaseRoute = "/messages";
         Console.WriteLine("Messages web api service with httpClient type: " + httpClientFactory.GetType().FullName);
     }
-
     
     public async Task<WebApiResponse<MessagesPageDto>> GetSearchedMessagesPage(PagedSearchDto searchData)
     {
         return await GetAsync<MessagesPageDto>(
             QueryHelpers.AddQueryString("/search/", GetQueryParamsForPagedSearch(searchData)));
+    }
+
+    public async Task<WebApiResponse<IList<MessageWithSenderDto>>> GetAllConversationMessagesAsync(int conversationId)
+    {
+        return await GetAsync<IList<MessageWithSenderDto>>($"/all/{conversationId}");
     }
 
     public async Task<WebApiResponse<MessageWithSenderDto>> SendMessageAsync(MessageDto messageData)

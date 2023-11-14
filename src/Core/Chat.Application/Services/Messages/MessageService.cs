@@ -7,6 +7,7 @@ using Chat.Domain.Web;
 using Chat.DomainServices.Repositories;
 using Chat.DomainServices.UnitsOfWork;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chat.Application.Services.Messages;
 
@@ -40,11 +41,13 @@ public sealed class MessageService : IMessageService
         });
     }
 
-    public async Task<IList<MessageDto>> GetAllConversationMessagesAsync(int conversationId)
+    public async Task<IList<MessageWithSenderDto>> GetAllConversationMessagesAsync(int conversationId)
     {
-        return (await _messageRepository.FindAllAsync(message => message.ConversationId == conversationId))
-               .Select(message => message.MapToDto())
-               .ToArray();
+        return await _messageRepository.AsQueryable()
+                                       .Include(x => x.Sender)
+                                       .Where(x => x.ConversationId == conversationId)
+                                       .Select(x => x.MapToDtoWithSender())
+                                       .ToListAsync();
     }
 
     public async Task<MessageWithSenderDto> CreateMessageAsync(MessageDto messageData)

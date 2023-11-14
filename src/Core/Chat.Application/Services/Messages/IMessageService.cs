@@ -7,5 +7,5 @@ public interface IMessageService
 {
     Task<MessagesPageDto> SearchMessagesPagedAsync(PagedSearchDto searchData);
     Task<MessageWithSenderDto> CreateMessageAsync(MessageDto messageData);
-    Task<IList<MessageDto>> GetAllConversationMessagesAsync(int conversationId);
+    Task<IList<MessageWithSenderDto>> GetAllConversationMessagesAsync(int conversationId);
 }

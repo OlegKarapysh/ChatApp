@@ -34,6 +34,8 @@ public sealed class EfRepository<T, TId> : IRepository<T, TId>
                          .Skip((page - 1) * pageSize)
                          .Take(pageSize);
     }
+
+    public IQueryable<T> AsQueryable() => _dbContext.Set<T>();
     
     public async Task<IList<T>> FindAllAsync(Expression<Func<T, bool>> predicate)
         => await _dbContext.Set<T>().Where(predicate).ToListAsync();

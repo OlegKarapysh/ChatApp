@@ -1,5 +1,6 @@
 ﻿@* @page "/chat" *@
 @attribute [Authorize]
+@implements IDisposable
 
 @inject HubConnectionService HubConnectionService
 @inject IMessagesWebApiService MessageService
@@ -11,7 +12,7 @@
         @foreach (var message in Messages)
         {
             <RadzenCard>
-                <RadzenText>@(message.UserName): @message.TextContent</RadzenText>
+                <RadzenText><strong>@(message.UserName): </strong> @message.TextContent</RadzenText>
             </RadzenCard>
         }
     </div>
@@ -28,13 +29,19 @@
     
     [Parameter, EditorRequired]
     public DialogDto Conversation { get; set; } = default!;
-    public IList<MessageWithSenderDto> Messages { get; set; } = new List<MessageWithSenderDto>();
+    public List<MessageWithSenderDto> Messages { get; set; } = new List<MessageWithSenderDto>();
     public string MessageText { get; set; } = string.Empty;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         HubConnectionService!.ReceivedMessage += AddMessage;
-        base.OnInitialized();
+        var messagesResponse = await MessageService!.GetAllConversationMessagesAsync(Conversation.Id);
+        if (messagesResponse.IsSuccessful)
+        {
+            Messages.AddRange(messagesResponse.Content!);
+        }
+        
+        await base.OnInitializedAsync();
     }
 
     public void Dispose()
@@ -44,9 +51,13 @@
 
     private Task AddMessage(MessageWithSenderDto message)
     {
-        Console.WriteLine($"Adding message {message.TextContent}");
-        Messages.Add(message);
-        StateHasChanged();
+        if (message.ConversationId == Conversation.Id)
+        {
+            Console.WriteLine($"Adding message {message.TextContent}");
+            Messages.Add(message);
+            StateHasChanged();
+        }
+
         return Task.CompletedTask;
     }
 
@@ -65,5 +76,6 @@
         }
         Console.WriteLine($"Sending message: {message.Content.TextContent}");
         await HubConnectionService!.SendMessageAsync(Conversation.Id.ToString(), message.Content);
+        MessageText = string.Empty;
     }
 }
