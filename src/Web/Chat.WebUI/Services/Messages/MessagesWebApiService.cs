@@ -23,4 +23,9 @@ public class MessagesWebApiService : WebApiServiceBase, IMessagesWebApiService
         return await GetAsync<MessagesPageDto>(
             QueryHelpers.AddQueryString("/search/", GetQueryParamsForPagedSearch(searchData)));
     }
+
+    public async Task<WebApiResponse<MessageDto>> SendMessageAsync(MessageDto messageData)
+    {
+        return await PostAsync<MessageDto, MessageDto>("", messageData);
+    }
 }

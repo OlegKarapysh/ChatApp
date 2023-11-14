@@ -1,4 +1,7 @@
-﻿<ErrorBoundary @ref="ErrorBoundary">
+﻿@inject HubConnectionService HubConnectionService
+@inject IConversationsWebApiService ConversationService
+
+<ErrorBoundary @ref="ErrorBoundary">
     <ChildContent>
         <Spinner></Spinner>
         <CascadingAuthenticationState>
@@ -40,4 +43,13 @@
 @code 
 {
     public ErrorBoundary ErrorBoundary { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var conversationIds = await ConversationService!.GetAllUserConversationIdsAsync();
+        await HubConnectionService!.ConnectAsync();
+        await HubConnectionService!.JoinConversationsAsync(
+            conversationIds.Content?.Select(x => x.ToString()).ToArray() ?? Array.Empty<string>());
+        await base.OnInitializedAsync();
+    }
 }

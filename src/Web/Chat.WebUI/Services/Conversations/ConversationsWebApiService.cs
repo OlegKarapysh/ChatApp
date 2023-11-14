@@ -26,4 +26,14 @@ public class ConversationsWebApiService : WebApiServiceBase, IConversationsWebAp
     {
         return await GetAsync<IList<int>>("/all-ids");
     }
+
+    public async Task<WebApiResponse<IList<ConversationDto>>> GetAllUserConversationsAsync()
+    {
+        return await GetAsync<IList<ConversationDto>>("/all");
+    }
+
+    public async Task<WebApiResponse<DialogDto>> CreateDialogAsync(NewDialogDto dialogData)
+    {
+        return await PostAsync<DialogDto, NewDialogDto>("/dialogs", dialogData);
+    }
 }

@@ -65,8 +65,10 @@ public sealed class ConversationService : IConversationService
             Title = $"{creator.UserName}-{interlocutor.UserName}_Dialog",
             Members = new List<User> { creator, interlocutor }
         };
+        var createdDialog = await _conversationsRepository.AddAsync(dialog);
+        await _unitOfWork.SaveChangesAsync();
         
-        return (await _conversationsRepository.AddAsync(dialog)).MapToDialogDto();
+        return createdDialog.MapToDialogDto();
     }
 
     public async Task<IList<ConversationDto>> GetAllUserConversationsAsync(int userId)

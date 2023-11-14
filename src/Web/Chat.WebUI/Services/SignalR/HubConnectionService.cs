@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using Chat.Domain.DTOs.Messages;
+using Microsoft.AspNetCore.SignalR.Client;
 using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.Services.SignalR;
 
 public sealed class HubConnectionService
 {
-    public event Func<string, Task>? ReceivedMessage;
+    public event Func<MessageDto, Task>? ReceivedMessage;
     private readonly ITokenService _tokenService;
     private readonly string _hubUrl;
     private HubConnection? _connection;
@@ -26,17 +27,22 @@ public sealed class HubConnectionService
                           })
                       .WithAutomaticReconnect()
                       .Build();
-        _connection.On<string>("ReceiveMessage", async message => await OnReceivedMessageAsync(message));
+        _connection.On<MessageDto>("ReceiveMessage", OnReceivedMessage);
         await _connection.StartAsync();
     }
 
-    public async Task JoinConversationGroupsAsync(string[] conversationIds)
+    public async Task JoinConversationsAsync(string[] conversationIds)
     {
-        await _connection?.InvokeAsync("JoinConversationGroups", conversationIds);
+        await _connection?.InvokeAsync("JoinConversations", conversationIds);
     }
 
-    protected async Task OnReceivedMessageAsync(string e)
+    public async Task SendMessageAsync(string conversationId, MessageDto message)
     {
-        await ReceivedMessage?.Invoke(e);
+        await _connection?.InvokeAsync("SendMessage", conversationId, message);
+    }
+
+    private async Task OnReceivedMessage(MessageDto message)
+    {
+        await ReceivedMessage?.Invoke(message);
     }
 }

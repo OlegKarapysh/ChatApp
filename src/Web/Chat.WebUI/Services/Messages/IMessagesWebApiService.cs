@@ -7,4 +7,5 @@ namespace Chat.WebUI.Services.Messages;
 public interface IMessagesWebApiService
 {
     Task<WebApiResponse<MessagesPageDto>> GetSearchedMessagesPage(PagedSearchDto searchData);
+    Task<WebApiResponse<MessageDto>> SendMessageAsync(MessageDto messageData);
 }

@@ -1,0 +1,69 @@
+﻿@* @page "/chat" *@
+@attribute [Authorize]
+
+@inject HubConnectionService HubConnectionService
+@inject IMessagesWebApiService MessageService
+@inject IToastService ToastService
+
+<RadzenCard Style="margin: 10px">
+    <h3>@Conversation.Title</h3>
+    <div style="margin: 10px">
+        @foreach (var message in Messages)
+        {
+            <RadzenCard>
+                <RadzenText>@(message.SenderId): @message.TextContent</RadzenText>
+            </RadzenCard>
+        }
+    </div>
+    <div style="display: flex; flex-direction: column; align-content: flex-end; align-self: flex-end">
+        <RadzenTextBox @bind-Value="MessageText" Placeholder="Message... "></RadzenTextBox>
+        <RadzenButton Click="SendMessage">Send</RadzenButton>
+    </div>
+</RadzenCard>
+
+
+@code 
+{
+    public const string Path = "/chat";
+    
+    [Parameter, EditorRequired]
+    public DialogDto Conversation { get; set; } = default!;
+    public IList<MessageDto> Messages { get; set; } = new List<MessageDto>();
+    public string MessageText { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        HubConnectionService!.ReceivedMessage += AddMessage;
+        base.OnInitialized();
+    }
+
+    public void Dispose()
+    {
+        HubConnectionService!.ReceivedMessage -= AddMessage;
+    }
+
+    private Task AddMessage(MessageDto message)
+    {
+        Console.WriteLine($"Adding message {message.TextContent}");
+        Messages.Add(message);
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private async Task SendMessage()
+    {
+        var messageData = new MessageDto
+        {
+            ConversationId = Conversation.Id,
+            TextContent = MessageText
+        };
+        var message = await MessageService!.SendMessageAsync(messageData);
+        if (!message.IsSuccessful)
+        {
+            ToastService!.ShowError(message.ErrorDetails.Message);
+            return;
+        }
+        Console.WriteLine($"Sending message: {message.Content.TextContent}");
+        await HubConnectionService!.SendMessageAsync(Conversation.Id.ToString(), message.Content);
+    }
+}

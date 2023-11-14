@@ -47,6 +47,9 @@ public sealed class MessageService : IMessageService
     public async Task<MessageDto> CreateMessageAsync(MessageDto messageData)
     {
         var message = new Message().MapFrom(messageData);
-        return (await _messageRepository.AddAsync(message)).MapToDto();
+        var createdMessage = await _messageRepository.AddAsync(message);
+        await _unitOfWork.SaveChangesAsync();
+        
+        return createdMessage.MapToDto();
     }
 }

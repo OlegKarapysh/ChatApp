@@ -1,28 +1,40 @@
-﻿using Chat.Application.SignalR;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Chat.Domain.DTOs.Conversations;
 using Chat.Domain.DTOs.Messages;
-using Chat.Domain.Entities;
+using Chat.Application.SignalR;
 
 namespace Chat.WebAPI.SignalR;
 
 [Authorize]
 public sealed class ChatHub : Hub<IChatClient>, IChatHub
 {
-    public override Task OnConnectedAsync()
+    public override async Task OnConnectedAsync()
     {
-        return Task.CompletedTask;
+        try
+        {
+            await base.OnConnectedAsync();
+            Console.WriteLine("Connected!");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     // TODO: create single Dto for all information
-    public void SendMessage(ConversationBasicInfoDto conversation, MessageBasicInfoDto message)
+    public void SendMessage(string conversationId, MessageDto message)
     {
-        //Clients.Group(conversation.Id).ReceiveMessage(message);
+        Clients.Group(conversationId).ReceiveMessage(message);
+        Console.WriteLine($"Sent '{message.TextContent}' message");
     }
 
-    public async Task JoinConversation(string conversationId)
+    public async Task JoinConversations(string[] conversationIds)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, conversationId);
+        foreach (var conversationId in conversationIds.Where(x => !string.IsNullOrEmpty(x)))
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, conversationId);
+            Console.WriteLine($"user {Context.ConnectionId} joined {conversationId}");
+        }
     }
 }

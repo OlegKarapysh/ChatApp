@@ -2,11 +2,48 @@
 
 @attribute [Authorize]
 
+@inject IConversationsWebApiService ConversationService
+
 <h1>Your chats</h1>
 <span></span>
-<RadzenButton Click=""></RadzenButton>
+<RadzenTextBox @bind-Value="InterlocutorUserName" Placeholder="Enter username..."></RadzenTextBox>
+<RadzenButton Click="AddChat">Add dialog</RadzenButton>
+
+@foreach (var chat in Chats)
+{
+    <ChatPage Conversation="chat"></ChatPage>
+}
 
 @code 
 {
     public const string Path = "/chats";
+    public string InterlocutorUserName { get; set; } = string.Empty;
+    public List<DialogDto> Chats = new List<DialogDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var allConversationsResponse = await ConversationService!.GetAllUserConversationsAsync();
+        if (!allConversationsResponse.IsSuccessful || !allConversationsResponse.Content.Any())
+        {
+            return;
+        }
+        var allDialogs = allConversationsResponse.Content.Select(x => new DialogDto
+        {
+            Title = x.Title,
+            Id = x.Id,
+            CreatedAt = x.CreatedAt,
+            UpdatedAt = x.UpdatedAt
+        });
+        Chats.Add(allDialogs.First());
+        StateHasChanged();
+    }
+    
+
+    private async Task AddChat()
+    {
+        var dialogResponse = await ConversationService!.CreateDialogAsync(
+            new NewDialogDto { InterlocutorUserName = InterlocutorUserName });
+        var dialog = dialogResponse.Content;
+        Chats.Add(dialog);
+    }
 }

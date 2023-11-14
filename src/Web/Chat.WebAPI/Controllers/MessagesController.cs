@@ -1,8 +1,11 @@
-﻿using Chat.Application.Services.Messages;
+﻿using Chat.Application.Extensions;
+using Chat.Application.Services.Messages;
 using Chat.Domain.DTOs.Messages;
 using Chat.Domain.DTOs.Users;
+using Chat.WebAPI.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Chat.WebAPI.Controllers;
 
@@ -10,10 +13,12 @@ namespace Chat.WebAPI.Controllers;
 public sealed class MessagesController : ControllerBase
 {
     private readonly IMessageService _messageService;
+    private readonly IHubContext<ChatHub> _hubContext;
 
-    public MessagesController(IMessageService messageService)
+    public MessagesController(IMessageService messageService, IHubContext<ChatHub> hubContext)
     {
         _messageService = messageService;
+        _hubContext = hubContext;
     }
 
     [HttpGet("search")]
@@ -23,8 +28,9 @@ public sealed class MessagesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateMessageAsync(MessageDto messageData)
+    public async Task<ActionResult<MessageDto>> CreateMessageAsync(MessageDto messageData)
     {
+        messageData.SenderId = HttpContext.User.GetIdClaim();
         return Ok(await _messageService.CreateMessageAsync(messageData));
     }
 }
