@@ -13,10 +13,10 @@ public abstract class WebApiServiceBase
 {
     private protected readonly string ApiUrl;
     private protected readonly HttpClient HttpClient;
-    private protected readonly ITokenService TokenService;
+    private protected readonly ITokenStorageService TokenService;
     private protected abstract string BaseRoute { get; init; }
     
-    public WebApiServiceBase(IHttpClientFactory httpClientFactory, ITokenService tokenService)
+    public WebApiServiceBase(IHttpClientFactory httpClientFactory, ITokenStorageService tokenService)
     {
         HttpClient = httpClientFactory.CreateClient(JwtAuthInterceptor.HttpClientWithJwtInterceptorName);
         TokenService = tokenService;
@@ -58,7 +58,7 @@ public abstract class WebApiServiceBase
     
     private protected async Task<bool> TryAddAuthorizationHeader()
     {
-        var jwt = (await TokenService.GetTokens()).AccessToken;
+        var jwt = (await TokenService.GetTokensAsync()).AccessToken;
         if (string.IsNullOrEmpty(jwt))
         {
             return false;

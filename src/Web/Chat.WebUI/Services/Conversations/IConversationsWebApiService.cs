@@ -10,4 +10,6 @@ public interface IConversationsWebApiService
     Task<WebApiResponse<IList<int>>> GetAllUserConversationIdsAsync();
     Task<WebApiResponse<IList<ConversationDto>>> GetAllUserConversationsAsync();
     Task<WebApiResponse<DialogDto>> CreateDialogAsync(NewDialogDto dialogData);
+    Task<WebApiResponse<ConversationDto>> CreateGroupChatAsync(NewGroupChatDto groupChatData);
+    Task<WebApiResponse<ConversationDto>> AddGroupMemberAsync(NewGroupMemberDto groupMemberData);
 }

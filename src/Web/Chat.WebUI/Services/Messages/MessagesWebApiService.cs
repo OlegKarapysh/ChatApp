@@ -10,7 +10,7 @@ public class MessagesWebApiService : WebApiServiceBase, IMessagesWebApiService
 {
     private protected override string BaseRoute { get; init; }
 
-    public MessagesWebApiService(IHttpClientFactory httpClientFactory, ITokenService tokenService)
+    public MessagesWebApiService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenService)
         : base(httpClientFactory, tokenService)
     {
         BaseRoute = "/messages";

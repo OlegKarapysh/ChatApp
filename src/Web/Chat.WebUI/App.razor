@@ -1,5 +1,8 @@
-﻿@inject HubConnectionService HubConnectionService
+﻿@inject IHubConnectionService HubConnectionService
 @inject IConversationsWebApiService ConversationService
+@inject IAuthWebApiService AuthService
+@inject IToastService ToastService
+@inject NavigationManager Navigation
 
 <ErrorBoundary @ref="ErrorBoundary">
     <ChildContent>
@@ -46,10 +49,35 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var conversationIds = await ConversationService!.GetAllUserConversationIdsAsync();
-        await HubConnectionService!.ConnectAsync();
-        await HubConnectionService!.JoinConversationsAsync(
-            conversationIds.Content?.Select(x => x.ToString()).ToArray() ?? Array.Empty<string>());
+        await TryConnectToHub();
+        HubConnectionService!.ReceivedMessage += ShowNotificationOnMessageReceived;
         await base.OnInitializedAsync();
+    }
+
+    private Task ShowNotificationOnMessageReceived(MessageWithSenderDto message)
+    {
+        Console.WriteLine(Navigation.Uri);
+        if (!Navigation!.Uri.Contains("/chat"))
+        {
+            ToastService!.ShowInfo($"{message.UserName}: {message.TextContent}");
+        }
+        return Task.CompletedTask;
+    }
+
+    private async Task<bool> TryConnectToHub()
+    {
+        try
+        {
+            await AuthService!.RefreshTokensAsync();
+            var conversationIds = await ConversationService!.GetAllUserConversationIdsAsync();
+            await HubConnectionService!.ConnectAsync();
+            await HubConnectionService!.JoinConversationsAsync(
+                conversationIds.Content?.Select(x => x.ToString()).ToArray() ?? Array.Empty<string>());
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

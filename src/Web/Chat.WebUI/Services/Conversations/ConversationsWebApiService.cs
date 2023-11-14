@@ -10,7 +10,7 @@ public class ConversationsWebApiService : WebApiServiceBase, IConversationsWebAp
 {
     private protected override string BaseRoute { get; init; }
     
-    public ConversationsWebApiService(IHttpClientFactory httpClientFactory, ITokenService tokenService)
+    public ConversationsWebApiService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenService)
         : base(httpClientFactory, tokenService)
     {
         BaseRoute = "/conversations";
@@ -35,5 +35,15 @@ public class ConversationsWebApiService : WebApiServiceBase, IConversationsWebAp
     public async Task<WebApiResponse<DialogDto>> CreateDialogAsync(NewDialogDto dialogData)
     {
         return await PostAsync<DialogDto, NewDialogDto>("/dialogs", dialogData);
+    }
+    
+    public async Task<WebApiResponse<ConversationDto>> CreateGroupChatAsync(NewGroupChatDto groupChatData)
+    {
+        return await PostAsync<ConversationDto, NewGroupChatDto>("/groups", groupChatData);
+    }
+
+    public async Task<WebApiResponse<ConversationDto>> AddGroupMemberAsync(NewGroupMemberDto groupMemberData)
+    {
+        return await PostAsync<ConversationDto, NewGroupMemberDto>("/members", groupMemberData);
     }
 }

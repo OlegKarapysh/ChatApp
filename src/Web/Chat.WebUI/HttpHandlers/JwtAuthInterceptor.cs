@@ -16,12 +16,12 @@ public sealed class JwtAuthInterceptor : DelegatingHandler
     public const string BearerAuthScheme = "Bearer";
     private readonly string _apiUrl;
     private readonly NavigationManager _navigationManager;
-    private readonly ITokenService _tokenService;
+    private readonly ITokenStorageService _tokenService;
     private readonly INotifyAuthenticationChanged _notifyAuthenticationService;
 
     public JwtAuthInterceptor(
         IConfiguration configuration,
-        ITokenService localStorage,
+        ITokenStorageService localStorage,
         NavigationManager navigationManager,
         INotifyAuthenticationChanged notifyAuthenticationService)
     {
@@ -33,7 +33,7 @@ public sealed class JwtAuthInterceptor : DelegatingHandler
     
      protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var jwt = (await _tokenService.GetTokens()).AccessToken;
+        var jwt = (await _tokenService.GetTokensAsync()).AccessToken;
         TryAddBearerHeader(request, jwt);
         var response = await base.SendAsync(request, cancellationToken);
 
@@ -45,7 +45,7 @@ public sealed class JwtAuthInterceptor : DelegatingHandler
 
         if (response.StatusCode == HttpStatusCode.Unauthorized && response.Headers.Contains("Token-Expired"))
         {
-            var tokenPair = await _tokenService.GetTokens();
+            var tokenPair = await _tokenService.GetTokensAsync();
             var tokenPairJson = JsonSerializer.Serialize(tokenPair);
             var jsonContent = new StringContent(tokenPairJson, System.Text.Encoding.UTF8, "application/json");
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_apiUrl}/auth/refresh") { Content = jsonContent };
@@ -57,7 +57,7 @@ public sealed class JwtAuthInterceptor : DelegatingHandler
             }
 
             var tokens = await refreshTokensResult.Content.ReadFromJsonAsync<TokenPairDto>(cancellationToken: cancellationToken);
-            await _tokenService.SaveTokens(tokens);
+            await _tokenService.SaveTokensAsync(tokens);
             _notifyAuthenticationService.NotifyAuthenticationChanged();
             TryAddBearerHeader(request, tokens?.AccessToken ?? string.Empty);
             return await base.SendAsync(request, cancellationToken);
@@ -78,7 +78,7 @@ public sealed class JwtAuthInterceptor : DelegatingHandler
 
     private async Task LogoutAndRedirectToLogin()
     {
-        await _tokenService.RemoveTokens();
+        await _tokenService.RemoveTokensAsync();
         _notifyAuthenticationService.NotifyAuthenticationChanged();
         _navigationManager.NavigateTo(LoginPage.Path, true);
     }

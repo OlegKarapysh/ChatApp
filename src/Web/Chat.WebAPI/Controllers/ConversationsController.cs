@@ -46,4 +46,21 @@ public sealed class ConversationsController : ControllerBase
         
         return Ok(await _conversationService.CreateOrGetDialogAsync(newDialogData));
     }
+    
+    [HttpPost("groups")]
+    public async Task<ActionResult<ConversationDto>> CreateGroupChatAsync(NewGroupChatDto newGroupChatData)
+    {
+        if (newGroupChatData.CreatorId == default)
+        {
+            newGroupChatData.CreatorId = HttpContext.User.GetIdClaim();
+        }
+
+        return Ok(await _conversationService.CreateOrGetGroupChatAsync(newGroupChatData));
+    }
+
+    [HttpPost("members")]
+    public async Task<ActionResult<ConversationDto>> AddGroupMemberAsync(NewGroupMemberDto groupMemberData)
+    {
+        return Ok(await _conversationService.AddGroupMemberAsync(groupMemberData));
+    }
 }

@@ -9,8 +9,8 @@ public sealed class AuthWebApiService : WebApiServiceBase, IAuthWebApiService
 {
     private protected override string BaseRoute { get; init; }
 
-    public AuthWebApiService(IHttpClientFactory httpClientFactory, ITokenService tokenStorage)
-        : base(httpClientFactory, tokenStorage)
+    public AuthWebApiService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenService)
+        : base(httpClientFactory, tokenService)
     {
         BaseRoute = "/auth";
     }
@@ -29,9 +29,20 @@ public sealed class AuthWebApiService : WebApiServiceBase, IAuthWebApiService
         return await PostAsync<TokenPairDto, RegistrationDto>(registerRoute, registerData);
     }
 
+    public async Task<WebApiResponse<TokenPairDto>> RefreshTokensAsync()
+    {
+        var expiredTokens = await TokenService.GetTokensAsync();
+        var refreshedTokensResponse = await PostAsync<TokenPairDto, TokenPairDto>("/refresh", expiredTokens);
+        if (refreshedTokensResponse.IsSuccessful)
+        {
+            await TokenService.SaveTokensAsync(refreshedTokensResponse.Content);
+        }
+
+        return refreshedTokensResponse;
+    }
+
     public async Task<ErrorDetailsDto?> ChangePasswordAsync(ChangePasswordDto changePasswordData)
     {
-        //await TryAddAuthorizationHeader();
         const string changePasswordRoute = "/change-password";
         var response = await HttpClient.PostAsJsonAsync(BuildFullRoute(changePasswordRoute), changePasswordData);
 

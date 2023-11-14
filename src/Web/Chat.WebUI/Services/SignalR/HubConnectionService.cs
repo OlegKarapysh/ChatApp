@@ -4,14 +4,14 @@ using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.Services.SignalR;
 
-public sealed class HubConnectionService
+public sealed class HubConnectionService : IHubConnectionService
 {
     public event Func<MessageWithSenderDto, Task>? ReceivedMessage;
-    private readonly ITokenService _tokenService;
+    private readonly ITokenStorageService _tokenService;
     private readonly string _hubUrl;
     private HubConnection? _connection;
     
-    public HubConnectionService(ITokenService tokenService, IConfiguration configuration)
+    public HubConnectionService(ITokenStorageService tokenService, IConfiguration configuration)
     {
         _tokenService = tokenService;
         _hubUrl = configuration["SignalR:HubUrl"]!;
@@ -23,7 +23,7 @@ public sealed class HubConnectionService
                       .WithUrl(_hubUrl,
                           options =>
                           {
-                              options.AccessTokenProvider = async () => (await _tokenService.GetTokens()).AccessToken;
+                              options.AccessTokenProvider = async () => (await _tokenService.GetTokensAsync()).AccessToken;
                           })
                       .WithAutomaticReconnect()
                       .Build();

@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
     public static void AddCustomServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<SpinnerService>();
-        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ITokenStorageService, TokenStorageService>();
         services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
         services.AddScoped<INotifyAuthenticationChanged, JwtAuthenticationStateProvider>();
         services.AddTransient<JwtAuthInterceptor>();
@@ -28,6 +28,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUsersWebApiService, UsersWebApiService>();
         services.AddScoped<IConversationsWebApiService, ConversationsWebApiService>();
         services.AddScoped<IMessagesWebApiService, MessagesWebApiService>();
-        services.AddScoped<HubConnectionService>();
+        services.AddScoped<IHubConnectionService, HubConnectionService>();
     }
 }

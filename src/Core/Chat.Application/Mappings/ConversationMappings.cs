@@ -6,7 +6,7 @@ namespace Chat.Application.Mappings;
 
 public static class ConversationMappings
 {
-    private const string SqlDateTimeFormat = "yyyy-MM-dd HH:mm:ss.fffffff";
+    public const string SqlDateTimeFormat = "yyyy-MM-dd HH:mm:ss.fffffff";
     
     public static ConversationBasicInfoDto MapToBasicDto(this Conversation conversation)
     {
