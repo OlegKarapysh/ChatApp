@@ -6,5 +6,6 @@ namespace Chat.WebUI.Services.Conversations;
 
 public interface IConversationsWebApiService
 {
-    Task<WebApiResponse<ConversationsPageDto>> GetSearchedConversationsPage(PagedSearchDto searchData);
+    Task<WebApiResponse<ConversationsPageDto>> GetSearchedConversationsPageAsync(PagedSearchDto searchData);
+    Task<WebApiResponse<IList<int>>> GetAllUserConversationIdsAsync();
 }

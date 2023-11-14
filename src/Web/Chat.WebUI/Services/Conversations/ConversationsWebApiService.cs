@@ -16,9 +16,14 @@ public class ConversationsWebApiService : WebApiServiceBase, IConversationsWebAp
         BaseRoute = "/conversations";
     }
     
-    public async Task<WebApiResponse<ConversationsPageDto>> GetSearchedConversationsPage(PagedSearchDto searchData)
+    public async Task<WebApiResponse<ConversationsPageDto>> GetSearchedConversationsPageAsync(PagedSearchDto searchData)
     {
         return await GetAsync<ConversationsPageDto>(
             QueryHelpers.AddQueryString("/search/", GetQueryParamsForPagedSearch(searchData)));
+    }
+
+    public async Task<WebApiResponse<IList<int>>> GetAllUserConversationIdsAsync()
+    {
+        return await GetAsync<IList<int>>("/all-ids");
     }
 }

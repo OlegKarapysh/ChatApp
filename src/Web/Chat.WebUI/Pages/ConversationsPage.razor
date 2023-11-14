@@ -143,6 +143,6 @@
 
     private async Task<WebApiResponse<ConversationsPageDto>> SendSearchRequest()
     {
-        return await ConversationService!.GetSearchedConversationsPage(ParseQueryModel());
+        return await ConversationService!.GetSearchedConversationsPageAsync(ParseQueryModel());
     }
 }

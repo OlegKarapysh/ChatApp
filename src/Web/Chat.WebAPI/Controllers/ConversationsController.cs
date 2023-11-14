@@ -1,9 +1,9 @@
-﻿using Chat.Application.Extensions;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Chat.Application.Extensions;
 using Chat.Application.Services.Conversations;
 using Chat.Domain.DTOs.Conversations;
 using Chat.Domain.DTOs.Users;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Chat.WebAPI.Controllers;
 
@@ -27,7 +27,13 @@ public sealed class ConversationsController : ControllerBase
     [HttpGet("all")]
     public async Task<ActionResult<IList<ConversationDto>>> GetAllUserConversationAsync()
     {
-        return Ok(await _conversationService.GetAllUserConversationsAsync(default));
+        return Ok(await _conversationService.GetAllUserConversationsAsync(HttpContext.User.GetIdClaim()));
+    }
+
+    [HttpGet("all-ids")]
+    public async Task<ActionResult<IList<int>>> GetAllUserConversationIdsAsync()
+    {
+        return Ok(await _conversationService.GetUserConversationIdsAsync(HttpContext.User.GetIdClaim()));
     }
 
     [HttpPost("dialogs")]
