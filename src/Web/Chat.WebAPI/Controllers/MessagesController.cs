@@ -28,7 +28,7 @@ public sealed class MessagesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<MessageDto>> CreateMessageAsync(MessageDto messageData)
+    public async Task<ActionResult<MessageWithSenderDto>> CreateMessageAsync(MessageDto messageData)
     {
         messageData.SenderId = HttpContext.User.GetIdClaim();
         return Ok(await _messageService.CreateMessageAsync(messageData));

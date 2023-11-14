@@ -31,6 +31,21 @@ public static class MessageMappings
             UpdatedAt = message.UpdatedAt.ToString(SqlDateTimeFormat, CultureInfo.InvariantCulture)
         };
     }
+    
+    public static MessageWithSenderDto MapToDtoWithSender(this Message message)
+    {
+        return new MessageWithSenderDto
+        {
+            Id = message.Id,
+            IsRead = message.IsRead,
+            ConversationId = message.ConversationId ?? default,
+            SenderId = message.SenderId ?? default,
+            UserName = message.Sender?.UserName ?? string.Empty,
+            TextContent = message.TextContent,
+            CreatedAt = message.CreatedAt.ToString(SqlDateTimeFormat, CultureInfo.InvariantCulture),
+            UpdatedAt = message.UpdatedAt.ToString(SqlDateTimeFormat, CultureInfo.InvariantCulture)
+        };
+    }
 
     public static Message MapFrom(this Message message, MessageBasicInfoDto messageDto)
     {

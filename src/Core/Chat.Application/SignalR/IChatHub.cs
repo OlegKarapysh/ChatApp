@@ -1,10 +1,9 @@
-﻿using Chat.Domain.DTOs.Conversations;
-using Chat.Domain.DTOs.Messages;
+﻿using Chat.Domain.DTOs.Messages;
 
 namespace Chat.Application.SignalR;
 
 public interface IChatHub
 {
-    void SendMessage(string conversationId, MessageDto message);
+    void SendMessage(string conversationId, MessageWithSenderDto message);
     Task JoinConversations(string[] conversationIds);
 }

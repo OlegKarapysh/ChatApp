@@ -23,7 +23,7 @@ public sealed class ChatHub : Hub<IChatClient>, IChatHub
     }
 
     // TODO: create single Dto for all information
-    public void SendMessage(string conversationId, MessageDto message)
+    public void SendMessage(string conversationId, MessageWithSenderDto message)
     {
         Clients.Group(conversationId).ReceiveMessage(message);
         Console.WriteLine($"Sent '{message.TextContent}' message");

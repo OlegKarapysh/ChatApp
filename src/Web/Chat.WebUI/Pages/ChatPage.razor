@@ -11,7 +11,7 @@
         @foreach (var message in Messages)
         {
             <RadzenCard>
-                <RadzenText>@(message.SenderId): @message.TextContent</RadzenText>
+                <RadzenText>@(message.UserName): @message.TextContent</RadzenText>
             </RadzenCard>
         }
     </div>
@@ -28,7 +28,7 @@
     
     [Parameter, EditorRequired]
     public DialogDto Conversation { get; set; } = default!;
-    public IList<MessageDto> Messages { get; set; } = new List<MessageDto>();
+    public IList<MessageWithSenderDto> Messages { get; set; } = new List<MessageWithSenderDto>();
     public string MessageText { get; set; } = string.Empty;
 
     protected override void OnInitialized()
@@ -42,7 +42,7 @@
         HubConnectionService!.ReceivedMessage -= AddMessage;
     }
 
-    private Task AddMessage(MessageDto message)
+    private Task AddMessage(MessageWithSenderDto message)
     {
         Console.WriteLine($"Adding message {message.TextContent}");
         Messages.Add(message);

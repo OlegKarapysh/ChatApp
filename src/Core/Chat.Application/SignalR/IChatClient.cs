@@ -6,5 +6,5 @@ namespace Chat.Application.SignalR;
 public interface IChatClient
 {
     // TODO: create single Dto for all information
-    Task ReceiveMessage(MessageDto message);
+    Task ReceiveMessage(MessageWithSenderDto message);
 }

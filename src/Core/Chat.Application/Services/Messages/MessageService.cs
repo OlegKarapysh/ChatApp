@@ -6,6 +6,7 @@ using Chat.Domain.Entities;
 using Chat.Domain.Web;
 using Chat.DomainServices.Repositories;
 using Chat.DomainServices.UnitsOfWork;
+using Microsoft.AspNetCore.Identity;
 
 namespace Chat.Application.Services.Messages;
 
@@ -13,10 +14,12 @@ public sealed class MessageService : IMessageService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IRepository<Message, int> _messageRepository;
+    private readonly UserManager<User> _userManager;
 
-    public MessageService(IUnitOfWork unitOfWork)
+    public MessageService(IUnitOfWork unitOfWork, UserManager<User> userManager)
     {
         _unitOfWork = unitOfWork;
+        _userManager = userManager;
         _messageRepository = _unitOfWork.GetRepository<Message, int>();
     }
     
@@ -44,12 +47,13 @@ public sealed class MessageService : IMessageService
                .ToArray();
     }
 
-    public async Task<MessageDto> CreateMessageAsync(MessageDto messageData)
+    public async Task<MessageWithSenderDto> CreateMessageAsync(MessageDto messageData)
     {
         var message = new Message().MapFrom(messageData);
         var createdMessage = await _messageRepository.AddAsync(message);
         await _unitOfWork.SaveChangesAsync();
+        createdMessage.Sender = await _userManager.FindByIdAsync(messageData.SenderId.ToString());
         
-        return createdMessage.MapToDto();
+        return createdMessage.MapToDtoWithSender();
     }
 }
