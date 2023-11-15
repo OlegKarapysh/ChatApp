@@ -1,11 +1,9 @@
-﻿using Chat.Application.Extensions;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Chat.Application.Extensions;
 using Chat.Application.Services.Messages;
 using Chat.Domain.DTOs.Messages;
 using Chat.Domain.DTOs.Users;
-using Chat.WebAPI.SignalR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Chat.WebAPI.Controllers;
 
@@ -13,12 +11,10 @@ namespace Chat.WebAPI.Controllers;
 public sealed class MessagesController : ControllerBase
 {
     private readonly IMessageService _messageService;
-    private readonly IHubContext<ChatHub> _hubContext;
 
-    public MessagesController(IMessageService messageService, IHubContext<ChatHub> hubContext)
+    public MessagesController(IMessageService messageService)
     {
         _messageService = messageService;
-        _hubContext = hubContext;
     }
 
     [HttpGet("search")]
@@ -38,5 +34,19 @@ public sealed class MessagesController : ControllerBase
     {
         messageData.SenderId = HttpContext.User.GetIdClaim();
         return Ok(await _messageService.CreateMessageAsync(messageData));
+    }
+    
+    [HttpPut]
+    public async Task<ActionResult<MessageDto>> UpdateMessageAsync(MessageDto messageData)
+    {
+        var userId = HttpContext.User.GetIdClaim();
+        return Ok(await _messageService.UpdateMessageAsync(messageData, userId));
+    }
+    
+    [HttpDelete("{messageId:int}")]
+    public async Task<IActionResult> DeleteMessageAsync(int messageId)
+    {
+        var isSuccessfullyDeleted = await _messageService.DeleteMessageAsync(messageId);
+        return isSuccessfullyDeleted ? NoContent() : NotFound();
     }
 }

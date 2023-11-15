@@ -50,8 +50,6 @@ public static class MessageMappings
     public static Message MapFrom(this Message message, MessageBasicInfoDto messageDto)
     {
         message.TextContent = messageDto.TextContent;
-        message.CreatedAt = DateTime.ParseExact(messageDto.CreatedAt, SqlDateTimeFormat, CultureInfo.InvariantCulture);
-        message.UpdatedAt = DateTime.ParseExact(messageDto.UpdatedAt, SqlDateTimeFormat, CultureInfo.InvariantCulture);
 
         return message;
     }
@@ -63,14 +61,6 @@ public static class MessageMappings
         message.SenderId = messageDto.SenderId;
         message.ConversationId = messageDto.ConversationId;
         message.TextContent = messageDto.TextContent;
-        try
-        {
-            message.CreatedAt =
-                DateTime.ParseExact(messageDto.CreatedAt, SqlDateTimeFormat, CultureInfo.InvariantCulture);
-            message.UpdatedAt =
-                DateTime.ParseExact(messageDto.UpdatedAt, SqlDateTimeFormat, CultureInfo.InvariantCulture);
-        }
-        catch { }
         
         return message;
     }

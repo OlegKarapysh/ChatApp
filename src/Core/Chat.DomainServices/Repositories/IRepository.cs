@@ -16,5 +16,5 @@ public interface IRepository<T, TId>
     Task<IList<T>> FindAllAsync(Expression<Func<T, bool>> predicate);
     Task<T> AddAsync(T entity);
     Task<bool> RemoveAsync(TId id);
-    void Update(T entity);
+    T Update(T entity);
 }

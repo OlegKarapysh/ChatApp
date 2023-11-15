@@ -42,7 +42,7 @@ public sealed class EfRepository<T, TId> : IRepository<T, TId>
 
     public async Task<T> AddAsync(T entity) => (await _dbContext.Set<T>().AddAsync(entity)).Entity;
 
-    public void Update(T entity) => _dbContext.Set<T>().Update(entity);
+    public T Update(T entity) => _dbContext.Set<T>().Update(entity).Entity;
 
     public async Task<bool> RemoveAsync(TId id)
     {
