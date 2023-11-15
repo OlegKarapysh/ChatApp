@@ -16,7 +16,7 @@
             <RadzenButton Click="AddUserToGroupAsync" disabled="@string.IsNullOrWhiteSpace(UserName)">Add user to group</RadzenButton>
         </div>
     }
-    <div style="margin: 10px; display: flex; flex-direction: column; gap: 5px; overflow: auto; max-width: 90%">
+    <div style="margin: 10px; display: flex; flex-direction: column; gap: 5px; overflow: auto; max-height: 90%">
         @foreach (var message in Messages)
         {
             <RadzenCard>

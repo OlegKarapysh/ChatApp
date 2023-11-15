@@ -33,16 +33,42 @@ public sealed class HubConnectionService : IHubConnectionService
 
     public async Task JoinConversationsAsync(string[] conversationIds)
     {
-        await _connection?.InvokeAsync("JoinConversations", conversationIds);
+        if (_connection is null)
+        {
+            await ConnectAsync();
+        }
+        var task = _connection?.InvokeAsync("JoinConversations", conversationIds);
+        if (task is null)
+        {
+            return;
+        }
+
+        await task;
     }
 
     public async Task SendMessageAsync(string conversationId, MessageWithSenderDto message)
     {
-        await _connection?.InvokeAsync("SendMessage", conversationId, message);
+        if (_connection is null)
+        {
+            await ConnectAsync();
+        }
+        var task = _connection?.InvokeAsync("SendMessage", conversationId, message);
+        if (task is null)
+        {
+            return;
+        }
+
+        await task;
     }
 
     private async Task OnReceivedMessage(MessageWithSenderDto message)
     {
-        await ReceivedMessage?.Invoke(message);
+        var task = ReceivedMessage?.Invoke(message);
+        if (task is null)
+        {
+            return;
+        }
+
+        await task;
     }
 }

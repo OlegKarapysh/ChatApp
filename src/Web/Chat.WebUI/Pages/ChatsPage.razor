@@ -1,4 +1,5 @@
 ﻿@page "/chats"
+@using Chat.Domain.Errors
 @attribute [Authorize]
 
 @inject IConversationsWebApiService ConversationService
@@ -16,12 +17,16 @@
     <RadzenButton Click="AddGroupChatAsync" disabled="@(string.IsNullOrWhiteSpace(GroupChatTitle))">Add group chat</RadzenButton>
 </div>
 
-<div style="margin: 10px; display: flex; flex-direction: column; gap: 5px; overflow: auto; max-width: 100%">
+<div style="margin: 10px; display: flex; flex-direction: column; gap: 5px; overflow: auto; max-height: 100%">
     @foreach (var conversation in Conversations)
     {
-        <RadzenCard Variant="Variant.Filled" Style="cursor: pointer;" 
-                    @onclick="() => NavigateToConversation(conversation.Id, conversation.Title, conversation.Type)">
-            <RadzenText>@conversation.Title</RadzenText>
+        <RadzenCard Variant="Variant.Outlined">
+                <RadzenText Style="cursor: pointer"
+                            @onclick="() => NavigateToConversation(conversation.Id, conversation.Title, conversation.Type)">
+                    @conversation.Title
+                </RadzenText>
+                <RadzenButton Variant="Variant.Flat"
+                              Click="() => RemoveUserFromConversationAsync(conversation)">Remove</RadzenButton>
         </RadzenCard>
     }
 </div>
@@ -36,11 +41,11 @@
     protected override async Task OnInitializedAsync()
     {
         var allConversationsResponse = await ConversationService!.GetAllUserConversationsAsync();
-        if (!allConversationsResponse.IsSuccessful || !allConversationsResponse.Content.Any())
+        if (!allConversationsResponse.IsSuccessful || !allConversationsResponse.Content!.Any())
         {
             return;
         }
-        var sortedConversations = allConversationsResponse.Content.OrderByDescending(
+        var sortedConversations = allConversationsResponse.Content!.OrderByDescending(
             x => DateTime.ParseExact(x.UpdatedAt, ConversationMappings.SqlDateTimeFormat, CultureInfo.InvariantCulture));
         Conversations.AddRange(sortedConversations);
         StateHasChanged();
@@ -61,7 +66,7 @@
             return;
         }
         
-        var dialog = dialogResponse.Content;
+        var dialog = dialogResponse.Content!;
         if (Conversations.Select(x => x.Id).Contains(dialog.Id))
         {
             NavigateToConversation(dialog.Id, dialog.Title, dialog.Type);
@@ -90,7 +95,7 @@
             return;
         }
         
-        var group = groupChatResponse.Content;
+        var group = groupChatResponse.Content!;
         if (Conversations.Select(x => x.Id).Contains(group.Id))
         {
             NavigateToConversation(group.Id, group.Title, group.Type);
@@ -100,5 +105,27 @@
         Conversations.Add(group);
         await HubConnectionService!.JoinConversationsAsync(new[] { group.Id.ToString() });
         GroupChatTitle = string.Empty;
+    }
+
+    public async Task RemoveUserFromConversationAsync(ConversationDto conversation)
+    {
+        var errorResponse = await ConversationService!.RemoveUserFromConversationAsync(conversation.Id);
+        if (errorResponse is not null)
+        {
+            if (errorResponse.ErrorType == ErrorType.Unknown)
+            {
+                Console.WriteLine(errorResponse.Message);
+                ToastService!.ShowError("Failed to delete!");
+            }
+            else
+            {
+                ToastService!.ShowError(errorResponse.Message);
+            }
+        }
+        else
+        {
+            Conversations.Remove(conversation);
+            StateHasChanged();
+        }
     }
 }

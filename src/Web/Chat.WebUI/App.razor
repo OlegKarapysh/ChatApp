@@ -56,8 +56,8 @@
 
     private Task ShowNotificationOnMessageReceived(MessageWithSenderDto message)
     {
-        Console.WriteLine(Navigation.Uri);
-        if (!Navigation!.Uri.Contains("/chat"))
+        var messageConversationUri = $"{Navigation!.BaseUri}chat/{message.ConversationId}";
+        if (!Navigation!.Uri.StartsWith(messageConversationUri, StringComparison.Ordinal))
         {
             ToastService!.ShowInfo($"{message.UserName}: {message.TextContent}");
         }
@@ -68,7 +68,7 @@
     {
         try
         {
-            await AuthService!.RefreshTokensAsync();
+            //await AuthService!.RefreshTokensAsync();
             var conversationIds = await ConversationService!.GetAllUserConversationIdsAsync();
             await HubConnectionService!.ConnectAsync();
             await HubConnectionService!.JoinConversationsAsync(

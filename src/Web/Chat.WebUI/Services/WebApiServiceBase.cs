@@ -48,24 +48,31 @@ public abstract class WebApiServiceBase
             ? default
             : await httpResponse.Content.ReadFromJsonAsync<ErrorDetailsDto>();
     }
+
+    private protected async Task<ErrorDetailsDto?> DeleteAsync(string route = "")
+    {
+        var httpResponse = await SendRequestWithAuthorizationHeader(
+            () => HttpClient.DeleteAsync(BuildFullRoute(route)));
+
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            return default;
+        }
+
+        try
+        {
+            return await httpResponse.Content.ReadFromJsonAsync<ErrorDetailsDto>();
+        }
+        catch (Exception e)
+        {
+            return new ErrorDetailsDto($"Unexpected error: {e.Message}", ErrorType.Unknown);
+        }
+    }
     
     private protected async Task<HttpResponseMessage> SendRequestWithAuthorizationHeader(
         Func<Task<HttpResponseMessage>> httpRequest)
     {
-        //await TryAddAuthorizationHeader();
         return await httpRequest.Invoke();
-    }
-    
-    private protected async Task<bool> TryAddAuthorizationHeader()
-    {
-        var jwt = (await TokenService.GetTokensAsync()).AccessToken;
-        if (string.IsNullOrEmpty(jwt))
-        {
-            return false;
-        }
-        
-        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-        return true;
     }
 
     private protected string BuildFullRoute(string relativeRoute) => $"{ApiUrl}{BaseRoute}{relativeRoute}";

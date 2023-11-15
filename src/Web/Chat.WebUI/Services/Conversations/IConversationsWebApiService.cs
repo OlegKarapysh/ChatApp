@@ -1,4 +1,5 @@
-﻿using Chat.Domain.DTOs.Conversations;
+﻿using Chat.Domain.DTOs;
+using Chat.Domain.DTOs.Conversations;
 using Chat.Domain.DTOs.Users;
 using Chat.Domain.Web;
 
@@ -12,4 +13,5 @@ public interface IConversationsWebApiService
     Task<WebApiResponse<DialogDto>> CreateDialogAsync(NewDialogDto dialogData);
     Task<WebApiResponse<ConversationDto>> CreateGroupChatAsync(NewGroupChatDto groupChatData);
     Task<WebApiResponse<ConversationDto>> AddGroupMemberAsync(NewGroupMemberDto groupMemberData);
+    Task<ErrorDetailsDto?> RemoveUserFromConversationAsync(int conversationId);
 }

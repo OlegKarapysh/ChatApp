@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using Chat.Domain.DTOs;
+using Microsoft.AspNetCore.WebUtilities;
 using Chat.Domain.DTOs.Conversations;
 using Chat.Domain.DTOs.Users;
 using Chat.Domain.Web;
@@ -45,5 +46,10 @@ public class ConversationsWebApiService : WebApiServiceBase, IConversationsWebAp
     public async Task<WebApiResponse<ConversationDto>> AddGroupMemberAsync(NewGroupMemberDto groupMemberData)
     {
         return await PostAsync<ConversationDto, NewGroupMemberDto>("/members", groupMemberData);
+    }
+
+    public async Task<ErrorDetailsDto?> RemoveUserFromConversationAsync(int conversationId)
+    {
+        return await DeleteAsync($"/{conversationId}");
     }
 }

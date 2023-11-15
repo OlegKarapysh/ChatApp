@@ -28,14 +28,14 @@ public sealed class UserService : IUserService
         return (await _userRepository.GetAllAsync()).Select(x => x.MapToDto()).ToList();
     }
 
-    public async Task<UserDto> GetUserByIdAsync(int id)
+    public async Task<UserDto> GetUserDtoByIdAsync(int id)
     {
-        return (await TryGetUserByIdAsync(id)).MapToDto();
+        return (await GetUserByIdAsync(id)).MapToDto();
     }
 
     public async Task UpdateUserAsync(UserDto userData, int id)
     {
-        var user = await TryGetUserByIdAsync(id);
+        var user = await GetUserByIdAsync(id);
         user.MapFrom(userData);
         _userRepository.Update(user);
         await _unitOfWork.SaveChangesAsync();
@@ -60,8 +60,13 @@ public sealed class UserService : IUserService
         });
     }
 
-    private async Task<User> TryGetUserByIdAsync(int id)
+    public async Task<User> GetUserByIdAsync(int id)
     {
-        return await _userRepository.GetByIdAsync(id) ?? throw new EntityNotFoundException("User", "Id");
+        return await _userRepository.GetByIdAsync(id) ?? throw new EntityNotFoundException(nameof(User), nameof(User.Id));
+    }
+    
+    public async Task<User> GetUserByNameAsync(string userName)
+    {
+        return await _userManager.FindByNameAsync(userName) ?? throw new EntityNotFoundException(nameof(User), nameof(User.Id));
     }
 }

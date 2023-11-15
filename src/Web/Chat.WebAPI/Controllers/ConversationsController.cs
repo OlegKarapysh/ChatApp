@@ -63,4 +63,13 @@ public sealed class ConversationsController : ControllerBase
     {
         return Ok(await _conversationService.AddGroupMemberAsync(groupMemberData));
     }
+    
+    [HttpDelete("{conversationId:int}")]
+    public async Task<IActionResult> RemoveUserFromConversationAsync(int conversationId)
+    {
+        var userId = HttpContext.User.GetIdClaim();
+        var isSuccessfullyDeleted = await _conversationService.RemoveUserFromConversationAsync(conversationId, userId);
+
+        return isSuccessfullyDeleted ? NoContent() : NotFound();
+    }
 }

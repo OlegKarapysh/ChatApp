@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Chat.Application.Extensions;
+﻿using Chat.Application.Extensions;
 using Chat.Application.Mappings;
 using Chat.Application.RequestExceptions;
+using Chat.Application.Services.Users;
 using Chat.Domain.DTOs.Conversations;
 using Chat.Domain.DTOs.Users;
 using Chat.Domain.Entities;
@@ -15,14 +15,14 @@ namespace Chat.Application.Services.Conversations;
 public sealed class ConversationService : IConversationService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserService _userService;
     private readonly IRepository<ConversationParticipants, int> _participantsRepository;
     private readonly IRepository<Conversation, int> _conversationsRepository;
-    private readonly UserManager<User> _userManager;
 
-    public ConversationService(IUnitOfWork unitOfWork, UserManager<User> userManager)
+    public ConversationService(IUnitOfWork unitOfWork, IUserService userService)
     {
         _unitOfWork = unitOfWork;
-        _userManager = userManager;
+        _userService = userService;
         _participantsRepository = _unitOfWork.GetRepository<ConversationParticipants, int>();
         _conversationsRepository = _unitOfWork.GetRepository<Conversation, int>();
     }
@@ -37,18 +37,8 @@ public sealed class ConversationService : IConversationService
 
     public async Task<ConversationDto> AddGroupMemberAsync(NewGroupMemberDto groupMemberData)
     {
-        var conversation = await _conversationsRepository.GetByIdAsync(groupMemberData.ConversationId);
-        if (conversation is null)
-        {
-            throw new EntityNotFoundException(nameof(Conversation), nameof(Conversation.Title));
-        }
-
-        var newMember = await _userManager.FindByNameAsync(groupMemberData.MemberUserName);
-        if (newMember is null)
-        {
-            throw new EntityNotFoundException(nameof(User), nameof(User.UserName));
-        }
-        
+        var conversation = await GetConversationByIdAsync(groupMemberData.ConversationId);
+        var newMember = await _userService.GetUserByNameAsync(groupMemberData.MemberUserName);
         if (conversation.Type != ConversationType.Group)
         {
             return conversation.MapToDto();
@@ -63,11 +53,7 @@ public sealed class ConversationService : IConversationService
 
     public async Task<ConversationDto> CreateOrGetGroupChatAsync(NewGroupChatDto newGroupChatData)
     {
-        var creator = await _userManager.FindByIdAsync(newGroupChatData.CreatorId.ToString());
-        if (creator is null)
-        {
-            throw new EntityNotFoundException(nameof(User), nameof(User.UserName));
-        }
+        var creator = await _userService.GetUserByIdAsync(newGroupChatData.CreatorId);
 
         var existingGroupChat = (await _conversationsRepository.FindAllAsync(conversation =>
                 conversation.Type == ConversationType.Group &&
@@ -92,18 +78,8 @@ public sealed class ConversationService : IConversationService
 
     public async Task<DialogDto> CreateOrGetDialogAsync(NewDialogDto newDialogData)
     {
-        var interlocutor = await _userManager.FindByNameAsync(newDialogData.InterlocutorUserName);
-        if (interlocutor is null)
-        {
-            throw new EntityNotFoundException(nameof(User), nameof(User.UserName));
-        }
-
-        var creator = await _userManager.FindByIdAsync(newDialogData.CreatorId.ToString());
-        if (creator is null)
-        {
-            throw new EntityNotFoundException(nameof(User), nameof(User.UserName));
-        }
-
+        var interlocutor = await _userService.GetUserByNameAsync(newDialogData.InterlocutorUserName);
+        var creator = await _userService.GetUserByIdAsync(newDialogData.CreatorId);
         var existingDialog = (await _conversationsRepository.FindAllAsync(conversation =>
             conversation.Type == ConversationType.Dialog &&
             conversation.Members.Contains(creator) &&
@@ -149,5 +125,28 @@ public sealed class ConversationService : IConversationService
             PageInfo = pageInfo,
             Conversations = foundConversationsPage.ToArray()
         });
+    }
+
+    public async Task<bool> RemoveUserFromConversationAsync(int conversationId, int userId)
+    {
+        var repository = _unitOfWork.GetRepository<ConversationParticipants, int>();
+        var conversationMember = (await repository
+                .FindAllAsync(x => x.ConversationId == conversationId && x.UserId == userId))
+                .FirstOrDefault();
+        if (conversationMember is null)
+        {
+            throw new EntityNotFoundException("Conversation member");
+        }
+
+        var isSuccessfullyRemoved = await repository.RemoveAsync(conversationMember.Id);
+        await _unitOfWork.SaveChangesAsync();
+
+        return isSuccessfullyRemoved;
+    }
+
+    public async Task<Conversation> GetConversationByIdAsync(int id)
+    {
+        return await _conversationsRepository.GetByIdAsync(id) ??
+            throw new EntityNotFoundException(nameof(Conversation), nameof(Conversation.Title));
     }
 }

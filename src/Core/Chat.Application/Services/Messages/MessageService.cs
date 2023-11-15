@@ -1,4 +1,6 @@
-﻿using Chat.Application.Extensions;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Chat.Application.Extensions;
 using Chat.Application.Mappings;
 using Chat.Domain.DTOs.Messages;
 using Chat.Domain.DTOs.Users;
@@ -6,8 +8,6 @@ using Chat.Domain.Entities;
 using Chat.Domain.Web;
 using Chat.DomainServices.Repositories;
 using Chat.DomainServices.UnitsOfWork;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Chat.Application.Services.Messages;
 
