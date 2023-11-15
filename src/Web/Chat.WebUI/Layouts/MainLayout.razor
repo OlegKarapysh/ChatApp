@@ -13,7 +13,7 @@
                 <AuthorizeView>
                     <Authorized>
                         <NavLink class="nav-link" href="@ChangePasswordPage.Path">Change password</NavLink>
-                        <NavLink class="nav-link" href="@LoginPage.Path" @onclick="async () => await AuthService!.Logout()">Log out</NavLink>
+                        <NavLink class="nav-link" href="@LoginPage.Path" @onclick="async () => await AuthService!.LogoutAsync()">Log out</NavLink>
                     </Authorized>
                     <NotAuthorized>
                         <NavLink class="nav-link" href="@RegistrationPage.Path">Register</NavLink>

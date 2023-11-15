@@ -22,6 +22,8 @@
             <RadzenCard>
                 <RadzenText><strong>@(message.UserName): </strong> @message.TextContent</RadzenText>
             </RadzenCard>
+            <RadzenButton Click="() => UpdateMessageAsync(message)" disabled="@string.IsNullOrWhiteSpace(MessageText)">Update</RadzenButton>
+            <RadzenButton Click="() => DeleteMessageAsync(message)">Delete</RadzenButton>
         }
     </div>
     <div style="display: flex; flex-direction: column; align-content: flex-end; align-self: flex-end; gap: 10px">
@@ -65,7 +67,6 @@
     {
         if (message.ConversationId.ToString() == ConversationId)
         {
-            Console.WriteLine($"Adding message {message.TextContent}");
             Messages.Add(message);
             StateHasChanged();
         }
@@ -91,21 +92,63 @@
         UserName = string.Empty;
     }
 
+    private async Task UpdateMessageAsync(MessageWithSenderDto messageData)
+    {
+        var messageDto = new MessageDto
+        {
+            TextContent = MessageText,
+            ConversationId = messageData.ConversationId,
+            IsRead = messageData.IsRead,
+            Id = messageData.Id,
+            SenderId = messageData.SenderId
+        };
+        var updatedMessageResponse = await MessageService!.UpdateMessageAsync(messageDto);
+        if (!updatedMessageResponse.IsSuccessful)
+        {
+            ToastService!.ShowError(updatedMessageResponse.ErrorDetails!.Message);
+            return;
+        }
+
+        var messageToUpdate = Messages.Find(x => x.Id == messageData.Id);
+        if (messageToUpdate is not null)
+        {
+            messageToUpdate.TextContent = updatedMessageResponse.Content!.TextContent;
+            StateHasChanged();
+        }
+    }
+
     private async Task SendMessageAsync()
     {
-        var messageData = new MessageDto
+        var messageData = GetCurrentMessageData();
+        var sentMessageResponse = await MessageService!.SendMessageAsync(messageData);
+        if (!sentMessageResponse.IsSuccessful)
+        {
+            ToastService!.ShowError(sentMessageResponse.ErrorDetails!.Message);
+            return;
+        }
+        await HubConnectionService!.SendMessageAsync(ConversationId, sentMessageResponse.Content);
+        MessageText = string.Empty;
+    }
+
+    private async Task DeleteMessageAsync(MessageWithSenderDto messageData)
+    {
+        var deletedMessageResponse = await MessageService!.DeleteMessageAsync(messageData.Id);
+        if (deletedMessageResponse is not null)
+        {
+            ToastService!.ShowError(deletedMessageResponse.Message);
+            return;
+        }
+
+        Messages.Remove(messageData);
+        StateHasChanged();
+    }
+
+    private MessageDto GetCurrentMessageData()
+    {
+        return new MessageDto
         {
             ConversationId = int.Parse(ConversationId),
             TextContent = MessageText
         };
-        var message = await MessageService!.SendMessageAsync(messageData);
-        if (!message.IsSuccessful)
-        {
-            ToastService!.ShowError(message.ErrorDetails!.Message);
-            return;
-        }
-        Console.WriteLine($"Sending message: {message.Content!.TextContent}");
-        await HubConnectionService!.SendMessageAsync(ConversationId, message.Content);
-        MessageText = string.Empty;
     }
 }

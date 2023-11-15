@@ -33,7 +33,7 @@ public sealed class AuthController : ControllerBase
     [AllowAnonymous, HttpPost("refresh")]
     public async Task<ActionResult<TokenPairDto>> RefreshTokenPairAsync([FromBody] TokenPairDto tokens)
     {
-        return Ok(await _authService.RefreshTokenPair(tokens));
+        return Ok(await _authService.RefreshTokenPairAsync(tokens));
     }
 
     [Authorize, HttpPost("change-password")]

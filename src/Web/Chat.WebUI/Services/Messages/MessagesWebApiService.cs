@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using Chat.Domain.DTOs;
+using Microsoft.AspNetCore.WebUtilities;
 using Chat.Domain.DTOs.Messages;
 using Chat.Domain.DTOs.Users;
 using Chat.Domain.Web;
@@ -14,10 +15,9 @@ public class MessagesWebApiService : WebApiServiceBase, IMessagesWebApiService
         : base(httpClientFactory, tokenService)
     {
         BaseRoute = "/messages";
-        Console.WriteLine("Messages web api service with httpClient type: " + httpClientFactory.GetType().FullName);
     }
     
-    public async Task<WebApiResponse<MessagesPageDto>> GetSearchedMessagesPage(PagedSearchDto searchData)
+    public async Task<WebApiResponse<MessagesPageDto>> GetSearchedMessagesPageAsync(PagedSearchDto searchData)
     {
         return await GetAsync<MessagesPageDto>(
             QueryHelpers.AddQueryString("/search/", GetQueryParamsForPagedSearch(searchData)));
@@ -30,6 +30,16 @@ public class MessagesWebApiService : WebApiServiceBase, IMessagesWebApiService
 
     public async Task<WebApiResponse<MessageWithSenderDto>> SendMessageAsync(MessageDto messageData)
     {
-        return await PostAsync<MessageWithSenderDto, MessageDto>("", messageData);
+        return await PostAsync<MessageWithSenderDto, MessageDto>(messageData);
+    }
+
+    public async Task<WebApiResponse<MessageDto>> UpdateMessageAsync(MessageDto messageData)
+    {
+        return await PutAsync<MessageDto, MessageDto>(messageData);
+    }
+
+    public async Task<ErrorDetailsDto?> DeleteMessageAsync(int messageId)
+    {
+        return await DeleteAsync($"/{messageId}");
     }
 }

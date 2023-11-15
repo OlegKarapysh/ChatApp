@@ -17,22 +17,18 @@ public sealed class AuthWebApiService : WebApiServiceBase, IAuthWebApiService
 
     public async Task<WebApiResponse<TokenPairDto>> LoginAsync(LoginDto loginData)
     {
-        const string loginRoute = "/login";
-
-        return await PostAsync<TokenPairDto, LoginDto>(loginRoute, loginData);
+        return await PostAsync<TokenPairDto, LoginDto>(loginData, "/login");
     }
     
     public async Task<WebApiResponse<TokenPairDto>> RegisterAsync(RegistrationDto registerData)
     {
-        const string registerRoute = "/register";
-
-        return await PostAsync<TokenPairDto, RegistrationDto>(registerRoute, registerData);
+        return await PostAsync<TokenPairDto, RegistrationDto>(registerData, "/register");
     }
 
     public async Task<WebApiResponse<TokenPairDto>> RefreshTokensAsync()
     {
         var expiredTokens = await TokenService.GetTokensAsync();
-        var refreshedTokensResponse = await PostAsync<TokenPairDto, TokenPairDto>("/refresh", expiredTokens);
+        var refreshedTokensResponse = await PostAsync<TokenPairDto, TokenPairDto>(expiredTokens, "/refresh");
         if (refreshedTokensResponse.IsSuccessful)
         {
             await TokenService.SaveTokensAsync(refreshedTokensResponse.Content);

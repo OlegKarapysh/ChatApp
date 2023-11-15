@@ -52,7 +52,7 @@ public sealed class JwtAuthService : IJwtAuthService
         return await _httpService.ChangePasswordAsync(changePasswordData);
     }
 
-    public async Task Logout()
+    public async Task LogoutAsync()
     {
         await _tokenService.RemoveTokensAsync();
         _authenticationState.NotifyAuthenticationChanged();

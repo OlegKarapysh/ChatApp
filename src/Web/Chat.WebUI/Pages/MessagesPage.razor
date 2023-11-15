@@ -143,6 +143,6 @@
 
     private async Task<WebApiResponse<MessagesPageDto>> SendSearchRequest()
     {
-        return await MessageService!.GetSearchedMessagesPage(ParseQueryModel());
+        return await MessageService!.GetSearchedMessagesPageAsync(ParseQueryModel());
     }
 }

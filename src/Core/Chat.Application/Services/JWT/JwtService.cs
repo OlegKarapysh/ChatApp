@@ -62,7 +62,7 @@ public sealed class JwtService : IJwtService
         var isParsed = int.TryParse(claimsPrincipal.FindFirstValue(IJwtService.IdClaimName), out var id);
         if (!isParsed)
         {
-            throw new MissingClaimException("id");
+            throw new MissingClaimException(IJwtService.IdClaimName);
         }
 
         return id;

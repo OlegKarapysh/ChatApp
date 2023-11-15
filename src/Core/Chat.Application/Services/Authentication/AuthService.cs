@@ -29,7 +29,7 @@ public sealed class AuthService : IAuthService
         }
 
         var refreshToken = _jwtService.CreateRefreshToken();
-        await UpdateUserRefreshToken(user, refreshToken);
+        await UpdateUserRefreshTokenAsync(user, refreshToken);
 
         return CreateTokenPair(user);
     }
@@ -55,12 +55,13 @@ public sealed class AuthService : IAuthService
             TokenExpiresAt = refreshToken.ExpirationTime
         };
         var identityResult = await _userManager.CreateAsync(user, registerData.Password);
-        if (!identityResult.Succeeded)
+        var registeredUser = await _userManager.FindByEmailAsync(user.Email);
+        if (!identityResult.Succeeded || registeredUser is null)
         {
             throw new BadRegistrationException();
         }
 
-        return CreateTokenPair(await _userManager.FindByEmailAsync(user.Email), refreshToken.Token);
+        return CreateTokenPair(registeredUser, refreshToken.Token);
     }
 
     public async Task ChangePasswordAsync(ChangePasswordDto changePasswordData, int id)
@@ -76,13 +77,13 @@ public sealed class AuthService : IAuthService
         }
     }
 
-    public async Task<TokenPairDto> RefreshTokenPair(TokenPairDto tokens)
+    public async Task<TokenPairDto> RefreshTokenPairAsync(TokenPairDto tokens)
     {
         var userId = _jwtService.GetIdClaim(tokens.AccessToken);
-        var user = _userManager.Users.FirstOrDefault(x => x.Id == userId);
+        var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
-            throw new EntityNotFoundException("User", "Id");
+            throw new EntityNotFoundException(nameof(User));
         }
 
         if (user.RefreshToken is null)
@@ -97,7 +98,7 @@ public sealed class AuthService : IAuthService
         }
 
         var newRefreshToken = _jwtService.CreateRefreshToken();
-        await UpdateUserRefreshToken(user, newRefreshToken);
+        await UpdateUserRefreshTokenAsync(user, newRefreshToken);
         var newTokens = CreateTokenPair(user, newRefreshToken.Token);
 
         return newTokens;
@@ -120,7 +121,7 @@ public sealed class AuthService : IAuthService
         };
     }
 
-    private async Task UpdateUserRefreshToken(User user, RefreshToken refreshToken)
+    private async Task UpdateUserRefreshTokenAsync(User user, RefreshToken refreshToken)
     {
         user.RefreshToken = refreshToken.Token;
         user.TokenExpiresAt = refreshToken.ExpirationTime;

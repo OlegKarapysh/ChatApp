@@ -48,7 +48,7 @@ public static class QueryableExtensions
                 var nullCheck = Expression.ReferenceEqual(propertyAsObject, Expression.Constant(null));
                 Expression stringifiedProperty = property.PropertyType == typeof(string)
                     ? propertyAccessor
-                    : Expression.Call(propertyAccessor, TryGetToStringMethod(property));
+                    : Expression.Call(propertyAccessor, TryGetToStringMethod(property)!);
                 var containsCall = Expression.Call(stringifiedProperty, containsMethod, Expression.Constant(word));
                 var conditionalExpression = Expression.Condition(nullCheck, Expression.Constant(false), containsCall);
                 var lambdaPredicate = Expression.Lambda<Func<TEntity, bool>>(conditionalExpression, entity);
