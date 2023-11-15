@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using Chat.Domain.DTOs;
 using Chat.Domain.DTOs.Users;
 using Chat.Domain.Errors;
@@ -13,10 +12,10 @@ public abstract class WebApiServiceBase
 {
     private protected readonly string ApiUrl;
     private protected readonly HttpClient HttpClient;
-    private protected readonly ITokenService TokenService;
+    private protected readonly ITokenStorageService TokenService;
     private protected abstract string BaseRoute { get; init; }
     
-    public WebApiServiceBase(IHttpClientFactory httpClientFactory, ITokenService tokenService)
+    public WebApiServiceBase(IHttpClientFactory httpClientFactory, ITokenStorageService tokenService)
     {
         HttpClient = httpClientFactory.CreateClient(JwtAuthInterceptor.HttpClientWithJwtInterceptorName);
         TokenService = tokenService;
@@ -25,47 +24,47 @@ public abstract class WebApiServiceBase
 
     private protected async Task<WebApiResponse<TResponse>> GetAsync<TResponse>(string route = "")
     {
-        var httpResponse = await SendRequestWithAuthorizationHeader(
-            () => HttpClient.GetAsync(BuildFullRoute(route)));
-
+        var httpResponse = await HttpClient.GetAsync(BuildFullRoute(route));
         return await ParseWebApiResponse<TResponse>(httpResponse);
     }
 
-    private protected async Task<WebApiResponse<TResponse>> PostAsync<TResponse, TData>(string route, TData data)
+    private protected async Task<WebApiResponse<TResponse>> PostAsync<TResponse, TData>(TData data, string route = "")
     {
-        var httpResponse = await SendRequestWithAuthorizationHeader(
-            () => HttpClient.PostAsJsonAsync(BuildFullRoute(route), data));
-
+        var httpResponse = await HttpClient.PostAsJsonAsync(BuildFullRoute(route), data);
         return await ParseWebApiResponse<TResponse>(httpResponse);
     }
 
     private protected async Task<ErrorDetailsDto?> PutAsync<TData>(TData data, string route = "")
     {
-        var httpResponse = await SendRequestWithAuthorizationHeader(
-            () => HttpClient.PutAsJsonAsync(BuildFullRoute(route), data));
+        var httpResponse = await HttpClient.PutAsJsonAsync(BuildFullRoute(route), data);
 
         return httpResponse.IsSuccessStatusCode
             ? default
             : await httpResponse.Content.ReadFromJsonAsync<ErrorDetailsDto>();
     }
     
-    private protected async Task<HttpResponseMessage> SendRequestWithAuthorizationHeader(
-        Func<Task<HttpResponseMessage>> httpRequest)
+    private protected async Task<WebApiResponse<TResponse>> PutAsync<TResponse, TData>(TData data, string route = "")
     {
-        //await TryAddAuthorizationHeader();
-        return await httpRequest.Invoke();
+        var httpResponse = await HttpClient.PutAsJsonAsync(BuildFullRoute(route), data);
+        return await ParseWebApiResponse<TResponse>(httpResponse);
     }
-    
-    private protected async Task<bool> TryAddAuthorizationHeader()
+
+    private protected async Task<ErrorDetailsDto?> DeleteAsync(string route = "")
     {
-        var jwt = (await TokenService.GetTokens()).AccessToken;
-        if (string.IsNullOrEmpty(jwt))
+        var httpResponse = await HttpClient.DeleteAsync(BuildFullRoute(route));
+        if (httpResponse.IsSuccessStatusCode)
         {
-            return false;
+            return default;
         }
-        
-        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-        return true;
+
+        try
+        {
+            return await httpResponse.Content.ReadFromJsonAsync<ErrorDetailsDto>();
+        }
+        catch (Exception e)
+        {
+            return new ErrorDetailsDto($"Unexpected error: {e.Message}", ErrorType.Unknown);
+        }
     }
 
     private protected string BuildFullRoute(string relativeRoute) => $"{ApiUrl}{BaseRoute}{relativeRoute}";

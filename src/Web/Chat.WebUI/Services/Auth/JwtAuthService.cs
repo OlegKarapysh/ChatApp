@@ -7,13 +7,13 @@ namespace Chat.WebUI.Services.Auth;
 public sealed class JwtAuthService : IJwtAuthService
 {
     private readonly IAuthWebApiService _httpService;
-    private readonly ITokenService _tokenService;
+    private readonly ITokenStorageService _tokenService;
     private readonly INotifyAuthenticationChanged _authenticationState;
 
     public JwtAuthService(
         IAuthWebApiService httpService,
         INotifyAuthenticationChanged authenticationState,
-        ITokenService tokenService)
+        ITokenStorageService tokenService)
     {
         _httpService = httpService;
         _authenticationState = authenticationState;
@@ -28,7 +28,7 @@ public sealed class JwtAuthService : IJwtAuthService
             return response.ErrorDetails;
         }
         
-        await _tokenService.SaveTokens(response.Content);
+        await _tokenService.SaveTokensAsync(response.Content);
         _authenticationState.NotifyAuthenticationChanged();
         
         return default;
@@ -42,7 +42,7 @@ public sealed class JwtAuthService : IJwtAuthService
             return response.ErrorDetails;
         }
 
-        await _tokenService.SaveTokens(response.Content);
+        await _tokenService.SaveTokensAsync(response.Content);
         
         return default;
     }
@@ -52,9 +52,9 @@ public sealed class JwtAuthService : IJwtAuthService
         return await _httpService.ChangePasswordAsync(changePasswordData);
     }
 
-    public async Task Logout()
+    public async Task LogoutAsync()
     {
-        await _tokenService.RemoveTokens();
+        await _tokenService.RemoveTokensAsync();
         _authenticationState.NotifyAuthenticationChanged();
     }
 }

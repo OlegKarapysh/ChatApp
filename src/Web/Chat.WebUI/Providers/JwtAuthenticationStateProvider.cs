@@ -7,16 +7,16 @@ namespace Chat.WebUI.Providers;
 
 public class JwtAuthenticationStateProvider : AuthenticationStateProvider, INotifyAuthenticationChanged
 {
-    private readonly ITokenService _tokenService;
+    private readonly ITokenStorageService _tokenService;
 
-    public JwtAuthenticationStateProvider(ITokenService tokenService)
+    public JwtAuthenticationStateProvider(ITokenStorageService tokenService)
     {
         _tokenService = tokenService;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var jwtTokenFromLocalStorage = (await _tokenService.GetTokens()).AccessToken;
+        var jwtTokenFromLocalStorage = (await _tokenService.GetTokensAsync()).AccessToken;
         
         return string.IsNullOrEmpty(jwtTokenFromLocalStorage)
             ? new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()))

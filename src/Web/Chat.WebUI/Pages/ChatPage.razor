@@ -1,0 +1,154 @@
+﻿@page "/chat/{ConversationId}/{ConversationTitle}/{ConversationType}"
+@attribute [Authorize]
+@implements IDisposable
+
+@inject IHubConnectionService HubConnectionService
+@inject IMessagesWebApiService MessageService
+@inject IConversationsWebApiService ConversationService
+@inject IToastService ToastService
+
+<RadzenCard Style="margin: 10px">
+    <h3>@ConversationTitle</h3>
+    @if (Enum.Parse<ConversationType>(ConversationType) == Domain.Entities.Conversations.ConversationType.Group)
+    {
+        <div style="margin: 10px">
+            <RadzenTextBox @bind-Value="UserName" Placeholder="Enter username..."></RadzenTextBox>
+            <RadzenButton Click="AddUserToGroupAsync" disabled="@string.IsNullOrWhiteSpace(UserName)">Add user to group</RadzenButton>
+        </div>
+    }
+    <div style="margin: 10px; display: flex; flex-direction: column; gap: 5px; overflow: auto; max-height: 90%">
+        @foreach (var message in Messages)
+        {
+            <RadzenCard>
+                <RadzenText><strong>@(message.UserName): </strong> @message.TextContent</RadzenText>
+            </RadzenCard>
+            <RadzenButton Click="() => UpdateMessageAsync(message)" disabled="@string.IsNullOrWhiteSpace(MessageText)">Update</RadzenButton>
+            <RadzenButton Click="() => DeleteMessageAsync(message)">Delete</RadzenButton>
+        }
+    </div>
+    <div style="display: flex; flex-direction: column; align-content: flex-end; align-self: flex-end; gap: 10px">
+        <RadzenTextBox @bind-Value="MessageText" Placeholder="Message... "></RadzenTextBox>
+        <RadzenButton Click="SendMessageAsync" disabled="@(string.IsNullOrWhiteSpace(MessageText))">Send</RadzenButton>
+    </div>
+</RadzenCard>
+
+@code 
+{
+    public const string Path = "/chat";
+
+    [Parameter]
+    public string ConversationTitle { get; set; } = string.Empty;
+    [Parameter]
+    public string ConversationId { get; set; } = string.Empty;
+    [Parameter]
+    public string ConversationType { get; set; } = string.Empty;
+    public string MessageText { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public List<MessageWithSenderDto> Messages { get; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        HubConnectionService!.ReceivedMessage += AddMessage;
+        var messagesResponse = await MessageService!.GetAllConversationMessagesAsync(int.Parse(ConversationId));
+        if (messagesResponse.IsSuccessful)
+        {
+            Messages.AddRange(messagesResponse.Content!);
+        }
+        
+        await base.OnInitializedAsync();
+    }
+
+    public void Dispose()
+    {
+        HubConnectionService!.ReceivedMessage -= AddMessage;
+    }
+
+    private Task AddMessage(MessageWithSenderDto message)
+    {
+        if (message.ConversationId.ToString() == ConversationId)
+        {
+            Messages.Add(message);
+            StateHasChanged();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task AddUserToGroupAsync()
+    {
+        var newMemberData = new NewGroupMemberDto
+        {
+            ConversationId = int.Parse(ConversationId),
+            MemberUserName = UserName
+        };
+        var response = await ConversationService!.AddGroupMemberAsync(newMemberData);
+        if (!response.IsSuccessful)
+        {
+            ToastService!.ShowError(response.ErrorDetails!.Message);
+            return;
+        }
+        
+        ToastService!.ShowSuccess($"User {newMemberData.MemberUserName} is successfully added to this group!");
+        UserName = string.Empty;
+    }
+
+    private async Task UpdateMessageAsync(MessageWithSenderDto messageData)
+    {
+        var messageDto = new MessageDto
+        {
+            TextContent = MessageText,
+            ConversationId = messageData.ConversationId,
+            IsRead = messageData.IsRead,
+            Id = messageData.Id,
+            SenderId = messageData.SenderId
+        };
+        var updatedMessageResponse = await MessageService!.UpdateMessageAsync(messageDto);
+        if (!updatedMessageResponse.IsSuccessful)
+        {
+            ToastService!.ShowError(updatedMessageResponse.ErrorDetails!.Message);
+            return;
+        }
+
+        var messageToUpdate = Messages.Find(x => x.Id == messageData.Id);
+        if (messageToUpdate is not null)
+        {
+            messageToUpdate.TextContent = updatedMessageResponse.Content!.TextContent;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SendMessageAsync()
+    {
+        var messageData = GetCurrentMessageData();
+        var sentMessageResponse = await MessageService!.SendMessageAsync(messageData);
+        if (!sentMessageResponse.IsSuccessful)
+        {
+            ToastService!.ShowError(sentMessageResponse.ErrorDetails!.Message);
+            return;
+        }
+        await HubConnectionService!.SendMessageAsync(ConversationId, sentMessageResponse.Content);
+        MessageText = string.Empty;
+    }
+
+    private async Task DeleteMessageAsync(MessageWithSenderDto messageData)
+    {
+        var deletedMessageResponse = await MessageService!.DeleteMessageAsync(messageData.Id);
+        if (deletedMessageResponse is not null)
+        {
+            ToastService!.ShowError(deletedMessageResponse.Message);
+            return;
+        }
+
+        Messages.Remove(messageData);
+        StateHasChanged();
+    }
+
+    private MessageDto GetCurrentMessageData()
+    {
+        return new MessageDto
+        {
+            ConversationId = int.Parse(ConversationId),
+            TextContent = MessageText
+        };
+    }
+}

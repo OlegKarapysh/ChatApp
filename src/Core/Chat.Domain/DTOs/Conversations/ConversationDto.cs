@@ -1,8 +1,9 @@
-﻿namespace Chat.Domain.DTOs.Conversations;
+﻿using Chat.Domain.Entities.Conversations;
 
-public class ConversationDto
+namespace Chat.Domain.DTOs.Conversations;
+
+public class ConversationDto : ConversationBasicInfoDto
 {
-    public string Title { get; set; } = string.Empty;
-    public string CreatedAt { get; set; } = string.Empty;
-    public string UpdatedAt { get; set; } = string.Empty;
+    public ConversationType Type { get; set; } = ConversationType.Dialog;
+    public int Id { get; set; }
 }

@@ -1,0 +1,131 @@
+﻿@page "/chats"
+@using Chat.Domain.Errors
+@attribute [Authorize]
+
+@inject IConversationsWebApiService ConversationService
+@inject IToastService ToastService
+@inject IHubConnectionService HubConnectionService
+@inject NavigationManager Navigation
+
+<h1>Your chats</h1>
+<div style="margin: 10px">
+    <RadzenTextBox @bind-Value="InterlocutorUserName" Placeholder="Enter username..."></RadzenTextBox>
+    <RadzenButton Click="AddDialogAsync" disabled="@(string.IsNullOrWhiteSpace(InterlocutorUserName))">Add dialog</RadzenButton>
+</div>
+<div style="margin: 10px">
+    <RadzenTextBox @bind-Value="GroupChatTitle" Placeholder="Enter group chat title..."></RadzenTextBox>
+    <RadzenButton Click="AddGroupChatAsync" disabled="@(string.IsNullOrWhiteSpace(GroupChatTitle))">Add group chat</RadzenButton>
+</div>
+
+<div style="margin: 10px; display: flex; flex-direction: column; gap: 5px; overflow: auto; max-height: 100%">
+    @foreach (var conversation in Conversations)
+    {
+        <RadzenCard Variant="Variant.Outlined">
+                <RadzenText Style="cursor: pointer"
+                            @onclick="() => NavigateToConversation(conversation.Id, conversation.Title, conversation.Type)">
+                    @conversation.Title
+                </RadzenText>
+                <RadzenButton Variant="Variant.Flat"
+                              Click="() => RemoveUserFromConversationAsync(conversation)">Remove</RadzenButton>
+        </RadzenCard>
+    }
+</div>
+
+@code 
+{
+    public const string Path = "/chats";
+    public string InterlocutorUserName { get; set; } = string.Empty;
+    public string GroupChatTitle { get; set; } = string.Empty;
+    public List<ConversationDto> Conversations = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var allConversationsResponse = await ConversationService!.GetAllUserConversationsAsync();
+        if (!allConversationsResponse.IsSuccessful || !allConversationsResponse.Content!.Any())
+        {
+            return;
+        }
+        var sortedConversations = allConversationsResponse.Content!.OrderByDescending(
+            x => DateTime.ParseExact(x.UpdatedAt, ConversationMappings.SqlDateTimeFormat, CultureInfo.InvariantCulture));
+        Conversations.AddRange(sortedConversations);
+        StateHasChanged();
+    }
+
+    private void NavigateToConversation(int conversationId, string conversationTitle, ConversationType type)
+    {
+        Navigation!.NavigateTo($"{ChatPage.Path}/{conversationId}/{conversationTitle}/{((int)type).ToString()}");
+    }
+
+    private async Task AddDialogAsync()
+    {
+        var dialogResponse = await ConversationService!.CreateDialogAsync(
+            new NewDialogDto { InterlocutorUserName = InterlocutorUserName });
+        if (!dialogResponse.IsSuccessful)
+        {
+            ToastService!.ShowError(dialogResponse.ErrorDetails!.Message);
+            return;
+        }
+        
+        var dialog = dialogResponse.Content!;
+        if (Conversations.Select(x => x.Id).Contains(dialog.Id))
+        {
+            NavigateToConversation(dialog.Id, dialog.Title, dialog.Type);
+            return;
+        }
+        
+        Conversations.Insert(0, new ConversationDto
+        {
+            Id = dialog.Id,
+            Title = dialog.Title,
+            CreatedAt = dialog.CreatedAt,
+            UpdatedAt = dialog.UpdatedAt,
+            Type = dialog.Type
+        });
+        await HubConnectionService!.JoinConversationsAsync(new[] { dialog.Id.ToString() });
+        InterlocutorUserName = string.Empty;
+    }
+
+    public async Task AddGroupChatAsync()
+    {
+        var groupChatResponse = await ConversationService!.CreateGroupChatAsync(
+            new NewGroupChatDto { Title = GroupChatTitle });
+        if (!groupChatResponse.IsSuccessful)
+        {
+            ToastService!.ShowError(groupChatResponse.ErrorDetails!.Message);
+            return;
+        }
+        
+        var group = groupChatResponse.Content!;
+        if (Conversations.Select(x => x.Id).Contains(group.Id))
+        {
+            NavigateToConversation(group.Id, group.Title, group.Type);
+            return;
+        }
+        
+        Conversations.Add(group);
+        await HubConnectionService!.JoinConversationsAsync(new[] { group.Id.ToString() });
+        GroupChatTitle = string.Empty;
+    }
+
+    public async Task RemoveUserFromConversationAsync(ConversationDto conversation)
+    {
+        var errorResponse = await ConversationService!.RemoveUserFromConversationAsync(conversation.Id);
+        if (errorResponse is not null)
+        {
+            if (errorResponse.ErrorType == ErrorType.Unknown)
+            {
+                Console.WriteLine(errorResponse.Message);
+                ToastService!.ShowError("Failed to delete!");
+            }
+            else
+            {
+                ToastService!.ShowError(errorResponse.Message);
+            }
+        }
+        else
+        {
+            Conversations.Remove(conversation);
+            StateHasChanged();
+        }
+    }
+}

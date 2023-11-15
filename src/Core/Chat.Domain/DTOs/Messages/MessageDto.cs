@@ -1,8 +1,9 @@
 ﻿namespace Chat.Domain.DTOs.Messages;
 
-public class MessageDto
+public class MessageDto : MessageBasicInfoDto
 {
-    public string TextContent { get; set; } = string.Empty;
-    public string CreatedAt { get; set; } = string.Empty;
-    public string UpdatedAt { get; set; } = string.Empty;
+    public int Id { get; set; }
+    public bool IsRead { get; set; }
+    public int SenderId { get; set; }
+    public int ConversationId { get; set; }
 }

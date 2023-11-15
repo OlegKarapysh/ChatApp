@@ -20,12 +20,12 @@
 </RadzenRadioButtonList>
 <RadzenButton Click="OnSearch">Search</RadzenButton>
 
-<RadzenDataGrid TItem="ConversationDto" Data="ConversationsOnPage" ColumnWidth="300px"
+<RadzenDataGrid TItem="ConversationBasicInfoDto" Data="ConversationsOnPage" ColumnWidth="300px"
                 AllowColumnResize="true" AllowAlternatingRows="false">
     <Columns>
-        <RadzenDataGridColumn TItem="ConversationDto" Property="Title" Title="Title" />
-        <RadzenDataGridColumn TItem="ConversationDto" Property="CreatedAt" Title="Created at"/>
-        <RadzenDataGridColumn TItem="ConversationDto" Property="UpdatedAt" Title="Last updated at"/>
+        <RadzenDataGridColumn TItem="ConversationBasicInfoDto" Property="Title" Title="Title" />
+        <RadzenDataGridColumn TItem="ConversationBasicInfoDto" Property="CreatedAt" Title="Created at"/>
+        <RadzenDataGridColumn TItem="ConversationBasicInfoDto" Property="UpdatedAt" Title="Last updated at"/>
     </Columns>
 </RadzenDataGrid>
 <RadzenPager @ref="Pager" PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
@@ -45,16 +45,16 @@
         set => _page = value < 1 ? 1 : value;
     }
     [QueryStringParameter]
-    public string SortingProperty { get; set; } = nameof(ConversationDto.Title);
+    public string SortingProperty { get; set; } = nameof(ConversationBasicInfoDto.Title);
     [QueryStringParameter]
     public int SortingOrder { get; set; } = (int)Chat.Domain.Enums.SortingOrder.Ascending;
     
     public RadzenPager Pager { get; set; } = default!;
     public int ConversationsCount { get; set; }
-    public readonly string[] ConversationsProperties = typeof(ConversationDto)
+    public readonly string[] ConversationsProperties = typeof(ConversationBasicInfoDto)
         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
         .Select(x => x.Name).ToArray();
-    public IList<ConversationDto> ConversationsOnPage { get; set; } = new List<ConversationDto>();
+    public IList<ConversationBasicInfoDto> ConversationsOnPage { get; set; } = new List<ConversationBasicInfoDto>();
     private int _page;
 
     public override Task SetParametersAsync(ParameterView parameters)
@@ -109,7 +109,7 @@
         Page = pageIndex + 1;
     }
 
-    private void UpdateConversations(ConversationDto[] conversations)
+    private void UpdateConversations(ConversationBasicInfoDto[] conversations)
     {
         ConversationsOnPage = conversations;
     }
@@ -143,6 +143,6 @@
 
     private async Task<WebApiResponse<ConversationsPageDto>> SendSearchRequest()
     {
-        return await ConversationService!.GetSearchedConversationsPage(ParseQueryModel());
+        return await ConversationService!.GetSearchedConversationsPageAsync(ParseQueryModel());
     }
 }

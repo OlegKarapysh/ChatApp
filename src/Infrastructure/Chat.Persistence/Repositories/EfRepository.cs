@@ -34,13 +34,15 @@ public sealed class EfRepository<T, TId> : IRepository<T, TId>
                          .Skip((page - 1) * pageSize)
                          .Take(pageSize);
     }
+
+    public IQueryable<T> AsQueryable() => _dbContext.Set<T>();
     
     public async Task<IList<T>> FindAllAsync(Expression<Func<T, bool>> predicate)
         => await _dbContext.Set<T>().Where(predicate).ToListAsync();
 
-    public async Task AddAsync(T entity) => await _dbContext.Set<T>().AddAsync(entity);
+    public async Task<T> AddAsync(T entity) => (await _dbContext.Set<T>().AddAsync(entity)).Entity;
 
-    public void Update(T entity) => _dbContext.Set<T>().Update(entity);
+    public T Update(T entity) => _dbContext.Set<T>().Update(entity).Entity;
 
     public async Task<bool> RemoveAsync(TId id)
     {

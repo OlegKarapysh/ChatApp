@@ -10,8 +10,13 @@ public static class QueryableExtensions
     public static IQueryable<TEntity> OrderBy<TEntity>(
         this IQueryable<TEntity> entities, string sortingPropertyName, SortingOrder sortingOrder)
     {
-        var sortingMethod = sortingOrder == SortingOrder.Ascending ? "OrderBy" : "OrderByDescending";
         var sortingProperty = typeof(TEntity).GetProperty(sortingPropertyName);
+        if (sortingProperty is null)
+        {
+            throw new ArgumentException("Property with this name is not found!", nameof(sortingPropertyName));
+        }
+        
+        var sortingMethod = sortingOrder == SortingOrder.Ascending ? "OrderBy" : "OrderByDescending";
         var parameter = Expression.Parameter(typeof(TEntity), "entity");
         var propertyAccess = Expression.MakeMemberAccess(parameter, sortingProperty);
         var orderByLambda = Expression.Lambda(propertyAccess, parameter);
@@ -36,14 +41,14 @@ public static class QueryableExtensions
         {
             foreach (var word in words)
             {
-                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
                 var entity = Expression.Parameter(typeof(TEntity), "entity");
                 var propertyAccessor = Expression.Property(entity, property);
                 var propertyAsObject = Expression.Convert(propertyAccessor, typeof(object));
                 var nullCheck = Expression.ReferenceEqual(propertyAsObject, Expression.Constant(null));
                 Expression stringifiedProperty = property.PropertyType == typeof(string)
                     ? propertyAccessor
-                    : Expression.Call(propertyAccessor, TryGetToStringMethod(property));
+                    : Expression.Call(propertyAccessor, TryGetToStringMethod(property)!);
                 var containsCall = Expression.Call(stringifiedProperty, containsMethod, Expression.Constant(word));
                 var conditionalExpression = Expression.Condition(nullCheck, Expression.Constant(false), containsCall);
                 var lambdaPredicate = Expression.Lambda<Func<TEntity, bool>>(conditionalExpression, entity);
@@ -51,7 +56,7 @@ public static class QueryableExtensions
             }
         }
 
-        return entities.AsExpandable().Where(x => ((Expression<Func<TEntity, bool>>)predicate).Invoke(x));
+        return entities.AsExpandable()!.Where(x => ((Expression<Func<TEntity, bool>>)predicate).Invoke(x));
     }
     
     public static IQueryable<T> ToSortedPage<T>(this IQueryable<T> entities,

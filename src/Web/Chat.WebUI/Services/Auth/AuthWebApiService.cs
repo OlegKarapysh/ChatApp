@@ -9,29 +9,36 @@ public sealed class AuthWebApiService : WebApiServiceBase, IAuthWebApiService
 {
     private protected override string BaseRoute { get; init; }
 
-    public AuthWebApiService(IHttpClientFactory httpClientFactory, ITokenService tokenStorage)
-        : base(httpClientFactory, tokenStorage)
+    public AuthWebApiService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenService)
+        : base(httpClientFactory, tokenService)
     {
         BaseRoute = "/auth";
     }
 
     public async Task<WebApiResponse<TokenPairDto>> LoginAsync(LoginDto loginData)
     {
-        const string loginRoute = "/login";
-
-        return await PostAsync<TokenPairDto, LoginDto>(loginRoute, loginData);
+        return await PostAsync<TokenPairDto, LoginDto>(loginData, "/login");
     }
     
     public async Task<WebApiResponse<TokenPairDto>> RegisterAsync(RegistrationDto registerData)
     {
-        const string registerRoute = "/register";
+        return await PostAsync<TokenPairDto, RegistrationDto>(registerData, "/register");
+    }
 
-        return await PostAsync<TokenPairDto, RegistrationDto>(registerRoute, registerData);
+    public async Task<WebApiResponse<TokenPairDto>> RefreshTokensAsync()
+    {
+        var expiredTokens = await TokenService.GetTokensAsync();
+        var refreshedTokensResponse = await PostAsync<TokenPairDto, TokenPairDto>(expiredTokens, "/refresh");
+        if (refreshedTokensResponse.IsSuccessful)
+        {
+            await TokenService.SaveTokensAsync(refreshedTokensResponse.Content);
+        }
+
+        return refreshedTokensResponse;
     }
 
     public async Task<ErrorDetailsDto?> ChangePasswordAsync(ChangePasswordDto changePasswordData)
     {
-        //await TryAddAuthorizationHeader();
         const string changePasswordRoute = "/change-password";
         var response = await HttpClient.PostAsJsonAsync(BuildFullRoute(changePasswordRoute), changePasswordData);
 

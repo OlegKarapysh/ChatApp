@@ -4,5 +4,4 @@ public enum ConversationType
 {
     Dialog,
     Group,
-    Channel
 }

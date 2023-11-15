@@ -2,5 +2,5 @@
 
 public class MessagesPageDto : PageDto
 {
-    public MessageDto[]? Messages { get; set; }
+    public MessageBasicInfoDto[]? Messages { get; set; }
 }

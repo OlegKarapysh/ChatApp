@@ -3,18 +3,18 @@ using Chat.Domain.DTOs.Authentication;
 
 namespace Chat.WebUI.Services.Auth;
 
-public sealed class TokenService : ITokenService
+public sealed class TokenStorageService : ITokenStorageService
 {
     public const string JwtLocalStorageKey = "JwtToken";
     public const string RefreshTokenLocalStorageKey = "RefreshToken";
     private readonly ILocalStorageService _localStorage;
 
-    public TokenService(ILocalStorageService localStorage)
+    public TokenStorageService(ILocalStorageService localStorage)
     {
         _localStorage = localStorage;
     }
 
-    public async ValueTask SaveTokens(TokenPairDto? tokens)
+    public async ValueTask SaveTokensAsync(TokenPairDto? tokens)
     {
         await _localStorage.SetItemAsStringAsync(
             JwtLocalStorageKey, tokens?.AccessToken ?? string.Empty);
@@ -22,12 +22,12 @@ public sealed class TokenService : ITokenService
             RefreshTokenLocalStorageKey, tokens?.RefreshToken ?? string.Empty);
     }
 
-    public async ValueTask RemoveTokens()
+    public async ValueTask RemoveTokensAsync()
     {
         await _localStorage.RemoveItemsAsync(new[] { JwtLocalStorageKey, RefreshTokenLocalStorageKey });
     }
 
-    public async Task<TokenPairDto> GetTokens()
+    public async Task<TokenPairDto> GetTokensAsync()
     {
         return new TokenPairDto
         {

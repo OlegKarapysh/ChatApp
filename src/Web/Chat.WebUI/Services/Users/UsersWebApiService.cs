@@ -10,7 +10,7 @@ public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
 {
     private protected override string BaseRoute { get; init; }
 
-    public UsersWebApiService(IHttpClientFactory httpClientFactory, ITokenService tokenService)
+    public UsersWebApiService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenService)
         : base(httpClientFactory, tokenService)
     {
         BaseRoute = "/users";

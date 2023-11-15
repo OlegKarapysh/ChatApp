@@ -1,10 +1,9 @@
-﻿using Chat.Application.Services.Conversations;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Chat.Application.Extensions;
 using Chat.Application.Services.Messages;
-using Chat.Domain.DTOs.Conversations;
 using Chat.Domain.DTOs.Messages;
 using Chat.Domain.DTOs.Users;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Chat.WebAPI.Controllers;
 
@@ -22,5 +21,32 @@ public sealed class MessagesController : ControllerBase
     public async Task<ActionResult<MessagesPageDto>> SearchMessagesPagedAsync([FromQuery] PagedSearchDto searchData)
     {
         return Ok(await _messageService.SearchMessagesPagedAsync(searchData));
+    }
+
+    [HttpGet("all/{conversationId:int}")]
+    public async Task<ActionResult<IList<MessageWithSenderDto>>> GetAllConversationMessagesAsync(int conversationId)
+    {
+        return Ok(await _messageService.GetAllConversationMessagesAsync(conversationId));
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<MessageWithSenderDto>> CreateMessageAsync(MessageDto messageData)
+    {
+        messageData.SenderId = HttpContext.User.GetIdClaim();
+        return Ok(await _messageService.CreateMessageAsync(messageData));
+    }
+    
+    [HttpPut]
+    public async Task<ActionResult<MessageDto>> UpdateMessageAsync(MessageDto messageData)
+    {
+        var userId = HttpContext.User.GetIdClaim();
+        return Ok(await _messageService.UpdateMessageAsync(messageData, userId));
+    }
+    
+    [HttpDelete("{messageId:int}")]
+    public async Task<IActionResult> DeleteMessageAsync(int messageId)
+    {
+        var isSuccessfullyDeleted = await _messageService.DeleteMessageAsync(messageId);
+        return isSuccessfullyDeleted ? NoContent() : NotFound();
     }
 }

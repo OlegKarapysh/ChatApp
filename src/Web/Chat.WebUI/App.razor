@@ -1,4 +1,10 @@
-﻿<ErrorBoundary @ref="ErrorBoundary">
+﻿@inject IHubConnectionService HubConnectionService
+@inject IConversationsWebApiService ConversationService
+@inject IAuthWebApiService AuthService
+@inject IToastService ToastService
+@inject NavigationManager Navigation
+
+<ErrorBoundary @ref="ErrorBoundary">
     <ChildContent>
         <Spinner></Spinner>
         <CascadingAuthenticationState>
@@ -40,4 +46,38 @@
 @code 
 {
     public ErrorBoundary ErrorBoundary { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await TryConnectToHub();
+        HubConnectionService!.ReceivedMessage += ShowNotificationOnMessageReceived;
+        await base.OnInitializedAsync();
+    }
+
+    private Task ShowNotificationOnMessageReceived(MessageWithSenderDto message)
+    {
+        var messageConversationUri = $"{Navigation!.BaseUri}chat/{message.ConversationId}";
+        if (!Navigation!.Uri.StartsWith(messageConversationUri, StringComparison.Ordinal))
+        {
+            ToastService!.ShowInfo($"{message.UserName}: {message.TextContent}");
+        }
+        return Task.CompletedTask;
+    }
+
+    private async Task<bool> TryConnectToHub()
+    {
+        try
+        {
+            //await AuthService!.RefreshTokensAsync();
+            var conversationIds = await ConversationService!.GetAllUserConversationIdsAsync();
+            await HubConnectionService!.ConnectAsync();
+            await HubConnectionService!.JoinConversationsAsync(
+                conversationIds.Content?.Select(x => x.ToString()).ToArray() ?? Array.Empty<string>());
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
