@@ -9,6 +9,7 @@ public sealed class HubConnectionService : IHubConnectionService
 {
     public event Func<MessageWithSenderDto, Task>? ReceivedMessage;
     public event Func<MessageWithSenderDto, Task>? UpdatedMessage;
+    public event Func<MessageDto, Task>? DeletedMessage;
     private readonly ITokenStorageService _tokenService;
     private readonly string _hubUrl;
     private HubConnection? _connection;
@@ -31,6 +32,7 @@ public sealed class HubConnectionService : IHubConnectionService
                       .Build();
         _connection.On<MessageWithSenderDto>(nameof(IChatClient.ReceiveMessage), OnReceivedMessageAsync);
         _connection.On<MessageWithSenderDto>(nameof(IChatClient.UpdateMessage), OnUpdatedMessageAsync);
+        _connection.On<MessageDto>(nameof(IChatClient.DeleteMessage), OnDeletedMessageAsync);
         await _connection.StartAsync();
     }
 
@@ -52,6 +54,12 @@ public sealed class HubConnectionService : IHubConnectionService
             nameof(IChatHub.UpdateMessage), conversationId, message));
     }
 
+    public async Task DeleteMessageAsync(string conversationId, MessageDto message)
+    {
+        await InvokeHubMethodAsync(() => _connection?.InvokeAsync(
+            nameof(IChatHub.DeleteMessage), conversationId, message));
+    }
+
     private async Task InvokeHubMethodAsync(Func<Task?> methodCall)
     {
         if (_connection is null)
@@ -67,15 +75,20 @@ public sealed class HubConnectionService : IHubConnectionService
 
         await task;
     }
+
+    private async Task OnReceivedMessageAsync(MessageWithSenderDto message)
+    {
+        await InvokeEventAsync(ReceivedMessage, message);
+    }
     
     private async Task OnUpdatedMessageAsync(MessageWithSenderDto message)
     {
         await InvokeEventAsync(UpdatedMessage, message);
     }
 
-    private async Task OnReceivedMessageAsync(MessageWithSenderDto message)
+    private async Task OnDeletedMessageAsync(MessageDto message)
     {
-        await InvokeEventAsync(ReceivedMessage, message);
+        await InvokeEventAsync(DeletedMessage, message);
     }
 
     private async Task InvokeEventAsync<T>(Func<T, Task>? eventFunc, T parameter)

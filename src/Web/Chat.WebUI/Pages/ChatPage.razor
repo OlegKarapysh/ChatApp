@@ -50,6 +50,7 @@
     {
         HubConnectionService!.ReceivedMessage += AddMessage;
         HubConnectionService.UpdatedMessage += UpdateMessage;
+        HubConnectionService.DeletedMessage += DeleteMessage;
         var messagesResponse = await MessageService!.GetAllConversationMessagesAsync(int.Parse(ConversationId));
         if (messagesResponse.IsSuccessful)
         {
@@ -92,6 +93,22 @@
         return Task.CompletedTask;
     }
 
+    private Task DeleteMessage(MessageDto deletedMessage)
+    {
+        if (deletedMessage.ConversationId.ToString() == ConversationId)
+        {
+            var messageToDelete = Messages
+                .FirstOrDefault(x => x.Id == deletedMessage.Id);
+            if (messageToDelete is not null)
+            {
+                Messages.Remove(messageToDelete);
+                StateHasChanged();
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
     private async Task AddUserToGroupAsync()
     {
         var newMemberData = new NewGroupMemberDto
@@ -108,6 +125,19 @@
         
         ToastService!.ShowSuccess($"User {newMemberData.MemberUserName} is successfully added to this group!");
         UserName = string.Empty;
+    }
+    
+    private async Task SendMessageAsync()
+    {
+        var messageData = GetCurrentMessageData();
+        var sentMessageResponse = await MessageService!.SendMessageAsync(messageData);
+        if (!sentMessageResponse.IsSuccessful)
+        {
+            ToastService!.ShowError(sentMessageResponse.ErrorDetails!.Message);
+            return;
+        }
+        await HubConnectionService!.SendMessageAsync(ConversationId, sentMessageResponse.Content!);
+        ResetTextInMessageTextBox();
     }
 
     private async Task UpdateMessageAsync(MessageWithSenderDto messageData)
@@ -129,26 +159,6 @@
         messageData.TextContent = updatedMessageResponse.Content!.TextContent;
         await HubConnectionService!.UpdateMessageAsync(ConversationId, messageData);
         ResetTextInMessageTextBox();
-    // var messageToUpdate = Messages.Find(x => x.Id == messageData.Id);
-    // if (messageToUpdate is not null)
-    // {
-    //     messageToUpdate.TextContent = updatedMessageResponse.Content!.TextContent;
-    //     StateHasChanged();
-    // }
-    }
-
-    private async Task SendMessageAsync()
-    {
-        var messageData = GetCurrentMessageData();
-        var sentMessageResponse = await MessageService!.SendMessageAsync(messageData);
-        if (!sentMessageResponse.IsSuccessful)
-        {
-            ToastService!.ShowError(sentMessageResponse.ErrorDetails!.Message);
-            return;
-        }
-        Console.WriteLine("Button clicked");
-        await HubConnectionService!.SendMessageAsync(ConversationId, sentMessageResponse.Content!);
-        ResetTextInMessageTextBox();
     }
 
     private async Task DeleteMessageAsync(MessageWithSenderDto messageData)
@@ -160,7 +170,7 @@
             return;
         }
 
-        Messages.Remove(messageData);
+        await HubConnectionService!.DeleteMessageAsync(ConversationId, messageData.MapToDo());
         StateHasChanged();
     }
 

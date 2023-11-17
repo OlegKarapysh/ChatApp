@@ -64,4 +64,18 @@ public static class MessageMappings
         
         return message;
     }
+
+    public static MessageDto MapToDo(this MessageWithSenderDto message)
+    {
+        return new MessageDto
+        {
+            Id = message.Id,
+            TextContent = message.TextContent,
+            IsRead = message.IsRead,
+            SenderId = message.SenderId,
+            ConversationId = message.ConversationId,
+            CreatedAt = message.CreatedAt,
+            UpdatedAt = message.UpdatedAt
+        };
+    }
 }

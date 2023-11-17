@@ -18,6 +18,11 @@ public sealed class ChatHub : Hub<IChatClient>, IChatHub
         await Clients.Group(conversationId).UpdateMessage(message);
     }
 
+    public async Task DeleteMessage(string conversationId, MessageDto message)
+    {
+        await Clients.Group(conversationId).DeleteMessage(message);
+    }
+
     public async Task JoinConversations(string[] conversationIds)
     {
         foreach (var conversationId in conversationIds.Where(x => !string.IsNullOrEmpty(x)))
