@@ -1,7 +1,6 @@
-﻿using Chat.WebUI.Services.Auth;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
+using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.Services.WebRtc;
 
@@ -26,6 +25,7 @@ public sealed class WebRtcService
     {
         if (_signalingChannel != null) throw new InvalidOperationException();
 
+        Console.WriteLine("Joining in webRTC service...");
         _signalingChannel = signalingChannel;
         var hub = await GetHub();
         await hub.SendAsync("join", signalingChannel);
@@ -109,6 +109,7 @@ public sealed class WebRtcService
             if (_jsModule == null) throw new InvalidOperationException();
 
             if (_signalingChannel != signalingChannel) return;
+            
             switch (type)
             {
                 case "offer":

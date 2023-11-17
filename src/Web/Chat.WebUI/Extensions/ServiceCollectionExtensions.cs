@@ -30,6 +30,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IConversationsWebApiService, ConversationsWebApiService>();
         services.AddScoped<IMessagesWebApiService, MessagesWebApiService>();
         services.AddScoped<IHubConnectionService, HubConnectionService>();
-        services.AddScoped<WebRtcService>();
+        services.AddTransient<WebRtcService>();
     }
 }

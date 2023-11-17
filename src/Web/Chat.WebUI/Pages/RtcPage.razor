@@ -25,6 +25,7 @@
     private bool _startDisabled;
     private bool _callDisabled = true;
     private bool _hangupDisabled = true;
+    private string _channel = "foo";
 
     protected override async Task OnInitializedAsync()
     {
@@ -34,6 +35,7 @@
     {
         if (firstRender)
         {
+            Console.WriteLine("First render of rtc page!");
             _module = await Js.InvokeAsync<IJSObjectReference>(
                 "import", "./Pages/RtcPage.razor.js");
         }
@@ -42,9 +44,9 @@
 
     private async Task StartAction()
     {
+        if (_startDisabled) return;
         if (string.IsNullOrWhiteSpace(_channel)) return;
         if (_module == null) throw new InvalidOperationException();
-        if (_startDisabled) return;
         _startDisabled = true;
         await RtcService.Join(_channel);
         var stream = await RtcService.StartLocalStream();
@@ -56,6 +58,7 @@
     private async void RtcOnOnRemoteStreamAcquired(object? _, IJSObjectReference e)
     {
         if (_module == null) throw new InvalidOperationException();
+        
         await _module.InvokeVoidAsync("setRemoteStream", e);
         _callDisabled = true;
         _hangupDisabled = false;
@@ -70,6 +73,7 @@
         await RtcService.Call();
         _hangupDisabled = false;
     }
+    
     private async Task HangupAction()
     {
         await RtcService.Hangup();
@@ -77,6 +81,4 @@
         _hangupDisabled = true;
         _startDisabled = false;
     }
-
-    private string _channel = "foo";
 }

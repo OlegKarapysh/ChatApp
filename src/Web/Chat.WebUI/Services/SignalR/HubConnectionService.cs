@@ -63,12 +63,14 @@ public sealed class HubConnectionService : IHubConnectionService
 
     private async Task OnReceivedMessage(MessageWithSenderDto message)
     {
-        var task = ReceivedMessage?.Invoke(message);
-        if (task is null)
+        Func<MessageWithSenderDto, Task>? eventHandler;
+        lock (this)
         {
-            return;
+            eventHandler = ReceivedMessage;
         }
-
-        await task;
+        if (eventHandler is not null)
+        {
+            await eventHandler.Invoke(message);
+        }
     }
 }

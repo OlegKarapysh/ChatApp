@@ -4,13 +4,11 @@ const mediaStreamConstraints = {
     video: true
     //audio: true
 };
-
 // Set up to exchange only video.
 const offerOptions = {
     offerToReceiveVideo: 1
     //offerToReceiveAudio: 1
 };
-
 const servers = {
     iceServers: [
         {
@@ -25,7 +23,6 @@ let dotNet;
 let localStream;
 let remoteStream;
 let peerConnection;
-
 let isOffering;
 let isOffered;
 
@@ -33,15 +30,14 @@ export function initialize(dotNetRef) {
     dotNet = dotNetRef;
 }
 export async function startLocalStream() {
-    console.log("Requesting local stream.");
     localStream = await navigator.mediaDevices.getUserMedia(mediaStreamConstraints);
     return localStream;
 }
-
 function createPeerConnection() {
-    if (peerConnection != null) return;
+    if (peerConnection) {
+        return;
+    }
     // Create peer connections and add behavior.
-    peerConnection = "hello";
     peerConnection = new RTCPeerConnection(servers);
     console.log("Created local peer connection object peerConnection.");
 
@@ -87,7 +83,9 @@ export async function processAnswer(descriptionText) {
 // in the flow above. srd triggers addStream.
 export async function processOffer(descriptionText) {
     console.log("processOffer");
-    if (isOffering) return;
+    if (isOffering) {
+        return;
+    }
 
     createPeerConnection();
     let description = JSON.parse(descriptionText);
@@ -136,7 +134,6 @@ async function handleConnection(event) {
 
     if (iceCandidate) {
         await dotNet.invokeMethodAsync("SendCandidate", JSON.stringify(iceCandidate));
-
         console.log(`peerConnection ICE candidate:${event.candidate.candidate}.`);
     }
 }
