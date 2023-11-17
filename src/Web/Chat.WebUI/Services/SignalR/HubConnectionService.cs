@@ -1,5 +1,5 @@
-﻿using Chat.Domain.DTOs.Messages;
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
+using Chat.Domain.DTOs.Messages;
 using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.Services.SignalR;
