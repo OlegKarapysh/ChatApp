@@ -4,6 +4,7 @@ namespace Chat.Application.SignalR;
 
 public interface IChatHub
 {
-    void SendMessage(string conversationId, MessageWithSenderDto message);
+    Task SendMessage(string conversationId, MessageWithSenderDto message);
+    Task UpdateMessage(string conversationId, MessageWithSenderDto message);
     Task JoinConversations(string[] conversationIds);
 }

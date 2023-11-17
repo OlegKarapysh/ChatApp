@@ -8,9 +8,14 @@ namespace Chat.WebAPI.SignalR;
 [Authorize]
 public sealed class ChatHub : Hub<IChatClient>, IChatHub
 {
-    public void SendMessage(string conversationId, MessageWithSenderDto message)
+    public async Task SendMessage(string conversationId, MessageWithSenderDto message)
     {
-        Clients.Group(conversationId).ReceiveMessage(message);
+        await Clients.Group(conversationId).ReceiveMessage(message);
+    }
+
+    public async Task UpdateMessage(string conversationId, MessageWithSenderDto message)
+    {
+        await Clients.Group(conversationId).UpdateMessage(message);
     }
 
     public async Task JoinConversations(string[] conversationIds)
