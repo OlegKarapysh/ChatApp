@@ -48,7 +48,6 @@
         var sortedConversations = allConversationsResponse.Content!.OrderByDescending(
             x => DateTime.ParseExact(x.UpdatedAt, ConversationMappings.SqlDateTimeFormat, CultureInfo.InvariantCulture));
         Conversations.AddRange(sortedConversations);
-        StateHasChanged();
     }
 
     private void NavigateToConversation(int conversationId, string conversationTitle, ConversationType type)
@@ -125,7 +124,6 @@
         else
         {
             Conversations.Remove(conversation);
-            StateHasChanged();
         }
     }
 }

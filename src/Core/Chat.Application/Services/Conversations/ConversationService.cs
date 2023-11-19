@@ -57,7 +57,8 @@ public sealed class ConversationService : IConversationService
 
         var existingGroupChat = (await _conversationsRepository.FindAllAsync(conversation =>
                 conversation.Type == ConversationType.Group &&
-                conversation.Members.Contains(creator)))
+                conversation.Members.Contains(creator) &&
+                conversation.Title == newGroupChatData.Title))
                 .FirstOrDefault();
         if (existingGroupChat is not null)
         {
