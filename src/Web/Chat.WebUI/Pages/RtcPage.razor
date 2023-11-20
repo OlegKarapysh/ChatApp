@@ -1,4 +1,5 @@
 ﻿@page "/call/{ConversationId}"
+@implements IDisposable
 @using Chat.WebUI.Services.WebRtc
 @inject WebRtcService RtcService;
 @inject IJSRuntime Js
@@ -35,6 +36,12 @@
         _channel = ConversationId;
         await base.OnInitializedAsync();
     }
+
+    public void Dispose()
+    {
+        HangupAction();
+    }
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
