@@ -58,7 +58,6 @@ public sealed class ChatHub : Hub<IChatClient>, IChatHub
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, channel);
         await Clients.OthersInGroup(channel).Leave(Context.ConnectionId);
-        Console.WriteLine(Context.ConnectionId + " left from channel " + channel);
     }
 
     public async Task SignalWebRtc(string channel, string type, string payload)

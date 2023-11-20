@@ -73,17 +73,24 @@
         var dialogTask = DialogService!.Confirm(
             $"Do you want to accept the incoming call from {call.CallerUserName}?",
             "Call") ?? Task.FromResult(new bool?(false));
-        var answer = await dialogTask;
-        if (answer is not null && (bool)answer)
+        var timeout = Task.Delay(TimeSpan.FromSeconds(10));
+        var completedTask = await Task.WhenAny(dialogTask, timeout);
+        if (completedTask == dialogTask && dialogTask.Result is not null && (bool)dialogTask.Result)
         {
+            call.Status = CallStatus.Accepted;
             Navigation!.NavigateTo($"{RtcPage.Path}/{call.Id}");
+        }
+        else if (completedTask == timeout)
+        {
+            call.Status = CallStatus.NoAnswer;
         }
         else
         {
-            call.IsDeclined = true;
+            call.Status = CallStatus.Declined;
         }
-        
+        Console.WriteLine("answered status: " + call.Status.ToString());
         await HubConnectionService!.AnswerCallAsync(call);
+        DialogService.Close();
     }
 
     private async Task<bool> TryConnectToHub()

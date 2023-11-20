@@ -25,7 +25,7 @@
     @if (Enum.Parse<ConversationType>(ConversationType) == Domain.Entities.Conversations.ConversationType.Dialog)
     {
         <div style="margin: 10px">
-            <RadzenButton Click="async () => await CallUserAsync()">
+            <RadzenButton Click="async () => await CallUserAsync(CancellationSource.Token)">
                 Call
             </RadzenButton>
         </div>
@@ -72,6 +72,8 @@
     public string UserName { get; set; } = string.Empty;
     public List<MessageWithSenderDto> Messages { get; } = new();
     public UserDto CurrentUser { get; set; } = new();
+    public CancellationTokenSource CancellationSource { get; set; } = new();
+    public bool IsCalling { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -148,13 +150,21 @@
     private Task ReceiveCallAnswer(CallDto call)
     {
         Spinner!.Hide();
-        if (call.IsDeclined)
+        CancellationSource.Cancel();
+        CancellationSource.TryReset();
+        IsCalling = false;
+        Console.WriteLine("call status: " + call.Status.ToString());
+        if (call.Status == CallStatus.Accepted)
         {
-            ToastService!.ShowError("Call declined");
+            Navigation!.NavigateTo($"{RtcPage.Path}/{call.Id}");
+        }
+        else if (call.Status == CallStatus.NoAnswer)
+        {
+            ToastService!.ShowError("No answer");
         }
         else
         {
-            Navigation!.NavigateTo($"{RtcPage.Path}/{call.Id}");
+            ToastService!.ShowError($"Call is {call.Status.ToString().ToLower()}");
         }
 
         return Task.CompletedTask;
@@ -225,10 +235,23 @@
         StateHasChanged();
     }
 
-    private async Task CallUserAsync()
+    private async Task CallUserAsync(CancellationToken cancellationToken)
     {
-        await HubConnectionService!.CallUserAsync(GetCallData());
         Spinner!.Show();
+        IsCalling = true;
+        await HubConnectionService!.CallUserAsync(GetCallData());
+        var timeout = TimeSpan.FromSeconds(11);
+        try
+        {
+            await Task.Delay(timeout, cancellationToken);
+            if (IsCalling)
+            {
+                IsCalling = false;
+                Spinner.Hide();
+                ToastService!.ShowError("No answer");
+            }
+        }
+        catch { }
     }
 
     private MessageDto GetCurrentMessageData() => new()

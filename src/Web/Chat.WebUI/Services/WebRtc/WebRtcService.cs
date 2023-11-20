@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using Chat.Application.SignalR;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 using Chat.WebUI.Services.Auth;
 
@@ -7,6 +8,7 @@ namespace Chat.WebUI.Services.WebRtc;
 public sealed class WebRtcService
 {
     public event EventHandler<IJSObjectReference>? OnRemoteStreamAcquired;
+    public event Func<string, Task>? InterlocutorLeft;
   
     private readonly IJSRuntime _js;
     private readonly ITokenStorageService _tokenService;
@@ -91,7 +93,7 @@ public sealed class WebRtcService
         var stream = await _jsModule.InvokeAsync<IJSObjectReference>("getRemoteStream");
         OnRemoteStreamAcquired?.Invoke(this, stream);
     }
-
+    
     private async Task<HubConnection> GetHub()
     {
         if (_hub != null) return _hub;
@@ -103,7 +105,7 @@ public sealed class WebRtcService
                           options.AccessTokenProvider = async () => (await _tokenService.GetTokensAsync()).AccessToken;
                       })
                   .Build();
-
+        hub.On<string>(nameof(IChatClient.Leave), id => InterlocutorLeft?.Invoke(id));
         hub.On<string, string, string>("SignalWebRtc", async (signalingChannel, type, payload) =>
         {
             if (_jsModule == null) throw new InvalidOperationException();
