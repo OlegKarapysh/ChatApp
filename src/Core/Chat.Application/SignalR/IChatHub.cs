@@ -1,4 +1,4 @@
-﻿using Chat.Domain.DTOs.Conversations;
+﻿using Chat.Domain.DTOs.Calls;
 using Chat.Domain.DTOs.Messages;
 
 namespace Chat.Application.SignalR;
@@ -9,6 +9,6 @@ public interface IChatHub
     Task UpdateMessage(string conversationId, MessageWithSenderDto message);
     Task DeleteMessage(string conversationId, MessageDto message);
     Task JoinConversations(string[] conversationIds);
-    Task CallUser(ConversationDto conversation);
-    Task AnswerCall(ConversationDto conversation);
+    Task CallUser(CallDto callData);
+    Task AnswerCall(CallDto callData);
 }

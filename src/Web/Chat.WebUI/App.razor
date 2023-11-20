@@ -1,4 +1,5 @@
-﻿@inject IHubConnectionService HubConnectionService
+﻿@using Chat.Domain.DTOs.Calls
+@inject IHubConnectionService HubConnectionService
 @inject IConversationsWebApiService ConversationService
 @inject IToastService ToastService
 @inject NavigationManager Navigation
@@ -67,28 +68,28 @@
         return Task.CompletedTask;
     }
 
-    private async Task AnswerOnCallReceived(ConversationDto conversation)
+    private async Task AnswerOnCallReceived(CallDto call)
     {
-        var answer = await DialogService!.Confirm(
-            "Do you want to accept the incoming call?",
-            "Call");
+        var dialogTask = DialogService!.Confirm(
+            $"Do you want to accept the incoming call from {call.CallerUserName}?",
+            "Call") ?? Task.FromResult(new bool?(false));
+        var answer = await dialogTask;
         if (answer is not null && (bool)answer)
         {
-            Navigation!.NavigateTo($"{RtcPage.Path}/{conversation.Id}");
+            Navigation!.NavigateTo($"{RtcPage.Path}/{call.Id}");
         }
         else
         {
-            conversation.Type = ConversationType.Group;
+            call.IsDeclined = true;
         }
         
-        await HubConnectionService!.AnswerCallAsync(conversation);
+        await HubConnectionService!.AnswerCallAsync(call);
     }
 
     private async Task<bool> TryConnectToHub()
     {
         try
         {
-            //await AuthService!.RefreshTokensAsync();
             var conversationIds = await ConversationService!.GetAllUserConversationIdsAsync();
             await HubConnectionService!.ConnectAsync();
             await HubConnectionService!.JoinConversationsAsync(

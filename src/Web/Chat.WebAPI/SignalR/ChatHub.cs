@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Chat.Domain.DTOs.Messages;
 using Chat.Application.SignalR;
-using Chat.Domain.DTOs.Conversations;
+using Chat.Domain.DTOs.Calls;
 using Chat.Domain.Entities.Conversations;
 
 namespace Chat.WebAPI.SignalR;
@@ -33,19 +33,19 @@ public sealed class ChatHub : Hub<IChatClient>, IChatHub
         }
     }
 
-    public async Task CallUser(ConversationDto conversation)
+    public async Task CallUser(CallDto callData)
     {
-        if (conversation.Type != ConversationType.Dialog)
+        if (callData.ConversationType != ConversationType.Dialog)
         {
             return;
         }
 
-        await Clients.OthersInGroup(conversation.Id.ToString()).ReceiveCallRequest(conversation);
+        await Clients.OthersInGroup(callData.ConversationId).ReceiveCallRequest(callData);
     }
 
-    public async Task AnswerCall(ConversationDto conversation)
+    public async Task AnswerCall(CallDto callData)
     {
-        await Clients.OthersInGroup(conversation.Id.ToString()).ReceiveCallAnswer(conversation);
+        await Clients.OthersInGroup(callData.ConversationId).ReceiveCallAnswer(callData);
     }
     
     public async Task Join(string channel)
@@ -58,6 +58,7 @@ public sealed class ChatHub : Hub<IChatClient>, IChatHub
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, channel);
         await Clients.OthersInGroup(channel).Leave(Context.ConnectionId);
+        Console.WriteLine(Context.ConnectionId + " left from channel " + channel);
     }
 
     public async Task SignalWebRtc(string channel, string type, string payload)

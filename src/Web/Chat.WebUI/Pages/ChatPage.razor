@@ -1,5 +1,6 @@
 ﻿@page "/chat/{ConversationId}/{ConversationTitle}/{ConversationType}"
 @attribute [Authorize]
+@using Chat.Domain.DTOs.Calls
 @implements IDisposable
 
 @inject IHubConnectionService HubConnectionService
@@ -144,16 +145,16 @@
         return Task.CompletedTask;
     }
 
-    private Task ReceiveCallAnswer(ConversationDto conversationDto)
+    private Task ReceiveCallAnswer(CallDto call)
     {
         Spinner!.Hide();
-        if (conversationDto.Type == Domain.Entities.Conversations.ConversationType.Dialog)
+        if (call.IsDeclined)
         {
-            Navigation!.NavigateTo($"{RtcPage.Path}/{ConversationId}");
+            ToastService!.ShowError("Call declined");
         }
         else
         {
-            ToastService!.ShowError("Call declined");
+            Navigation!.NavigateTo($"{RtcPage.Path}/{call.Id}");
         }
 
         return Task.CompletedTask;
@@ -226,7 +227,7 @@
 
     private async Task CallUserAsync()
     {
-        await HubConnectionService!.CallUserAsync(GetCurrentConversation());
+        await HubConnectionService!.CallUserAsync(GetCallData());
         Spinner!.Show();
     }
 
@@ -236,11 +237,13 @@
         TextContent = MessageText
     };
 
-    private ConversationDto GetCurrentConversation() => new()
+    private CallDto GetCallData() => new()
     {
-        Id = int.Parse(ConversationId),
-        Title = ConversationTitle,
-        Type = Enum.Parse<ConversationType>(ConversationType)
+        Id = $"{ConversationId}_{Guid.NewGuid().ToString()}",
+        ConversationId = ConversationId,
+        ConversationTitle = ConversationTitle,
+        ConversationType = Enum.Parse<ConversationType>(ConversationType),
+        CallerUserName = CurrentUser.UserName
     };
 
     private void ResetTextInMessageTextBox() => MessageText = string.Empty;
