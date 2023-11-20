@@ -1,12 +1,13 @@
 ﻿@inject IHubConnectionService HubConnectionService
 @inject IConversationsWebApiService ConversationService
-@inject IAuthWebApiService AuthService
 @inject IToastService ToastService
 @inject NavigationManager Navigation
+@inject DialogService DialogService
 
 <ErrorBoundary @ref="ErrorBoundary">
     <ChildContent>
         <Spinner></Spinner>
+        <RadzenDialog></RadzenDialog>
         <CascadingAuthenticationState>
             <Router AppAssembly="@typeof(App).Assembly">
                 <Found Context="routeData">
@@ -51,6 +52,7 @@
     {
         await TryConnectToHub();
         HubConnectionService!.ReceivedMessage += ShowNotificationOnMessageReceived;
+        HubConnectionService.ReceivedCallRequest += AnswerOnCallReceived;
         await base.OnInitializedAsync();
     }
 
@@ -61,7 +63,20 @@
         {
             ToastService!.ShowInfo($"{message.UserName}: {message.TextContent}");
         }
+        
         return Task.CompletedTask;
+    }
+
+    private async Task AnswerOnCallReceived(ConversationDto conversation)
+    {
+        var answer = await DialogService!.Confirm(
+            "Do you want to accept the incoming call?",
+            "Call");
+        if (answer is not null && (bool)answer)
+        {
+            Navigation!.NavigateTo($"{RtcPage.Path}/{conversation.Id}");
+            await HubConnectionService!.AnswerCallAsync(conversation);
+        }
     }
 
     private async Task<bool> TryConnectToHub()

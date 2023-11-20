@@ -4,8 +4,11 @@
 
 @inject IHubConnectionService HubConnectionService
 @inject IMessagesWebApiService MessageService
+@inject IUsersWebApiService UserService
 @inject IConversationsWebApiService ConversationService
 @inject IToastService ToastService
+@inject NavigationManager Navigation
+@inject SpinnerService Spinner
 
 <RadzenCard Style="margin: 10px">
     <h3>@ConversationTitle</h3>
@@ -13,22 +16,44 @@
     {
         <div style="margin: 10px">
             <RadzenTextBox @bind-Value="UserName" Placeholder="Enter username..."></RadzenTextBox>
-            <RadzenButton Click="AddUserToGroupAsync" disabled="@string.IsNullOrWhiteSpace(UserName)">Add user to group</RadzenButton>
+            <RadzenButton Click="async () => await AddUserToGroupAsync()" Disabled="@(string.IsNullOrWhiteSpace(UserName))">
+                Add user to group
+            </RadzenButton>
+        </div>
+    }
+    @if (Enum.Parse<ConversationType>(ConversationType) == Domain.Entities.Conversations.ConversationType.Dialog)
+    {
+        <div style="margin: 10px">
+            <RadzenButton Click="async () => await CallUserAsync()">
+                Call
+            </RadzenButton>
         </div>
     }
     <div style="margin: 10px; display: flex; flex-direction: column; gap: 5px; overflow: auto; max-height: 90%">
         @foreach (var message in Messages)
         {
             <RadzenCard>
-                <RadzenText><strong>@(message.UserName): </strong> @message.TextContent</RadzenText>
+                <RadzenStack Orientation="Orientation.Horizontal">
+                    <RadzenText Style="text-wrap: normal"><strong>@(message.UserName): </strong> @message.TextContent</RadzenText>
+                    @if (CurrentUser.UserName == message.UserName)
+                    {
+                        <RadzenButton ButtonStyle="ButtonStyle.Secondary" Disabled="@(string.IsNullOrWhiteSpace(MessageText))" 
+                                      Click="async () => await UpdateMessageAsync(message)">
+                            Update
+                        </RadzenButton>
+                    }
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="async () => await DeleteMessageAsync(message)">
+                        Delete
+                    </RadzenButton>
+                </RadzenStack>
             </RadzenCard>
-            <RadzenButton Click="() => UpdateMessageAsync(message)" disabled="@string.IsNullOrWhiteSpace(MessageText)">Update</RadzenButton>
-            <RadzenButton Click="() => DeleteMessageAsync(message)">Delete</RadzenButton>
         }
     </div>
     <div style="display: flex; flex-direction: column; align-content: flex-end; align-self: flex-end; gap: 10px">
         <RadzenTextBox @bind-Value="MessageText" Placeholder="Message... "></RadzenTextBox>
-        <RadzenButton Click="SendMessageAsync" disabled="@(string.IsNullOrWhiteSpace(MessageText))">Send</RadzenButton>
+        <RadzenButton ButtonStyle="ButtonStyle.Primary" Click="SendMessageAsync" disabled="@(string.IsNullOrWhiteSpace(MessageText))">
+            Send
+        </RadzenButton>
     </div>
 </RadzenCard>
 
@@ -45,16 +70,24 @@
     public string MessageText { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
     public List<MessageWithSenderDto> Messages { get; } = new();
+    public UserDto CurrentUser { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         HubConnectionService!.ReceivedMessage += AddMessage;
         HubConnectionService.UpdatedMessage += UpdateMessage;
         HubConnectionService.DeletedMessage += DeleteMessage;
+        HubConnectionService.ReceivedCallAnswer += ReceiveCallAnswer;
         var messagesResponse = await MessageService!.GetAllConversationMessagesAsync(int.Parse(ConversationId));
         if (messagesResponse.IsSuccessful)
         {
             Messages.AddRange(messagesResponse.Content!);
+        }
+
+        var currentUserResponse = await UserService!.GetCurrentUserInfoAsync();
+        if (currentUserResponse.IsSuccessful)
+        {
+            CurrentUser = currentUserResponse.Content!;
         }
         
         await base.OnInitializedAsync();
@@ -64,6 +97,8 @@
     {
         HubConnectionService!.ReceivedMessage -= AddMessage;
         HubConnectionService.UpdatedMessage -= UpdateMessage;
+        HubConnectionService.DeletedMessage -= DeleteMessage;
+        HubConnectionService.ReceivedCallAnswer -= ReceiveCallAnswer;
     }
 
     private Task AddMessage(MessageWithSenderDto message)
@@ -105,6 +140,14 @@
                 StateHasChanged();
             }
         }
+
+        return Task.CompletedTask;
+    }
+
+    private Task ReceiveCallAnswer(ConversationDto conversationDto)
+    {
+        Spinner!.Hide();
+        Navigation!.NavigateTo($"{RtcPage.Path}/{ConversationId}");
 
         return Task.CompletedTask;
     }
@@ -174,11 +217,24 @@
         StateHasChanged();
     }
 
+    private async Task CallUserAsync()
+    {
+        await HubConnectionService!.CallUserAsync(GetCurrentConversation());
+        Spinner!.Show();
+    }
+
     private MessageDto GetCurrentMessageData() => new()
     {
         ConversationId = int.Parse(ConversationId),
         TextContent = MessageText
     };
-    
+
+    private ConversationDto GetCurrentConversation() => new()
+    {
+        Id = int.Parse(ConversationId),
+        Title = ConversationTitle,
+        Type = Enum.Parse<ConversationType>(ConversationType)
+    };
+
     private void ResetTextInMessageTextBox() => MessageText = string.Empty;
 }

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.SignalR;
 using Chat.Domain.DTOs.Messages;
 using Chat.Application.SignalR;
+using Chat.Domain.DTOs.Conversations;
+using Chat.Domain.Entities.Conversations;
 
 namespace Chat.WebAPI.SignalR;
 
@@ -29,6 +31,21 @@ public sealed class ChatHub : Hub<IChatClient>, IChatHub
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, conversationId);
         }
+    }
+
+    public async Task CallUser(ConversationDto conversation)
+    {
+        if (conversation.Type != ConversationType.Dialog)
+        {
+            return;
+        }
+
+        await Clients.OthersInGroup(conversation.Id.ToString()).ReceiveCallRequest(conversation);
+    }
+
+    public async Task AnswerCall(ConversationDto conversation)
+    {
+        await Clients.OthersInGroup(conversation.Id.ToString()).ReceiveCallAnswer(conversation);
     }
     
     public async Task Join(string channel)

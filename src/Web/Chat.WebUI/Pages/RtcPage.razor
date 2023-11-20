@@ -1,4 +1,4 @@
-﻿@page "/rtc"
+﻿@page "/call/{ConversationId}"
 @using Chat.WebUI.Services.WebRtc
 @inject WebRtcService RtcService;
 @inject IJSRuntime Js
@@ -21,6 +21,10 @@
 
 
 @code {
+    public const string Path = "/call";
+    
+    [Parameter]
+    public string ConversationId { get; set; } = string.Empty;
     private IJSObjectReference? _module;
     private bool _startDisabled;
     private bool _callDisabled = true;
@@ -29,6 +33,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _channel = ConversationId;
         await base.OnInitializedAsync();
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)

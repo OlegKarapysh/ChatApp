@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using Chat.Application.SignalR;
+using Chat.Domain.DTOs.Conversations;
 using Chat.Domain.DTOs.Messages;
 using Chat.WebUI.Services.Auth;
 
@@ -10,6 +11,8 @@ public sealed class HubConnectionService : IHubConnectionService
     public event Func<MessageWithSenderDto, Task>? ReceivedMessage;
     public event Func<MessageWithSenderDto, Task>? UpdatedMessage;
     public event Func<MessageDto, Task>? DeletedMessage;
+    public event Func<ConversationDto, Task>? ReceivedCallRequest;
+    public event Func<ConversationDto, Task>? ReceivedCallAnswer;
     private readonly ITokenStorageService _tokenService;
     private readonly string _hubUrl;
     private HubConnection? _connection;
@@ -33,6 +36,8 @@ public sealed class HubConnectionService : IHubConnectionService
         _connection.On<MessageWithSenderDto>(nameof(IChatClient.ReceiveMessage), OnReceivedMessageAsync);
         _connection.On<MessageWithSenderDto>(nameof(IChatClient.UpdateMessage), OnUpdatedMessageAsync);
         _connection.On<MessageDto>(nameof(IChatClient.DeleteMessage), OnDeletedMessageAsync);
+        _connection.On<ConversationDto>(nameof(IChatClient.ReceiveCallRequest), OnReceivedCallRequest);
+        _connection.On<ConversationDto>(nameof(IChatClient.ReceiveCallAnswer), OnReceivedCallAnswer);
         await _connection.StartAsync();
     }
 
@@ -58,6 +63,16 @@ public sealed class HubConnectionService : IHubConnectionService
     {
         await InvokeHubMethodAsync(() => _connection?.InvokeAsync(
             nameof(IChatHub.DeleteMessage), conversationId, message));
+    }
+
+    public async Task CallUserAsync(ConversationDto conversation)
+    {
+        await InvokeHubMethodAsync(() => _connection?.InvokeAsync(nameof(IChatHub.CallUser), conversation));
+    }
+
+    public async Task AnswerCallAsync(ConversationDto conversation)
+    {
+        await InvokeHubMethodAsync(() => _connection?.InvokeAsync(nameof(IChatHub.AnswerCall), conversation));
     }
 
     private async Task InvokeHubMethodAsync(Func<Task?> methodCall)
@@ -89,6 +104,16 @@ public sealed class HubConnectionService : IHubConnectionService
     private async Task OnDeletedMessageAsync(MessageDto message)
     {
         await InvokeEventAsync(DeletedMessage, message);
+    }
+
+    private async Task OnReceivedCallRequest(ConversationDto conversation)
+    {
+        await InvokeEventAsync(ReceivedCallRequest, conversation);
+    }
+    
+    private async Task OnReceivedCallAnswer(ConversationDto conversation)
+    {
+        await InvokeEventAsync(ReceivedCallAnswer, conversation);
     }
 
     private async Task InvokeEventAsync<T>(Func<T, Task>? eventFunc, T parameter)
