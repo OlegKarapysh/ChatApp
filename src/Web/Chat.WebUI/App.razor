@@ -75,8 +75,13 @@
         if (answer is not null && (bool)answer)
         {
             Navigation!.NavigateTo($"{RtcPage.Path}/{conversation.Id}");
-            await HubConnectionService!.AnswerCallAsync(conversation);
         }
+        else
+        {
+            conversation.Type = ConversationType.Group;
+        }
+        
+        await HubConnectionService!.AnswerCallAsync(conversation);
     }
 
     private async Task<bool> TryConnectToHub()

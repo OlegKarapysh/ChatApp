@@ -147,7 +147,14 @@
     private Task ReceiveCallAnswer(ConversationDto conversationDto)
     {
         Spinner!.Hide();
-        Navigation!.NavigateTo($"{RtcPage.Path}/{ConversationId}");
+        if (conversationDto.Type == Domain.Entities.Conversations.ConversationType.Dialog)
+        {
+            Navigation!.NavigateTo($"{RtcPage.Path}/{ConversationId}");
+        }
+        else
+        {
+            ToastService!.ShowError("Call declined");
+        }
 
         return Task.CompletedTask;
     }
