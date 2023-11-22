@@ -33,9 +33,6 @@ export function getRemoteStream() {
     return remoteStream;
 }
 function createPeerConnection() {
-    // if (peerConnection) {
-    //     return;
-    // }
     peerConnection = new RTCPeerConnection(servers);
     peerConnection.addEventListener("icecandidate", handleConnection);
     peerConnection.addEventListener("addstream", gotRemoteMediaStream);
