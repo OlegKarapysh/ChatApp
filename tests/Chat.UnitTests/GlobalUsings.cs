@@ -12,4 +12,7 @@ global using Chat.Domain.DTOs.Authentication;
 global using Microsoft.AspNetCore.Mvc;
 global using System.Security.Claims;
 global using Chat.Application.RequestExceptions;
+global using Chat.Domain.Entities;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.Identity;
 

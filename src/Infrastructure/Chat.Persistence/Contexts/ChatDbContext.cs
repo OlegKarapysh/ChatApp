@@ -19,8 +19,7 @@ public class ChatDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     public ChatDbContext()
     {
     }
-    public ChatDbContext(DbContextOptions<ChatDbContext> options)
-        : base(options)
+    public ChatDbContext(DbContextOptions<ChatDbContext> options) : base(options)
     {
     }
 
