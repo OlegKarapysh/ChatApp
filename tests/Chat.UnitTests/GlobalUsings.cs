@@ -15,4 +15,14 @@ global using Chat.Application.RequestExceptions;
 global using Chat.Domain.Entities;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Identity;
+global using Chat.Application.Services.Conversations;
+global using Chat.Application.Services.Messages;
+global using Chat.Application.Services.Users;
+global using Chat.Domain.Entities.Conversations;
+global using Chat.DomainServices.Repositories;
+global using Chat.DomainServices.UnitsOfWork;
+global using System.Linq.Expressions;
+global using Chat.Domain.DTOs.Conversations;
+global using Chat.Domain.DTOs.Users;
+global using Chat.Domain.Web;
 

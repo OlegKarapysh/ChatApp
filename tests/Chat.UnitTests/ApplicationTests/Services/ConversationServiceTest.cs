@@ -1,14 +1,4 @@
-﻿using System.Linq.Expressions;
-using Chat.Application.Services.Conversations;
-using Chat.Application.Services.Users;
-using Chat.Domain.DTOs.Conversations;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Entities.Conversations;
-using Chat.Domain.Web;
-using Chat.DomainServices.Repositories;
-using Chat.DomainServices.UnitsOfWork;
-
-namespace Chat.UnitTests.ApplicationTests.Services;
+﻿namespace Chat.UnitTests.ApplicationTests.Services;
 
 public sealed class ConversationServiceTest
 {
