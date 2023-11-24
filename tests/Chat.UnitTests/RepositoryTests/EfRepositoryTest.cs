@@ -19,7 +19,7 @@ public sealed class EfRepositoryTest : IDisposable
         _connection = new SqliteConnection("Filename=:memory:");
         _connection.Open();
         _dbOptions = new DbContextOptionsBuilder<ChatDbContext>().UseSqlite(_connection).Options;
-        DbSeedHelper.SeedDb(CreateDbContext());
+        DbSeedHelper.RecreateAndSeedDb(CreateDbContext());
     }
 
     public ChatDbContext CreateDbContext() => new(_dbOptions);

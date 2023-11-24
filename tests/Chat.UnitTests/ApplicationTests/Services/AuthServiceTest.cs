@@ -15,8 +15,8 @@ public sealed class AuthServiceTest
     
     public AuthServiceTest()
     {
-        _userManagerMock = MockUserManager();
-        _signInManagerMock = MockSignInManager(_userManagerMock.Object);
+        _userManagerMock = MockHelper.MockUserManager();
+        _signInManagerMock = MockHelper.MockSignInManager(_userManagerMock.Object);
         _sut = new AuthService(_jwtServiceMock.Object, _userManagerMock.Object, _signInManagerMock.Object);
     }
 
@@ -187,20 +187,5 @@ public sealed class AuthServiceTest
         
         // Assert.
         tryRegister.Should()!.ThrowAsync<BadRegistrationException>();
-    }
-    
-    private Mock<UserManager<User>> MockUserManager()
-    {
-        var store = new Mock<IUserStore<User>>();
-        var mock = new Mock<UserManager<User>>(store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
-        mock.Object.UserValidators.Add(new UserValidator<User>());
-        mock.Object.PasswordValidators.Add(new PasswordValidator<User>());
-        return mock;
-    }
-
-    private Mock<SignInManager<User>> MockSignInManager(UserManager<User> userManager)
-    {
-        return new Mock<SignInManager<User>>(userManager, Mock.Of<IHttpContextAccessor>(),
-            Mock.Of<IUserClaimsPrincipalFactory<User>>(), null!, null!, null!, null!);
     }
 }
