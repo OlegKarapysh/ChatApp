@@ -1,4 +1,5 @@
 ﻿using Chat.Application.Mappings;
+using Chat.Domain.Enums;
 
 namespace Chat.UnitTests.ApplicationTests.Services;
 
@@ -89,5 +90,56 @@ public sealed class UserServiceTest
         actualCallSequence.Should()!.BeEquivalentTo(expectedCallSequence, o => o.WithStrictOrdering());
         _userRepositoryMock.Verify(x => x.Update(user), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+    }
+
+    [Fact]
+    public async Task SearchUsersPagedAsync_ReturnsUsersPage_WhenValidPagedSearchDto()
+    {
+        // Arrange.
+        var (users, expectedUsersPage) = GetTestUsersWithUsersPage();
+        var pageSearchDto = new PagedSearchDto
+        {
+            Page = expectedUsersPage.PageInfo!.CurrentPage, SearchFilter = "filter",
+            SortingProperty = nameof(User.UserName), SortingOrder = SortingOrder.Descending
+        };
+        _userRepositoryMock.Setup(x => x.SearchWhere<UserDto>(pageSearchDto.SearchFilter))
+                                    .Returns(users.AsQueryable());
+        // Act.
+        var result = await _sut.SearchUsersPagedAsync(pageSearchDto);
+        
+        // Assert.
+        result.Should()!.BeOfType<UsersPageDto>()!.And!.NotBeNull();
+        result.Users.Should()!.NotBeNull().And!
+              .BeEquivalentTo(expectedUsersPage.Users!, o => o.WithStrictOrdering());
+        result.PageInfo.Should()!.NotBeNull().And.BeEquivalentTo(expectedUsersPage.PageInfo);
+    }
+
+    private (List<User> Users, UsersPageDto UsersPage) GetTestUsersWithUsersPage()
+    {
+        return (new()
+        {
+            new() { UserName = "username01" },
+            new() { UserName = "username09" },
+            new() { UserName = "username02" },
+            new() { UserName = "username08" },
+            new() { UserName = "username03" },
+            new() { UserName = "username07" },
+            new() { UserName = "username04" },
+            new() { UserName = "username06" },
+            new() { UserName = "username05" },
+            new() { UserName = "username10" },
+            new() { UserName = "username11" },
+        }, new()
+        {
+            Users = new UserDto[]
+            {
+                new() { UserName = "username06" },
+                new() { UserName = "username05" },
+                new() { UserName = "username04" },
+                new() { UserName = "username03" },
+                new() { UserName = "username02" },
+            },
+            PageInfo = new PageInfo { CurrentPage = 2, PageSize = PageInfo.DefaultPageSize, TotalCount = 11, TotalPages = 3 }
+        });
     }
 }

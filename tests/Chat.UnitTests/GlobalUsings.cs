@@ -27,5 +27,7 @@ global using Chat.Domain.DTOs.Conversations;
 global using Chat.Domain.DTOs.Users;
 global using Chat.Domain.Web;
 global using Chat.UnitTests.TestHelpers;
+global using Chat.Application.Extensions;
+
 
 

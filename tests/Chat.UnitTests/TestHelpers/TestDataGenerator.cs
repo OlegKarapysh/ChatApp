@@ -21,7 +21,7 @@ public static class TestDataGenerator
                .RuleFor(x => x.Email, f => f.Internet!.Email())!
                .RuleFor(x => x.TokenExpiresAt, f => f.Date!.Future(1, DefaultDate))!
                .RuleFor(x => x.RefreshToken, f => f.Random!.AlphaNumeric(RefreshTokenLength))!
-               .RuleFor(x => x.PhoneNumber, f => f.Phone!.ToString()!)!
+               .RuleFor(x => x.PhoneNumber, f => f.Phone!.PhoneNumber()!)!
                .RuleFor(x => x.CreatedAt, f => DefaultDate)!.Generate(count)!;
     }
 }

@@ -43,7 +43,7 @@ public sealed class UserService : IUserService
 
     public async Task<UsersPageDto> SearchUsersPagedAsync(PagedSearchDto searchData)
     {
-        var foundUsers = _userManager.Users.SearchWhere<User, UserDto>(searchData.SearchFilter);
+        var foundUsers = _userRepository.SearchWhere<UserDto>(searchData.SearchFilter);
         var usersCount = foundUsers.Count();
         var pageSize = PageInfo.DefaultPageSize;
         var foundUsersPage = foundUsers
