@@ -6,8 +6,6 @@ namespace Chat.UnitTests.ApplicationTests.Services;
 public sealed class UserServiceTest
 {
     private const int Id = 1;
-    private const string UserName = "username";
-    private const string Email = "email@gmail.com";
     private readonly IUserService _sut;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
     private readonly Mock<IRepository<User, int>> _userRepositoryMock = new();

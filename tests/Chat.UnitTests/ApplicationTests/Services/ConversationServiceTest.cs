@@ -1,4 +1,6 @@
-﻿namespace Chat.UnitTests.ApplicationTests.Services;
+﻿using Chat.Domain.Enums;
+
+namespace Chat.UnitTests.ApplicationTests.Services;
 
 public sealed class ConversationServiceTest
 {
@@ -42,26 +44,22 @@ public sealed class ConversationServiceTest
     public async Task SearchConversationsPagedAsync_ReturnsConversationsPage_WhenValidPageSearchDto()
     {
         // Arrange.
-        const int pageSize = 5;
-        const int page = 2;
-        const int totalPagesCount = 2;
-        var conversations = GetConversations();
-        var pageSearchDto = new PagedSearchDto { Page = 2, SortingProperty = nameof(Conversation.Title) };
-        var expectedTitles = new[] { "title6", "title7", "title8", "title9" };
-        var expectedPageInfo = new PageInfo
+        var (conversations, expectedConversationsPage) = GetConversationsWithConversationsPage();
+        var pageSearchDto = new PagedSearchDto
         {
-            CurrentPage = page, PageSize = pageSize, TotalCount = conversations.Count, TotalPages = totalPagesCount
+            Page = expectedConversationsPage.PageInfo!.CurrentPage, SortingProperty = nameof(Conversation.Title),
+            SortingOrder = SortingOrder.Descending, SearchFilter = "filter"
         };
         _conversationsRepositoryMock.Setup(x => x.SearchWhere<ConversationBasicInfoDto>(pageSearchDto.SearchFilter))
                                     .Returns(conversations.AsQueryable());
         // Act.
         var result = await _sut.SearchConversationsPagedAsync(pageSearchDto);
-        var resultTitles = result.Conversations?.Select(x => x.Title).ToArray();
         
         // Assert.
         result.Should()!.BeOfType<ConversationsPageDto>()!.And!.NotBeNull();
-        resultTitles.Should()!.NotBeNull().And.BeEquivalentTo(expectedTitles);
-        result.PageInfo.Should()!.NotBeNull().And.BeEquivalentTo(expectedPageInfo);
+        result.Conversations.Should()!.NotBeNull().And.BeEquivalentTo(expectedConversationsPage.Conversations!,
+            o => o.WithStrictOrdering()!.Excluding(x => x.CreatedAt)!.Excluding(x => x.UpdatedAt));
+        result.PageInfo.Should()!.NotBeNull().And.BeEquivalentTo(expectedConversationsPage.PageInfo);
     }
 
     [Fact]
@@ -114,16 +112,33 @@ public sealed class ConversationServiceTest
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
     }
     
-    private List<Conversation> GetConversations() => new()
-    {
-        new() { Id = 1, Title = "title1", Type = ConversationType.Dialog },
-        new() { Id = 2, Title = "title2", Type = ConversationType.Dialog },
-        new() { Id = 3, Title = "title3", Type = ConversationType.Dialog },
-        new() { Id = 4, Title = "title4", Type = ConversationType.Group },
-        new() { Id = 5, Title = "title5", Type = ConversationType.Dialog },
-        new() { Id = 6, Title = "title6", Type = ConversationType.Dialog },
-        new() { Id = 7, Title = "title7", Type = ConversationType.Group },
-        new() { Id = 8, Title = "title8", Type = ConversationType.Dialog },
-        new() { Id = 9, Title = "title9", Type = ConversationType.Dialog },
-    };
+    private (List<Conversation> Conversations, ConversationsPageDto ConversationsPage) GetConversationsWithConversationsPage() => new
+    (
+        new List<Conversation>
+        {
+            new() { Id = 1, Title = "title02", Type = ConversationType.Dialog },
+            new() { Id = 2, Title = "title01", Type = ConversationType.Dialog },
+            new() { Id = 3, Title = "title03", Type = ConversationType.Dialog },
+            new() { Id = 4, Title = "title09", Type = ConversationType.Group },
+            new() { Id = 5, Title = "title10", Type = ConversationType.Dialog },
+            new() { Id = 6, Title = "title06", Type = ConversationType.Dialog },
+            new() { Id = 7, Title = "title07", Type = ConversationType.Group },
+            new() { Id = 8, Title = "title08", Type = ConversationType.Dialog },
+            new() { Id = 9, Title = "title05", Type = ConversationType.Dialog },
+            new() { Id = 8, Title = "title04", Type = ConversationType.Dialog },
+            new() { Id = 9, Title = "title11", Type = ConversationType.Dialog },
+        },
+        new ConversationsPageDto
+        {
+            Conversations = new ConversationBasicInfoDto[]
+            {
+                new() { Title = "title06" },
+                new() { Title = "title05" },
+                new() { Title = "title04" },
+                new() { Title = "title03" },
+                new() { Title = "title02" },
+            },
+            PageInfo = new PageInfo { CurrentPage = 2, PageSize = PageInfo.DefaultPageSize, TotalCount = 11, TotalPages = 3 }
+        }
+    );
 }
