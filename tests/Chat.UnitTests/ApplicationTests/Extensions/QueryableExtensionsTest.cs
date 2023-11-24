@@ -1,8 +1,4 @@
-﻿using Chat.Application.Extensions;
-using Chat.Domain.DTOs.Conversations;
-using Chat.Domain.Entities.Conversations;
-
-namespace Chat.UnitTests.ApplicationTests.Extensions;
+﻿namespace Chat.UnitTests.ApplicationTests.Extensions;
 
 public sealed class QueryableExtensionsTest
 {
