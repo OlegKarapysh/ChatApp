@@ -81,7 +81,6 @@ public sealed class UserServiceTest
                        .Callback(() => actualCallSequence.Add(nameof(IUnitOfWork.SaveChangesAsync)));
         _userRepositoryMock.Setup(x => x.Update(It.IsAny<User>()))
                            .Callback(() => actualCallSequence.Add(nameof(IRepository<User, int>.Update)));
-
         
         // Act.
         await _sut.UpdateUserAsync(userDto, Id);
