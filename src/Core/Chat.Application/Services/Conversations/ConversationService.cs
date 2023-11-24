@@ -38,12 +38,12 @@ public sealed class ConversationService : IConversationService
     public async Task<ConversationDto> AddGroupMemberAsync(NewGroupMemberDto groupMemberData)
     {
         var conversation = await GetConversationByIdAsync(groupMemberData.ConversationId);
-        var newMember = await _userService.GetUserByNameAsync(groupMemberData.MemberUserName);
         if (conversation.Type != ConversationType.Group)
         {
-            return conversation.MapToDto();
+            throw new WrongConversationTypeException();
         }
         
+        var newMember = await _userService.GetUserByNameAsync(groupMemberData.MemberUserName);
         conversation.Members.Add(newMember);
         _conversationsRepository.Update(conversation);
         await _unitOfWork.SaveChangesAsync();
@@ -57,7 +57,8 @@ public sealed class ConversationService : IConversationService
 
         var existingGroupChat = (await _conversationsRepository.FindAllAsync(conversation =>
                 conversation.Type == ConversationType.Group &&
-                conversation.Members.Contains(creator)))
+                conversation.Members.Contains(creator) &&
+                conversation.Title == newGroupChatData.Title))
                 .FirstOrDefault();
         if (existingGroupChat is not null)
         {
@@ -147,6 +148,6 @@ public sealed class ConversationService : IConversationService
     public async Task<Conversation> GetConversationByIdAsync(int id)
     {
         return await _conversationsRepository.GetByIdAsync(id) ??
-            throw new EntityNotFoundException(nameof(Conversation), nameof(Conversation.Title));
+            throw new EntityNotFoundException(nameof(Conversation));
     }
 }

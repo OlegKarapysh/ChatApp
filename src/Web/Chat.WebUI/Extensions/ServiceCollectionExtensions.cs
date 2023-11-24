@@ -7,6 +7,7 @@ using Chat.WebUI.Services.Conversations;
 using Chat.WebUI.Services.Messages;
 using Chat.WebUI.Services.SignalR;
 using Chat.WebUI.Services.Users;
+using Chat.WebUI.Services.WebRtc;
 
 namespace Chat.WebUI.Extensions;
 
@@ -29,5 +30,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IConversationsWebApiService, ConversationsWebApiService>();
         services.AddScoped<IMessagesWebApiService, MessagesWebApiService>();
         services.AddScoped<IHubConnectionService, HubConnectionService>();
+        services.AddTransient<WebRtcService>();
     }
 }

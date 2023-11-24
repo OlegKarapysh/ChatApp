@@ -11,7 +11,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Bogus" Version="34.0.2" />
+        <PackageReference Include="FluentAssertions" Version="6.12.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.14" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.14" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.14" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0"/>
+        <PackageReference Include="MockQueryable.Moq" Version="7.0.0" />
+        <PackageReference Include="Moq" Version="4.20.69" />
         <PackageReference Include="xunit" Version="2.4.2"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -24,8 +31,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="ApplicationTests\" />
-      <Folder Include="DomainServicesTests\" />
+      <Folder Include="WebUiTests\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Core\Chat.Application\Chat.Application.csproj" />
+      <ProjectReference Include="..\..\src\Core\Chat.DomainServices\Chat.DomainServices.csproj" />
+      <ProjectReference Include="..\..\src\Core\Chat.Domain\Chat.Domain.csproj" />
+      <ProjectReference Include="..\..\src\Web\Chat.WebAPI\Chat.WebAPI.csproj" />
     </ItemGroup>
 
 </Project>

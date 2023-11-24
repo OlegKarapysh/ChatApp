@@ -22,8 +22,11 @@
 
 <RadzenDataGrid TItem="MessageBasicInfoDto" Data="MessagesOnPage" ColumnWidth="300px"
                 AllowColumnResize="true" AllowAlternatingRows="false">
+    <EmptyTemplate>
+        <NoResultsInGridComponent></NoResultsInGridComponent>
+    </EmptyTemplate>
     <Columns>
-        <RadzenDataGridColumn TItem="MessageBasicInfoDto" Property="TextContent" Title="Text" />
+        <RadzenDataGridColumn TItem="MessageBasicInfoDto" Property="TextContent" Title="Text"/>
         <RadzenDataGridColumn TItem="MessageBasicInfoDto" Property="CreatedAt" Title="Created at"/>
         <RadzenDataGridColumn TItem="MessageBasicInfoDto" Property="UpdatedAt" Title="Last updated at"/>
     </Columns>

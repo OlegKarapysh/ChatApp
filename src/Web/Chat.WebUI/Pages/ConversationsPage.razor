@@ -22,6 +22,9 @@
 
 <RadzenDataGrid TItem="ConversationBasicInfoDto" Data="ConversationsOnPage" ColumnWidth="300px"
                 AllowColumnResize="true" AllowAlternatingRows="false">
+    <EmptyTemplate>
+        <NoResultsInGridComponent></NoResultsInGridComponent>
+    </EmptyTemplate>
     <Columns>
         <RadzenDataGridColumn TItem="ConversationBasicInfoDto" Property="Title" Title="Title" />
         <RadzenDataGridColumn TItem="ConversationBasicInfoDto" Property="CreatedAt" Title="Created at"/>

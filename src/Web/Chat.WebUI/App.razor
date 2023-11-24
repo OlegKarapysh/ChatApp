@@ -1,12 +1,14 @@
-﻿@inject IHubConnectionService HubConnectionService
+﻿@using Chat.Domain.DTOs.Calls
+@inject IHubConnectionService HubConnectionService
 @inject IConversationsWebApiService ConversationService
-@inject IAuthWebApiService AuthService
 @inject IToastService ToastService
 @inject NavigationManager Navigation
+@inject DialogService DialogService
 
 <ErrorBoundary @ref="ErrorBoundary">
     <ChildContent>
         <Spinner></Spinner>
+        <RadzenDialog></RadzenDialog>
         <CascadingAuthenticationState>
             <Router AppAssembly="@typeof(App).Assembly">
                 <Found Context="routeData">
@@ -51,6 +53,7 @@
     {
         await TryConnectToHub();
         HubConnectionService!.ReceivedMessage += ShowNotificationOnMessageReceived;
+        HubConnectionService.ReceivedCallRequest += AnswerOnCallReceived;
         await base.OnInitializedAsync();
     }
 
@@ -61,14 +64,39 @@
         {
             ToastService!.ShowInfo($"{message.UserName}: {message.TextContent}");
         }
+        
         return Task.CompletedTask;
+    }
+
+    private async Task AnswerOnCallReceived(CallDto call)
+    {
+        var dialogTask = DialogService!.Confirm(
+            $"Do you want to accept the incoming call from {call.CallerUserName}?",
+            "Call") ?? Task.FromResult(new bool?(false));
+        var timeout = Task.Delay(TimeSpan.FromSeconds(10));
+        var completedTask = await Task.WhenAny(dialogTask, timeout);
+        if (completedTask == dialogTask && dialogTask.Result is not null && (bool)dialogTask.Result)
+        {
+            call.Status = CallStatus.Accepted;
+            Navigation!.NavigateTo($"{RtcPage.Path}/{call.Id}");
+        }
+        else if (completedTask == timeout)
+        {
+            call.Status = CallStatus.NoAnswer;
+        }
+        else
+        {
+            call.Status = CallStatus.Declined;
+        }
+        Console.WriteLine("answered status: " + call.Status.ToString());
+        await HubConnectionService!.AnswerCallAsync(call);
+        DialogService.Close();
     }
 
     private async Task<bool> TryConnectToHub()
     {
         try
         {
-            //await AuthService!.RefreshTokensAsync();
             var conversationIds = await ConversationService!.GetAllUserConversationIdsAsync();
             await HubConnectionService!.ConnectAsync();
             await HubConnectionService!.JoinConversationsAsync(

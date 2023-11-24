@@ -14,16 +14,19 @@
 </RadzenDropDown>
 <RadzenRadioButtonList @bind-Value="SortingOrder" TValue="int" class="mb-5" Change="OnSortingOrderChanged">
     <Items>
-        <RadzenRadioButtonListItem Text="Ascending" Value="1" />
-        <RadzenRadioButtonListItem Text="Descending" Value="2" />
+        <RadzenRadioButtonListItem Text="Ascending" Value="1"/>
+        <RadzenRadioButtonListItem Text="Descending" Value="2"/>
     </Items>
 </RadzenRadioButtonList>
 <RadzenButton Click="OnSearch">Search</RadzenButton>
 
 <RadzenDataGrid TItem="UserDto" Data="UsersOnPage" ColumnWidth="300px"
                 AllowColumnResize="true" AllowAlternatingRows="false">
+    <EmptyTemplate>
+        <NoResultsInGridComponent></NoResultsInGridComponent>
+    </EmptyTemplate>
     <Columns>
-        <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="Username" Width="120px" />
+        <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="Username" Width="120px"/>
         <RadzenDataGridColumn TItem="UserDto" Property="FirstName" Title="First name" Frozen="true" Width="160px"/>
         <RadzenDataGridColumn TItem="UserDto" Property="LastName" Title="Last name" Width="160px"/>
         <RadzenDataGridColumn TItem="UserDto" Property="PhoneNumber" Title="Phone number" Width="200px"/>
