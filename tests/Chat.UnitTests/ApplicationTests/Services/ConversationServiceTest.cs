@@ -110,6 +110,92 @@ public sealed class ConversationServiceTest
         result.Type.Should()!.Be(createdGroup.Type);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
     }
+    
+    [Fact]
+    public async Task CreateOrGetDialogAsync_ReturnsDialog_WhenDialogAlreadyExists()
+    {
+        // Arrange.
+        var creator = TestDataGenerator.GenerateUser();
+        var interlocutor = TestDataGenerator.GenerateUser();
+        var newDialogDto = new NewDialogDto { CreatorId = Id, InterlocutorUserName = interlocutor.UserName! };
+        var existingDialog = new Conversation
+        {
+            Type = ConversationType.Dialog, Members = new List<User> { creator, interlocutor }, Title = Title, Id = Id
+        };
+        _userServiceMock.Setup(x => x.GetUserByIdAsync(newDialogDto.CreatorId)).ReturnsAsync(creator);
+        _userServiceMock.Setup(x => x.GetUserByNameAsync(interlocutor.UserName!)).ReturnsAsync(interlocutor);
+        _conversationsRepositoryMock.Setup(x => x.FindAllAsync(It.IsAny<Expression<Func<Conversation, bool>>>()))
+                                    .ReturnsAsync(new List<Conversation> { existingDialog });
+        // Act.
+        var result = await _sut.CreateOrGetDialogAsync(newDialogDto);
+
+        // Assert.
+        result.Should()!.NotBeNull();
+        result.Id.Should()!.Be(existingDialog.Id);
+        result.Title.Should()!.Be(existingDialog.Title);
+        result.Type.Should()!.Be(existingDialog.Type);
+    }
+    
+    [Fact]
+    public async Task CreateOrGetDialogAsync_ReturnsCreatedDialog_WhenDialogDoesntExist()
+    {
+        // Arrange.
+        var creator = TestDataGenerator.GenerateUser();
+        var interlocutor = TestDataGenerator.GenerateUser();
+        var newDialogDto = new NewDialogDto { CreatorId = Id, InterlocutorUserName = interlocutor.UserName! };
+        var createdDialog = new Conversation
+        {
+            Type = ConversationType.Dialog, Members = new List<User> { creator, interlocutor }, Title = Title, Id = Id
+        };
+        _userServiceMock.Setup(x => x.GetUserByIdAsync(newDialogDto.CreatorId)).ReturnsAsync(creator);
+        _userServiceMock.Setup(x => x.GetUserByNameAsync(interlocutor.UserName!)).ReturnsAsync(interlocutor);
+        _conversationsRepositoryMock.Setup(x => x.FindAllAsync(It.IsAny<Expression<Func<Conversation, bool>>>()))
+                                    .ReturnsAsync(new List<Conversation>());
+        _conversationsRepositoryMock.Setup(x => x.AddAsync(It.IsAny<Conversation>()))
+                                    .ReturnsAsync(createdDialog);
+        // Act.
+        var result = await _sut.CreateOrGetDialogAsync(newDialogDto);
+
+        // Assert.
+        result.Should()!.NotBeNull();
+        result.Id.Should()!.Be(createdDialog.Id);
+        result.Title.Should()!.Be(createdDialog.Title);
+        result.Type.Should()!.Be(createdDialog.Type);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+    }
+
+    [Fact]
+    public void RemoveUserFromConversationAsync_ThrowsEntityNotFoundException_WhenUserNotFound()
+    {
+        // Arrange.
+        _participantsRepositoryMock
+            .Setup(x => x.FindAllAsync(It.IsAny<Expression<Func<ConversationParticipants, bool>>>()))
+            .ReturnsAsync(new List<ConversationParticipants>());
+        // Act.
+        var tryRemoveUserFromConversation = async () => await _sut.RemoveUserFromConversationAsync(Id, Id);
+        
+        // Assert.
+        tryRemoveUserFromConversation.Should()!.ThrowAsync<EntityNotFoundException>();
+    }
+
+    [Fact]
+    public async Task RemoveUserFromConversationAsync_RemovesUser_WhenUserFound()
+    {
+        // Arrange.
+        const int conversationId = 3;
+        var user = new ConversationParticipants { Id = Id, ConversationId = conversationId };
+        _participantsRepositoryMock
+            .Setup(x => x.FindAllAsync(It.IsAny<Expression<Func<ConversationParticipants, bool>>>()))
+            .ReturnsAsync(new List<ConversationParticipants> { user });
+        _participantsRepositoryMock.Setup(x => x.RemoveAsync(Id)).ReturnsAsync(true);
+        
+        // Act.
+        var result = await _sut.RemoveUserFromConversationAsync(conversationId, Id);
+
+        // Assert.
+        result.Should()!.BeTrue();
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+    }
 
     [Fact]
     public void GetConversationByIdAsync_ThrowsEntityNotFoundException_WhenInvalidId()

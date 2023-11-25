@@ -129,8 +129,7 @@ public sealed class ConversationService : IConversationService
 
     public async Task<bool> RemoveUserFromConversationAsync(int conversationId, int userId)
     {
-        var repository = _unitOfWork.GetRepository<ConversationParticipants, int>();
-        var conversationMember = (await repository
+        var conversationMember = (await _participantsRepository
                 .FindAllAsync(x => x.ConversationId == conversationId && x.UserId == userId))
                 .FirstOrDefault();
         if (conversationMember is null)
@@ -138,7 +137,7 @@ public sealed class ConversationService : IConversationService
             throw new EntityNotFoundException("Conversation member");
         }
 
-        var isSuccessfullyRemoved = await repository.RemoveAsync(conversationMember.Id);
+        var isSuccessfullyRemoved = await _participantsRepository.RemoveAsync(conversationMember.Id);
         await _unitOfWork.SaveChangesAsync();
 
         return isSuccessfullyRemoved;
