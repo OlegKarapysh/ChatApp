@@ -24,4 +24,6 @@ public static class TestDataGenerator
                .RuleFor(x => x.PhoneNumber, f => f.Phone!.PhoneNumber()!)!
                .RuleFor(x => x.CreatedAt, f => DefaultDate)!.Generate(count)!;
     }
+
+    public static User GenerateUser() => GenerateUsers(count: 1).First();
 }

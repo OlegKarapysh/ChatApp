@@ -1,11 +1,10 @@
-﻿using Chat.Domain.Enums;
-
-namespace Chat.UnitTests.ApplicationTests.Services;
+﻿namespace Chat.UnitTests.ApplicationTests.Services;
 
 public sealed class ConversationServiceTest
 {
-    private const string UserName = "username";
     private const int Id = 1;
+    private const string Title = "title1";
+    private const string UserName = "username";
     private readonly IConversationService _sut;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
     private readonly Mock<IUserService> _userServiceMock = new();
@@ -60,6 +59,56 @@ public sealed class ConversationServiceTest
         result.Conversations.Should()!.NotBeNull().And.BeEquivalentTo(expectedConversationsPage.Conversations!,
             o => o.WithStrictOrdering()!.Excluding(x => x.CreatedAt)!.Excluding(x => x.UpdatedAt));
         result.PageInfo.Should()!.NotBeNull().And.BeEquivalentTo(expectedConversationsPage.PageInfo);
+    }
+
+    [Fact]
+    public async Task CreateOrGetGroupChatAsync_ReturnsGroup_WhenGroupAlreadyExists()
+    {
+        // Arrange.
+        var newGroupDto = new NewGroupChatDto { CreatorId = Id, Title = Title };
+        var creator = TestDataGenerator.GenerateUser();
+        var existingGroup = new Conversation
+        {
+            Type = ConversationType.Group, Members = new List<User> { creator }, Title = Title, Id = Id
+        };
+        _userServiceMock.Setup(x => x.GetUserByIdAsync(newGroupDto.CreatorId)).ReturnsAsync(creator);
+        _conversationsRepositoryMock.Setup(x => x.FindAllAsync(It.IsAny<Expression<Func<Conversation, bool>>>()))
+                                    .ReturnsAsync(new List<Conversation> { existingGroup });
+        // Act.
+        var result = await _sut.CreateOrGetGroupChatAsync(newGroupDto);
+
+        // Assert.
+        result.Should()!.NotBeNull();
+        result.Id.Should()!.Be(existingGroup.Id);
+        result.Title.Should()!.Be(existingGroup.Title);
+        result.Type.Should()!.Be(existingGroup.Type);
+    }
+    
+    [Fact]
+    public async Task CreateOrGetGroupChatAsync_ReturnsCreatedGroup_WhenGroupDoesntExist()
+    {
+        // Arrange.
+        var newGroupDto = new NewGroupChatDto { CreatorId = Id, Title = Title };
+        var creator = TestDataGenerator.GenerateUser();
+        var createdGroupTitle = $"new {Title}";
+        var createdGroup = new Conversation
+        {
+            Type = ConversationType.Group, Members = new List<User> { creator }, Title = createdGroupTitle, Id = Id
+        };
+        _userServiceMock.Setup(x => x.GetUserByIdAsync(newGroupDto.CreatorId)).ReturnsAsync(creator);
+        _conversationsRepositoryMock.Setup(x => x.FindAllAsync(It.IsAny<Expression<Func<Conversation, bool>>>()))
+                                    .ReturnsAsync(new List<Conversation>());
+        _conversationsRepositoryMock.Setup(x => x.AddAsync(It.IsAny<Conversation>()))
+                                    .ReturnsAsync(createdGroup);
+        // Act.
+        var result = await _sut.CreateOrGetGroupChatAsync(newGroupDto);
+
+        // Assert.
+        result.Should()!.NotBeNull();
+        result.Id.Should()!.Be(createdGroup.Id);
+        result.Title.Should()!.Be(createdGroup.Title);
+        result.Type.Should()!.Be(createdGroup.Type);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
     }
 
     [Fact]

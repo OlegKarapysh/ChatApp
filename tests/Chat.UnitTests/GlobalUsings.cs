@@ -28,6 +28,8 @@ global using Chat.Domain.DTOs.Users;
 global using Chat.Domain.Web;
 global using Chat.UnitTests.TestHelpers;
 global using Chat.Application.Extensions;
+global using Chat.Application.Mappings;
+global using Chat.Domain.Enums;
 
 
 

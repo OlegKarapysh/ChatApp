@@ -1,7 +1,4 @@
-﻿using Chat.Application.Mappings;
-using Chat.Domain.Enums;
-
-namespace Chat.UnitTests.ApplicationTests.Services;
+﻿namespace Chat.UnitTests.ApplicationTests.Services;
 
 public sealed class UserServiceTest
 {
@@ -71,7 +68,7 @@ public sealed class UserServiceTest
     public async Task UpdateUserAsync_UpdatesUser_WhenValidDto()
     {
         // Arrange.
-        var user = TestDataGenerator.GenerateUsers(1).First();
+        var user = TestDataGenerator.GenerateUser();
         var userDto = user.MapToDto();
         var expectedCallSequence = new List<string> { nameof(IRepository<User, int>.Update), nameof(IUnitOfWork.SaveChangesAsync) };
         var actualCallSequence = new List<string>();
@@ -107,14 +104,14 @@ public sealed class UserServiceTest
         
         // Assert.
         result.Should()!.BeOfType<UsersPageDto>()!.And!.NotBeNull();
-        result.Users.Should()!.NotBeNull().And!
+        result.Users!.Should()!.NotBeNull()!.And!
               .BeEquivalentTo(expectedUsersPage.Users!, o => o.WithStrictOrdering());
-        result.PageInfo.Should()!.NotBeNull().And.BeEquivalentTo(expectedUsersPage.PageInfo);
+        result.PageInfo!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedUsersPage.PageInfo);
     }
 
     private (List<User> Users, UsersPageDto UsersPage) GetTestUsersWithUsersPage()
     {
-        return (new()
+        return (new List<User>
         {
             new() { UserName = "username01" },
             new() { UserName = "username09" },
@@ -127,7 +124,7 @@ public sealed class UserServiceTest
             new() { UserName = "username05" },
             new() { UserName = "username10" },
             new() { UserName = "username11" },
-        }, new()
+        }, new UsersPageDto
         {
             Users = new UserDto[]
             {

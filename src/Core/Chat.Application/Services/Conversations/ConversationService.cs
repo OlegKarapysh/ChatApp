@@ -54,7 +54,6 @@ public sealed class ConversationService : IConversationService
     public async Task<ConversationDto> CreateOrGetGroupChatAsync(NewGroupChatDto newGroupChatData)
     {
         var creator = await _userService.GetUserByIdAsync(newGroupChatData.CreatorId);
-
         var existingGroupChat = (await _conversationsRepository.FindAllAsync(conversation =>
                 conversation.Type == ConversationType.Group &&
                 conversation.Members.Contains(creator) &&
