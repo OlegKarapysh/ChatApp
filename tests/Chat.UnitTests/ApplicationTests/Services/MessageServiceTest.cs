@@ -19,6 +19,31 @@ public sealed class MessageServiceTest
     }
 
     [Fact]
+    public async Task SearchMessagesPagedAsync_ReturnsMessagesPage_WhenValidPagedSearchDto()
+    {
+        // Arrange.
+        var (messages, expectedMessagesPage) = GetTestMessagesWithMessagesPage();
+        var pageSearchDto = new PagedSearchDto
+        {
+            Page = expectedMessagesPage.PageInfo!.CurrentPage, SearchFilter = "filter",
+            SortingProperty = nameof(Message.TextContent), SortingOrder = SortingOrder.Descending
+        };
+        _messageRepositoryMock.Setup(x => x.SearchWhere<MessageBasicInfoDto>(pageSearchDto.SearchFilter))
+                           .Returns(messages.AsQueryable());
+        // Act.
+        var result = await _sut.SearchMessagesPagedAsync(pageSearchDto);
+        
+        // Assert.
+        result.Should()!.BeOfType<MessagesPageDto>()!.And!.NotBeNull();
+        result.Messages!.Should()!.NotBeNull()!.And!
+              .BeEquivalentTo(expectedMessagesPage.Messages!,
+                  o => o.WithStrictOrdering()!
+                        .Excluding(x => x.CreatedAt)!
+                        .Excluding(x => x.UpdatedAt));
+        result.PageInfo!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedMessagesPage.PageInfo);
+    }
+
+    [Fact]
     public async Task CreateMessageAsync_CreatesMessageAndReturnsMessageDto_WhenValidDto()
     {
         // Arrange.
@@ -46,5 +71,34 @@ public sealed class MessageServiceTest
         result.SenderId.Should()!.Be(messageDto.SenderId);
         result.TextContent.Should()!.Be(messageDto.TextContent);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+    }
+    
+    private (List<Message> Messages, MessagesPageDto MessagesPage) GetTestMessagesWithMessagesPage()
+    {
+        return (new List<Message>
+        {
+            new() { TextContent = "text01" },
+            new() { TextContent = "text09" },
+            new() { TextContent = "text02" },
+            new() { TextContent = "text08" },
+            new() { TextContent = "text03" },
+            new() { TextContent = "text07" },
+            new() { TextContent = "text04" },
+            new() { TextContent = "text06" },
+            new() { TextContent = "text05" },
+            new() { TextContent = "text10" },
+            new() { TextContent = "text11" },
+        }, new MessagesPageDto
+        {
+            Messages = new MessageBasicInfoDto[]
+            {
+                new() { TextContent = "text06" },
+                new() { TextContent = "text05" },
+                new() { TextContent = "text04" },
+                new() { TextContent = "text03" },
+                new() { TextContent = "text02" },
+            },
+            PageInfo = new PageInfo { CurrentPage = 2, PageSize = PageInfo.DefaultPageSize, TotalCount = 11, TotalPages = 3 }
+        });
     }
 }
