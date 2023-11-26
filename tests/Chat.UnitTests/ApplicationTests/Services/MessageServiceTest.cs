@@ -1,4 +1,5 @@
 ﻿using Chat.Domain.DTOs.Messages;
+using MockQueryable.Moq;
 
 namespace Chat.UnitTests.ApplicationTests.Services;
 
@@ -41,6 +42,66 @@ public sealed class MessageServiceTest
                         .Excluding(x => x.CreatedAt)!
                         .Excluding(x => x.UpdatedAt));
         result.PageInfo!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedMessagesPage.PageInfo);
+    }
+
+    [Fact]
+    public async Task GetAllConversationMessagesAsync_ReturnsConversationMessages()
+    {
+        // Arrange.
+        var conversationMessages = TestDataGenerator.GenerateMessagesForDialog(10, Id);
+        var allMessages = TestDataGenerator.GenerateMessagesForDialog(10, Id + 1)
+                                           .Concat(conversationMessages);
+        var expectedMessages = conversationMessages.Select(x => x.MapToDtoWithSender());
+        _messageRepositoryMock.Setup(x => x.AsQueryable()).Returns(allMessages.BuildMock()!);
+        
+        // Act.
+        var result = await _sut.GetAllConversationMessagesAsync(Id);
+
+        // Assert.
+        result.Should()!.BeEquivalentTo(expectedMessages);
+    }
+    
+    [Fact]
+    public async Task GetAllConversationMessagesAsync_ReturnsEmptyList_WhenNoMessagesInConversation()
+    {
+        // Arrange.
+        var allMessages = TestDataGenerator.GenerateMessagesForDialog(10, Id + 1);
+        _messageRepositoryMock.Setup(x => x.AsQueryable()).Returns(allMessages.BuildMock()!);
+        
+        // Act.
+        var result = await _sut.GetAllConversationMessagesAsync(Id);
+
+        // Assert.
+        result.Should()!.BeEmpty();
+    }
+
+    [Fact]
+    public void UpdateMessageAsync_ThrowsEntityNotFoundException_WhenMessageNotFound()
+    {
+        // Arrange.
+        _messageRepositoryMock.Setup(x => x.GetByIdAsync(Id)).ReturnsAsync((Message)null!);
+        
+        // Act.
+        var tryUpdateMessage = async () => await _sut.UpdateMessageAsync(new MessageDto(), Id);
+        
+        // Assert.
+        tryUpdateMessage.Should()!.ThrowAsync<EntityNotFoundException>();
+    }
+
+    [Fact]
+    public void UpdateMessageAsync_ThrowsInvalidMessageUpdaterException_WhenInvalidUpdater()
+    {
+        // Arrange.
+        const int invalidUpdaterId = Id + 1;
+        var message = TestDataGenerator.GenerateMessage(Id);
+        var messageDto = message.MapToDto();
+        _messageRepositoryMock.Setup(x => x.GetByIdAsync(Id)).ReturnsAsync(message);
+
+        // Act.
+        var tryUpdateMessage = async () => await _sut.UpdateMessageAsync(messageDto, invalidUpdaterId);
+
+        // Assert.
+        tryUpdateMessage.Should()!.ThrowAsync<InvalidMessageUpdaterException>();
     }
 
     [Fact]
