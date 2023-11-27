@@ -21,4 +21,8 @@
     <ProjectReference Include="..\..\Infrastructure\Chat.Persistence\Chat.Persistence.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Chat.IntegrationTests" />
+  </ItemGroup>
+
 </Project>

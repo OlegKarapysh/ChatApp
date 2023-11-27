@@ -12,10 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddSignalR(options =>
 {
-    options.MaximumReceiveMessageSize = long.MaxValue;
+    options.MaximumReceiveMessageSize = int.MaxValue;
     options.EnableDetailedErrors = true;
 });
-builder.Services.AddDbContext<ChatDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ChatDb")));
+builder.Services.AddSqlServer<ChatDbContext>(builder.Configuration.GetConnectionString("ChatDb"));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddIdentity<User, IdentityRole<int>>()
