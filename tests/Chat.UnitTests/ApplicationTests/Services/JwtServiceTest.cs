@@ -1,7 +1,4 @@
-﻿using System.Text;
-using Microsoft.IdentityModel.Tokens;
-
-namespace Chat.UnitTests.ApplicationTests.Services;
+﻿namespace Chat.UnitTests.ApplicationTests.Services;
 
 public sealed class JwtServiceTest
 {

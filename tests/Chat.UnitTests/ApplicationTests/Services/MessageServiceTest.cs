@@ -1,7 +1,4 @@
-﻿using Chat.Domain.DTOs.Messages;
-using MockQueryable.Moq;
-
-namespace Chat.UnitTests.ApplicationTests.Services;
+﻿namespace Chat.UnitTests.ApplicationTests.Services;
 
 public sealed class MessageServiceTest
 {

@@ -1,7 +1,4 @@
-﻿using Chat.Persistence.Contexts;
-using Microsoft.EntityFrameworkCore;
-
-namespace Chat.UnitTests.TestHelpers;
+﻿namespace Chat.UnitTests.TestHelpers;
 
 internal static class DbSeedHelper
 {

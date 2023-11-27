@@ -56,9 +56,9 @@ public sealed class ConversationServiceTest
         
         // Assert.
         result.Should()!.BeOfType<ConversationsPageDto>()!.And!.NotBeNull();
-        result.Conversations.Should()!.NotBeNull().And.BeEquivalentTo(expectedConversationsPage.Conversations!,
+        result.Conversations!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedConversationsPage.Conversations!,
             o => o.WithStrictOrdering()!.Excluding(x => x.CreatedAt)!.Excluding(x => x.UpdatedAt));
-        result.PageInfo.Should()!.NotBeNull().And.BeEquivalentTo(expectedConversationsPage.PageInfo);
+        result.PageInfo!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedConversationsPage.PageInfo);
     }
 
     [Fact]

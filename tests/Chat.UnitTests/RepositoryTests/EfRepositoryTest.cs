@@ -1,18 +1,11 @@
-﻿using System.Data.Common;
-using Chat.Domain.Entities.Conversations;
-using Chat.Persistence.Contexts;
-using Chat.Persistence.Repositories;
-using Chat.UnitTests.TestHelpers;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-
-namespace Chat.UnitTests.RepositoryTests;
+﻿namespace Chat.UnitTests.RepositoryTests;
 
 public sealed class EfRepositoryTest : IDisposable
 {
-    private EfRepository<Conversation, int>? _sut;
+    private readonly EfRepository<User, int> _sut;
     private readonly DbConnection _connection;
     private readonly DbContextOptions<ChatDbContext> _dbOptions;
+    private readonly ChatDbContext _context;
 
     public EfRepositoryTest()
     {
@@ -20,29 +13,140 @@ public sealed class EfRepositoryTest : IDisposable
         _connection.Open();
         _dbOptions = new DbContextOptionsBuilder<ChatDbContext>().UseSqlite(_connection).Options;
         DbSeedHelper.RecreateAndSeedDb(CreateDbContext());
+        _context = CreateDbContext();
+        _sut = new EfRepository<User, int>(_context);
     }
 
     public ChatDbContext CreateDbContext() => new(_dbOptions);
+
+    public void Dispose()
+    {
+        _connection.Dispose();
+        _context.Dispose();
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ReturnsFoundEntity()
+    {
+        // Arrange.
+        var expectedEntity = (await _sut.GetAllAsync()).First();
+        
+        // Act.
+        var result = await _sut.GetByIdAsync(expectedEntity.Id);
+
+        // Assert.
+        result!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedEntity);
+    }
     
-    public void Dispose() => _connection.Dispose();
+    [Fact]
+    public async Task GetByIdAsync_ReturnsNull_WhenEntityNotFound()
+    {
+        // Arrange.
+        const int invalidId = int.MinValue;
+        
+        // Act.
+        var result = await _sut.GetByIdAsync(invalidId);
+
+        // Assert.
+        result!.Should()!.BeNull();
+    }
     
     [Fact]
     public async Task AddAsync_AddsEntityAndReturnsIt()
     {
         // Arrange.
-        var context = CreateDbContext();
-        _sut = new EfRepository<Conversation, int>(context);
         var expectedCount = (await _sut.GetAllAsync()).Count + 1;
-        var conversation = new Conversation { Title = "title1", Type = ConversationType.Dialog };
+        var entity = TestDataGenerator.GenerateUser();
         
         // Act.
-        var result = await _sut.AddAsync(conversation);
-        context.SaveChanges();
+        var result = await _sut.AddAsync(entity);
+        await _context.SaveChangesAsync();
         var resultCount = (await _sut.GetAllAsync()).Count;
         
         // Assert.
-        result.Title.Should()!.Be(conversation.Title);
-        result.Type.Should()!.Be(conversation.Type);
+        result.Should()!.BeEquivalentTo(entity);
         resultCount.Should()!.Be(expectedCount);
+    }
+
+    [Fact]
+    public async Task RemoveAsync_RemovesEntityAndReturnsTrue_WhenEntityFound()
+    {
+        // Arrange.
+        var context = CreateDbContext();
+        var sut = new EfRepository<ConversationParticipants, int>(context);
+        var all = await sut.GetAllAsync();
+        var expectedCount = all.Count - 1;
+        var existingId = all.First().Id;
+        
+        // Act.
+        var result = await sut.RemoveAsync(existingId);
+        await context.SaveChangesAsync();
+        var resultCount = (await sut.GetAllAsync()).Count;
+
+        // Assert.
+        result.Should()!.BeTrue();
+        resultCount.Should()!.Be(expectedCount);
+    }
+    
+    [Fact]
+    public async Task RemoveAsync_ReturnsFalse_WhenEntityNotFound()
+    {
+        // Arrange.
+        var context = CreateDbContext();
+        var sut = new EfRepository<ConversationParticipants, int>(context);
+        const int invalidId = int.MinValue;
+        var expectedCount = (await sut.GetAllAsync()).Count;
+        
+        // Act.
+        var result = await sut.RemoveAsync(invalidId);
+        await context.SaveChangesAsync();
+        var resultCount = (await sut.GetAllAsync()).Count;
+
+        // Assert.
+        result.Should()!.BeFalse();
+        resultCount.Should()!.Be(expectedCount);
+    }
+
+    [Fact]
+    public async Task Update_ReturnsUpdatedEntity()
+    {
+        // Arrange.
+        var existingEntity = (await _sut.GetAllAsync()).First();
+        existingEntity.FirstName += "updated";
+        existingEntity.LastName += "updated";
+        existingEntity.UserName += "updated";
+        existingEntity.PhoneNumber += "updated";
+        
+        // Act.
+        var result = _sut.Update(existingEntity);
+        await _context.SaveChangesAsync();
+        var foundResult = await _sut.GetByIdAsync(result.Id);
+
+        // Assert.
+        result.Should()!.BeEquivalentTo(existingEntity);
+        foundResult!.Should()!.NotBeNull()!.And!.BeEquivalentTo(existingEntity);
+    }
+
+    [Fact]
+    public async Task FindAllAsync_ReturnsAllEntitiesThatMatchPredicate()
+    {
+        // Arrange.
+        const int minId = 3;
+        
+        // Act.
+        var result = await _sut.FindAllAsync(entity => entity.Id > minId);
+
+        // Assert.
+        result.Should()!.Satisfy(entity => entity.Id > minId);
+    }
+
+    [Fact]
+    public void AsQueryable_ReturnsEntitiesAsQueryable()
+    {
+        // Act.
+        var result = _sut.AsQueryable();
+        
+        // Assert.
+        result.Should()!.BeAssignableTo<IQueryable<User>>();
     }
 }

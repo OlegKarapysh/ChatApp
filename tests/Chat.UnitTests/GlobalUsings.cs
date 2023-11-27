@@ -1,15 +1,21 @@
 global using System.Text.RegularExpressions;
 global using System.Linq.Expressions;
 global using System.Net;
+global using System.Data.Common;
 global using System.Security.Claims;
+global using System.Text;
 global using Xunit;
 global using Moq;
 global using FluentAssertions;
 global using Bogus;
+global using MockQueryable.Moq;
+global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.Extensions.Options;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Identity;
+global using Microsoft.Data.Sqlite;
+global using Microsoft.EntityFrameworkCore;
 global using Chat.WebAPI.Controllers;
 global using Chat.Application.JWT;
 global using Chat.Application.Services.JWT;
@@ -30,6 +36,6 @@ global using Chat.UnitTests.TestHelpers;
 global using Chat.Application.Extensions;
 global using Chat.Application.Mappings;
 global using Chat.Domain.Enums;
-
-
-
+global using Chat.Persistence.Contexts;
+global using Chat.Persistence.Repositories;
+global using Chat.Domain.DTOs.Messages;
