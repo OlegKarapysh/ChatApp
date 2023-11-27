@@ -11,22 +11,23 @@ public static class TestDataGenerator
         Randomizer.Seed = new Random(defaultSeed);
     }
 
-    public static List<Message> GenerateMessagesForDialog(int count, int conversationId)
+    public static List<Message> GenerateMessagesForDialog(int count, int conversationId, string? text = null)
     {
         var interlocutors = GenerateUsers(2);
         return new Faker<Message>()
                .RuleFor(x => x.Id, f => f.IndexFaker)!
-               .RuleFor(x => x.TextContent, f => f.Lorem!.Sentence())!
+               .RuleFor(x => x.TextContent, f => text ?? f.Lorem!.Sentence())!
                .RuleFor(x => x.CreatedAt, _ => DefaultDate)!
                .RuleFor(x => x.UpdatedAt, _ => DefaultDate)!
                .RuleFor(x => x.ConversationId, _ => conversationId)!
                .RuleFor(x => x.Sender, f => f.PickRandom(interlocutors))!
+               .RuleFor(x => x.SenderId, (f, p) => p.Sender!.Id)!
                .Generate(count)!;
     }
 
-    public static Message GenerateMessage(int conversationId)
+    public static Message GenerateMessage(int conversationId, string? text = null)
     {
-        return GenerateMessagesForDialog(count: 1, conversationId).First();
+        return GenerateMessagesForDialog(count: 1, conversationId, text).First();
     }
 
     public static List<User> GenerateUsers(int count)

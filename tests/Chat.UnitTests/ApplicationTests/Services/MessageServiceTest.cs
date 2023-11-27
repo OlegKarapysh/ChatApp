@@ -103,6 +103,43 @@ public sealed class MessageServiceTest
         // Assert.
         tryUpdateMessage.Should()!.ThrowAsync<InvalidMessageUpdaterException>();
     }
+    
+    [Fact]
+    public async Task UpdateMessageAsync_UpdatesMessage_WhenValidDto()
+    {
+        // Arrange.
+        const string oldMessageText = "oldMessage";
+        const string updatedMessageText = "newMessage";
+        var message = TestDataGenerator.GenerateMessage(Id, oldMessageText);
+        var updatedMessage = CopyMessage(message);
+        updatedMessage.TextContent = updatedMessageText;
+        var messageDto = updatedMessage.MapToDto();
+        _messageRepositoryMock.Setup(x => x.GetByIdAsync(message.Id)).ReturnsAsync(message);
+        _messageRepositoryMock.Setup(x => x.Update(
+                                  It.Is<Message>(m => m.TextContent == updatedMessageText && m.SenderId == message.SenderId)))
+                              .Returns(updatedMessage);
+
+        // Act.
+        var result = await _sut.UpdateMessageAsync(messageDto, messageDto.SenderId);
+
+        // Assert.
+        result.Should()!.BeEquivalentTo(messageDto);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteMessageAsync_DeletesMessage_WhenMessageFound()
+    {
+        // Arrange.
+        _messageRepositoryMock.Setup(x => x.RemoveAsync(Id)).ReturnsAsync(true);
+        
+        // Act.
+        var result = await _sut.DeleteMessageAsync(Id);
+
+        // Assert.
+        result.Should()!.BeTrue();
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+    }
 
     [Fact]
     public async Task CreateMessageAsync_CreatesMessageAndReturnsMessageDto_WhenValidDto()
@@ -162,4 +199,16 @@ public sealed class MessageServiceTest
             PageInfo = new PageInfo { CurrentPage = 2, PageSize = PageInfo.DefaultPageSize, TotalCount = 11, TotalPages = 3 }
         });
     }
+
+    private Message CopyMessage(Message message) => new()
+    {
+        Id = message.Id,
+        ConversationId = message.ConversationId,
+        SenderId = message.SenderId,
+        Sender = message.Sender,
+        Conversation = message.Conversation,
+        TextContent = message.TextContent,
+        CreatedAt = message.CreatedAt,
+        UpdatedAt = message.UpdatedAt
+    };
 }
