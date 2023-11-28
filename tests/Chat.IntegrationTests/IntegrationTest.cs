@@ -31,7 +31,7 @@ public class IntegrationTest : IDisposable
         TestAppFactory.Dispose();
     }
 
-    internal async Task RegisterAsync()
+    internal async Task<TokenPairDto> RegisterAsync()
     {
         const string registerRoute = "api/auth/register";
         var registrationResponse = await HttpClient.PostAsJsonAsync(registerRoute, RegisteredUser);
@@ -46,11 +46,11 @@ public class IntegrationTest : IDisposable
             throw new Exception("Couldn't get authentication tokens!");
         }
         
-        var authHeader = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, tokens.AccessToken);
-        HttpClient.DefaultRequestHeaders.Authorization = authHeader;
+        SetAuthorizationHeader(tokens.AccessToken);
+        return tokens;
     }
 
-    internal async Task LoginAsync()
+    internal async Task<TokenPairDto> LoginAsync()
     {
         const string loginRoute = "api/auth/login";
         var loginResponse = await HttpClient.PostAsJsonAsync(loginRoute, LoggedInUser);
@@ -65,7 +65,13 @@ public class IntegrationTest : IDisposable
             throw new Exception("Couldn't get authentication tokens!");
         }
         
-        var authHeader = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, tokens.AccessToken);
+        SetAuthorizationHeader(tokens.AccessToken);
+        return tokens;
+    }
+
+    internal void SetAuthorizationHeader(string jwt)
+    {
+        var authHeader = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, jwt);
         HttpClient.DefaultRequestHeaders.Authorization = authHeader;
     }
 }

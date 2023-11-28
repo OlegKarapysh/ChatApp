@@ -9,6 +9,11 @@ internal sealed class TestDbHelper
         _testAppFactory = testAppFactory;
     }
 
+    internal int CountUsers()
+    {
+        return GetFromDb(x => x.Users.AsNoTracking().Count());
+    }
+
     internal User? GetUserByEmail(string email)
     {
         return GetFromDb(x => x.Users.AsNoTracking().FirstOrDefault(u => u.Email == email));
