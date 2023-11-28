@@ -16,4 +16,5 @@ global using Chat.Domain.DTOs.Authentication;
 global using Chat.Domain.Entities;
 global using Chat.Domain.Enums;
 global using Chat.Domain.Web;
+global using Chat.IntegrationTests.TestHelpers;
 

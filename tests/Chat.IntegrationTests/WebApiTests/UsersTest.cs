@@ -1,6 +1,4 @@
-﻿using FluentAssertions.Execution;
-
-namespace Chat.IntegrationTests.WebApiTests;
+﻿namespace Chat.IntegrationTests.WebApiTests;
 
 [Collection("Sequential")]
 public sealed class UsersTest : IClassFixture<IntegrationTest>
@@ -53,23 +51,27 @@ public sealed class UsersTest : IClassFixture<IntegrationTest>
         }
     }
 
-    [Fact]
-    public async Task SearchUsersPaged_ReturnsUsersPage()
+    [Theory]
+    [InlineData(2, 7, 2, 2, "")]
+    [InlineData(1, 0, 0, 0, "1234123412341234123412342134123423412342342341234129")]
+    [InlineData(1, 1, 1, 1, "Alice")]
+    public async Task SearchUsersPaged_ReturnsCorrectUsersPage(
+        int page, int totalCount, int totalPages, int expectedCount, string search)
     {
         // Arrange.
         await _test.LoginAsync();
         const string route = "api/users/search";
         var expectedPageInfo = new PageInfo
         {
-            CurrentPage = 2,
+            CurrentPage = page,
             PageSize = PageInfo.DefaultPageSize,
-            TotalCount = 7,
-            TotalPages = 2
+            TotalCount = totalCount,
+            TotalPages = totalPages
         };
         var searchDto = new PagedSearchDto
         {
             Page = expectedPageInfo.CurrentPage,
-            SearchFilter = string.Empty,
+            SearchFilter = search,
             SortingProperty = nameof(User.UserName),
             SortingOrder = SortingOrder.Descending
         };
@@ -78,7 +80,6 @@ public sealed class UsersTest : IClassFixture<IntegrationTest>
             $"&{nameof(searchDto.SearchFilter)}={searchDto.SearchFilter}" +
             $"&{nameof(searchDto.SortingProperty)}={searchDto.SortingProperty}" +
             $"&{nameof(searchDto.SortingOrder)}={(int)searchDto.SortingOrder}";
-        const int expectedCount = 2;
 
         // Act.
         var response = await _test.HttpClient.GetAsync(routeWithParams);
@@ -93,15 +94,5 @@ public sealed class UsersTest : IClassFixture<IntegrationTest>
             result.Users!.Length.Should()!.Be(expectedCount);
             result.Users!.Should()!.BeEquivalentTo(result.Users.OrderByDescending(x => x.UserName));
         }
-    }
-
-    [Fact]
-    public async Task SearchUsersPaged_ReturnsEmptyPage_WhenNoUserMatchesSearch()
-    {
-        // Arrange.
-        
-        // Act.
-
-        // Assert.
     }
 }
