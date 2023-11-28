@@ -64,8 +64,11 @@ public sealed class EfRepositoryTest : IDisposable
         var resultCount = (await _sut.GetAllAsync()).Count;
         
         // Assert.
-        result.Should()!.BeEquivalentTo(entity);
-        resultCount.Should()!.Be(expectedCount);
+        using (new AssertionScope())
+        {
+            result.Should()!.BeEquivalentTo(entity);
+            resultCount.Should()!.Be(expectedCount);
+        }
     }
 
     [Fact]
@@ -84,8 +87,11 @@ public sealed class EfRepositoryTest : IDisposable
         var resultCount = (await sut.GetAllAsync()).Count;
 
         // Assert.
-        result.Should()!.BeTrue();
-        resultCount.Should()!.Be(expectedCount);
+        using (new AssertionScope())
+        {
+            result.Should()!.BeTrue();
+            resultCount.Should()!.Be(expectedCount); 
+        }
     }
     
     [Fact]
@@ -103,8 +109,11 @@ public sealed class EfRepositoryTest : IDisposable
         var resultCount = (await sut.GetAllAsync()).Count;
 
         // Assert.
-        result.Should()!.BeFalse();
-        resultCount.Should()!.Be(expectedCount);
+        using (new AssertionScope())
+        {
+            result.Should()!.BeFalse();
+            resultCount.Should()!.Be(expectedCount);
+        }
     }
 
     [Fact]
@@ -123,8 +132,11 @@ public sealed class EfRepositoryTest : IDisposable
         var foundResult = await _sut.GetByIdAsync(result.Id);
 
         // Assert.
-        result.Should()!.BeEquivalentTo(existingEntity);
-        foundResult!.Should()!.NotBeNull()!.And!.BeEquivalentTo(existingEntity);
+        using (new AssertionScope())
+        {
+            result.Should()!.BeEquivalentTo(existingEntity);
+            foundResult!.Should()!.NotBeNull()!.And!.BeEquivalentTo(existingEntity);
+        }
     }
 
     [Fact]
