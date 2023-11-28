@@ -41,9 +41,12 @@ public sealed class AuthServiceTest
         await _sut.ChangePasswordAsync(changePasswordDto, id);
 
         // Assert.
-        _userManagerMock.Verify(x => x.FindByIdAsync(id.ToString()), Times.Once);
-        _userManagerMock.Verify(x => 
-            x.ChangePasswordAsync(user, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword), Times.Once);
+        using (new AssertionScope())
+        {
+            _userManagerMock.Verify(x => x.FindByIdAsync(id.ToString()), Times.Once);
+            _userManagerMock.Verify(x => x.ChangePasswordAsync(
+                user, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword), Times.Once);
+        }
     }
 
     [Fact]
@@ -131,8 +134,11 @@ public sealed class AuthServiceTest
         var result = await _sut.LoginAsync(loginDto);
         
         // Assert.
-        result.Should()!.BeEquivalentTo(expectedTokenPair);
-        _userManagerMock.Verify(x => x.UpdateAsync(user), Times.Once);
+        using (new AssertionScope())
+        {
+            result.Should()!.BeEquivalentTo(expectedTokenPair);
+            _userManagerMock.Verify(x => x.UpdateAsync(user), Times.Once);
+        }
     }
 
     [Fact]

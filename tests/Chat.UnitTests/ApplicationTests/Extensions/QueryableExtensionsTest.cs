@@ -23,7 +23,10 @@ public sealed class QueryableExtensionsTest
         var result = allConversations.SearchWhere<Conversation, ConversationBasicInfoDto>(filter);
 
         // Assert.
-        result.Count().Should()!.Be(expectedCount);
-        result.Should()!.BeAssignableTo<IQueryable<Conversation>>();
+        using (new AssertionScope())
+        {
+            result.Count().Should()!.Be(expectedCount);
+            result.Should()!.BeAssignableTo<IQueryable<Conversation>>();
+        }
     }
 }

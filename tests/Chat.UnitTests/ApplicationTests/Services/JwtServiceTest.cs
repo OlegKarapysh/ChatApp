@@ -81,7 +81,10 @@ public sealed class JwtServiceTest
         var resultId = _sut.GetIdClaim(result);
         
         // Assert.
-        result.Should()!.NotBeNullOrWhiteSpace()!.And!.MatchRegex(jwtRegex);
-        resultId.Should()!.Be(id);
+        using (new AssertionScope())
+        {
+            result.Should()!.NotBeNullOrWhiteSpace()!.And!.MatchRegex(jwtRegex);
+            resultId.Should()!.Be(id);
+        }
     }
 }

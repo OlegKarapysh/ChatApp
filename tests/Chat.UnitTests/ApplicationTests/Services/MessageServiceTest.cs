@@ -32,13 +32,16 @@ public sealed class MessageServiceTest
         var result = await _sut.SearchMessagesPagedAsync(pageSearchDto);
         
         // Assert.
-        result.Should()!.BeOfType<MessagesPageDto>()!.And!.NotBeNull();
-        result.Messages!.Should()!.NotBeNull()!.And!
-              .BeEquivalentTo(expectedMessagesPage.Messages!,
-                  o => o.WithStrictOrdering()!
-                        .Excluding(x => x.CreatedAt)!
-                        .Excluding(x => x.UpdatedAt));
-        result.PageInfo!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedMessagesPage.PageInfo);
+        using (new AssertionScope())
+        {
+            result.Should()!.BeOfType<MessagesPageDto>()!.And!.NotBeNull();
+            result.Messages!.Should()!.NotBeNull()!.And!
+                  .BeEquivalentTo(expectedMessagesPage.Messages!,
+                      o => o.WithStrictOrdering()!
+                            .Excluding(x => x.CreatedAt)!
+                            .Excluding(x => x.UpdatedAt));
+            result.PageInfo!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedMessagesPage.PageInfo);
+        }
     }
 
     [Fact]
@@ -120,8 +123,11 @@ public sealed class MessageServiceTest
         var result = await _sut.UpdateMessageAsync(messageDto, messageDto.SenderId);
 
         // Assert.
-        result.Should()!.BeEquivalentTo(messageDto);
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        using (new AssertionScope())
+        {
+            result.Should()!.BeEquivalentTo(messageDto);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
     }
 
     [Fact]
@@ -134,8 +140,11 @@ public sealed class MessageServiceTest
         var result = await _sut.DeleteMessageAsync(Id);
 
         // Assert.
-        result.Should()!.BeTrue();
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        using (new AssertionScope())
+        {
+            result.Should()!.BeTrue();
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
     }
 
     [Fact]
@@ -161,11 +170,14 @@ public sealed class MessageServiceTest
         var result = await _sut.CreateMessageAsync(messageDto);
 
         // Assert.
-        result.UserName.Should()!.Be(sender.UserName);
-        result.ConversationId.Should()!.Be(messageDto.ConversationId);
-        result.SenderId.Should()!.Be(messageDto.SenderId);
-        result.TextContent.Should()!.Be(messageDto.TextContent);
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        using (new AssertionScope())
+        {
+            result.UserName.Should()!.Be(sender.UserName);
+            result.ConversationId.Should()!.Be(messageDto.ConversationId);
+            result.SenderId.Should()!.Be(messageDto.SenderId);
+            result.TextContent.Should()!.Be(messageDto.TextContent);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
     }
     
     private (List<Message> Messages, MessagesPageDto MessagesPage) GetTestMessagesWithMessagesPage()

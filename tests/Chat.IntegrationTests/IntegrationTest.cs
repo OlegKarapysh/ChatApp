@@ -1,33 +1,34 @@
 ﻿namespace Chat.IntegrationTests;
 
-public sealed class IntegrationTest : IDisposable
+public class IntegrationTest : IDisposable
 {
     internal readonly HttpClient HttpClient;
-    internal readonly LoginDto LoggedInUser = new()
-    {
-        Email = "oleh@a.a",
-        Password = "asdfA1!"
-    };
-    internal readonly RegistrationDto RegisteredUser = new()
-    {
-        UserName = "DefaultUser",
-        Email = "email@gmail.com",
-        Password = "somethingA1!",
-        RepeatPassword = "somethingA1!"
-    };
-    private readonly TestApplicationFactory _testAppFactory;
-
+    internal readonly TestApplicationFactory TestAppFactory;
+    internal readonly LoginDto LoggedInUser;
+    internal readonly RegistrationDto RegisteredUser;
+    
     public IntegrationTest()
     {
-        _testAppFactory = new TestApplicationFactory();
-        HttpClient = _testAppFactory.CreateClient();
-        File.AppendAllText(@"C:\Users\sebas\OneDrive\Desktop\Books\a.txt", "ctor\n");
+        TestAppFactory = new TestApplicationFactory();
+        HttpClient = TestAppFactory.CreateClient();
+        LoggedInUser = new()
+        {
+            Email = "oleh@a.a",
+            Password = "asdfA1!"
+        };
+        RegisteredUser = new()
+        {
+            UserName = "DefaultUser",
+            Email = "email@gmail.com",
+            Password = "somethingA1!",
+            RepeatPassword = "somethingA1!"
+        };
     }
 
     public void Dispose()
     {
         HttpClient.Dispose();
-        _testAppFactory.Dispose();
+        TestAppFactory.Dispose();
     }
 
     internal async Task RegisterAsync()

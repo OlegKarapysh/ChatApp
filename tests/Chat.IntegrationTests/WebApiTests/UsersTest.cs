@@ -1,5 +1,8 @@
-﻿namespace Chat.IntegrationTests.WebApiTests;
+﻿using FluentAssertions.Execution;
 
+namespace Chat.IntegrationTests.WebApiTests;
+
+[Collection("Sequential")]
 public sealed class UsersTest : IClassFixture<IntegrationTest>
 {
     private readonly IntegrationTest _test;
@@ -13,7 +16,7 @@ public sealed class UsersTest : IClassFixture<IntegrationTest>
     public async Task GetAllUsers_ReturnsAllUsers()
     {
         // Arrange.
-        await _test.RegisterAsync();
+        await _test.LoginAsync();
         const string route = "api/users/all";
         
         // Act.
@@ -21,9 +24,12 @@ public sealed class UsersTest : IClassFixture<IntegrationTest>
         var result = await response.Content.ReadFromJsonAsync<IList<UserDto>>();
         
         // Assert.
-        response.EnsureSuccessStatusCode();
-        result!.Should()!.NotBeNull();
-        result!.Count.Should()!.BeGreaterOrEqualTo(1);
+        using (new AssertionScope())
+        {
+            response.EnsureSuccessStatusCode();
+            result!.Should()!.NotBeNull();
+            result!.Count.Should()!.BeGreaterOrEqualTo(1);
+        }
     }
 
     [Fact]
@@ -32,16 +38,19 @@ public sealed class UsersTest : IClassFixture<IntegrationTest>
         // Arrange.
         await _test.LoginAsync();
         var expectedEmail = _test.LoggedInUser.Email;
-        const string route = "api/users/";
+        const string route = "api/users";
 
         // Act.
         var response = await _test.HttpClient.GetAsync(route);
         var result = await response.Content.ReadFromJsonAsync<UserDto>();
 
         // Assert.
-        response.EnsureSuccessStatusCode();
-        result!.Should()!.NotBeNull();
-        result!.Email.Should()!.Be(expectedEmail);
+        using (new AssertionScope())
+        {
+            response.EnsureSuccessStatusCode();
+            result!.Should()!.NotBeNull();
+            result!.Email.Should()!.Be(expectedEmail);
+        }
     }
 
     [Fact]
@@ -76,10 +85,23 @@ public sealed class UsersTest : IClassFixture<IntegrationTest>
         var result = await response.Content.ReadFromJsonAsync<UsersPageDto>();
 
         // Assert.
-        response.EnsureSuccessStatusCode();
-        result!.Should()!.NotBeNull();
-        result!.PageInfo!.Should()!.BeEquivalentTo(expectedPageInfo);
-        result.Users!.Length.Should()!.Be(expectedCount);
-        result.Users!.Should()!.BeEquivalentTo(result.Users.OrderByDescending(x => x.UserName));
+        using (new AssertionScope())
+        {
+            response.EnsureSuccessStatusCode();
+            result!.Should()!.NotBeNull();
+            result!.PageInfo!.Should()!.BeEquivalentTo(expectedPageInfo);
+            result.Users!.Length.Should()!.Be(expectedCount);
+            result.Users!.Should()!.BeEquivalentTo(result.Users.OrderByDescending(x => x.UserName));
+        }
+    }
+
+    [Fact]
+    public async Task SearchUsersPaged_ReturnsEmptyPage_WhenNoUserMatchesSearch()
+    {
+        // Arrange.
+        
+        // Act.
+
+        // Assert.
     }
 }
