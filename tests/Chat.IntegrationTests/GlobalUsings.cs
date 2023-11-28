@@ -12,4 +12,7 @@ global using Chat.Persistence.Contexts;
 global using Chat.Domain.DTOs.Users;
 global using Chat.Application.RequestExceptions;
 global using Chat.Domain.DTOs.Authentication;
+global using Chat.Domain.Entities;
+global using Chat.Domain.Enums;
+global using Chat.Domain.Web;
 
