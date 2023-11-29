@@ -50,4 +50,38 @@ public sealed class AuthTest : IClassFixture<IntegrationTest>
             currentUserAgain!.Should()!.BeEquivalentTo(currentUser);
         }
     }
+
+    [Fact]
+    public async Task LoginFlow_LogsInUserAndAllowsToChangePasswordAndTokens()
+    {
+        // Arrange.
+        var newPassword = _test.LoggedInUser.Password + "new";
+        var changePasswordDto = new ChangePasswordDto
+        {
+            CurrentPassword = _test.LoggedInUser.Password,
+            NewPassword = newPassword, RepeatNewPassword = newPassword
+        };
+
+        // Act.
+        var tokens = await _test.LoginAsync();
+        var currentUser = await _test.HttpClient.GetFromJsonAsync<UserDto>("api/users");
+        var oldUserPasswordSalt = _testDbHelper.GetUserByEmail(_test.LoggedInUser.Email)!.PasswordHash;
+        var changePasswordResponse = await _test.HttpClient.PostAsJsonAsync("api/auth/change-password", changePasswordDto);
+        var newUserPasswordSalt = _testDbHelper.GetUserByEmail(_test.LoggedInUser.Email)!.PasswordHash;
+        var refreshResponse = await _test.HttpClient.PostAsJsonAsync("api/auth/refresh", tokens);
+        var newTokens = await refreshResponse.Content.ReadFromJsonAsync<TokenPairDto>();
+        _test.SetAuthorizationHeader(newTokens!.AccessToken);
+        var currentUserAgain = await _test.HttpClient.GetFromJsonAsync<UserDto>("api/users");
+
+        // Assert.
+        using (new AssertionScope())
+        {
+            changePasswordResponse.EnsureSuccessStatusCode();
+            currentUser!.Should()!.NotBeNull();
+            currentUser!.Email.Should()!.Be(_test.LoggedInUser.Email);
+            newUserPasswordSalt!.Should()!.NotBe(oldUserPasswordSalt!);
+            newTokens.Should()!.NotBeEquivalentTo(tokens);
+            currentUserAgain!.Should()!.BeEquivalentTo(currentUser);
+        }
+    }
 }
