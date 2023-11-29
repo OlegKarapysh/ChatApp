@@ -9,6 +9,13 @@ internal sealed class TestDbHelper
         _testAppFactory = testAppFactory;
     }
 
+    internal List<int> GetAllUserConversationIds(int userId)
+    {
+        return GetFromDb(x => x.ConversationParticipants.AsNoTracking()
+                               .Where(c => c.UserId == userId)
+                               .Select(c => c.ConversationId).ToList());
+    }
+
     internal int CountUsers()
     {
         return GetFromDb(x => x.Users.AsNoTracking().Count());

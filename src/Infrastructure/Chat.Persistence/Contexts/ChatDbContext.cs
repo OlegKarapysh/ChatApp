@@ -15,6 +15,7 @@ public class ChatDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     public DbSet<Conversation> Conversations => Set<Conversation>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<Attachment> Attachments => Set<Attachment>();
+    public DbSet<ConversationParticipants> ConversationParticipants => Set<ConversationParticipants>();
     
     public ChatDbContext()
     {
