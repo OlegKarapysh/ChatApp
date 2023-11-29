@@ -19,3 +19,4 @@ global using Chat.Domain.Web;
 global using Chat.IntegrationTests.TestHelpers;
 global using Chat.Domain.Entities.Conversations;
 global using Chat.Domain.DTOs.Conversations;
+global using Chat.Domain.DTOs.Messages;

@@ -4,12 +4,10 @@
 public sealed class ConversationsTest : IClassFixture<IntegrationTest>
 {
     private readonly IntegrationTest _test;
-    private readonly TestDbHelper _testDbHelper;
 
     public ConversationsTest(IntegrationTest test)
     {
         _test = test;
-        _testDbHelper = new TestDbHelper(_test.TestAppFactory);
     }
 
     [Fact]
