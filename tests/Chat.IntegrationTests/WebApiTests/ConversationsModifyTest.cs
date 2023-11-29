@@ -35,6 +35,31 @@ public sealed class ConversationsModifyTest : IClassFixture<IntegrationTest>
             userConversationIds!.Should()!.Contain(createdDialog.Id);
         }
     }
+    
+    [Fact]
+    public async Task CreateGroupChat()
+    {
+        // Arrange.
+        await _test.LoginAsync();
+        var newGroupChatDto = new NewGroupChatDto { Title = "NewTestGroup" };
+        
+        // Act.
+        var groupChatResponse = await _test.HttpClient.PostAsJsonAsync("api/conversations/groups", newGroupChatDto);
+        var createdGroup = await groupChatResponse.Content.ReadFromJsonAsync<ConversationDto>();
+        var userConversationIdsResponse = await _test.HttpClient.GetAsync("api/conversations/all-ids");
+        var userConversationIds = await userConversationIdsResponse.Content.ReadFromJsonAsync<IList<int>>();
+        
+        // Assert.
+        using (new AssertionScope())
+        {
+            groupChatResponse.EnsureSuccessStatusCode();
+            userConversationIdsResponse.EnsureSuccessStatusCode();
+            createdGroup!.Should()!.NotBeNull();
+            createdGroup!.Title.Should()!.Be(newGroupChatDto.Title);
+            userConversationIds!.Should()!.NotBeNull();
+            userConversationIds!.Should()!.Contain(createdGroup.Id);
+        }
+    }
 
     [Fact]
     public async Task AddAndRemoveConversationMember()
