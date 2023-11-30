@@ -34,6 +34,21 @@ public sealed class ConversationsModifyTest : IClassFixture<IntegrationTest>
             userConversationIds!.Should()!.Contain(createdDialog.Id);
         }
     }
+
+    [Fact]
+    public async Task CreateDialog_ReturnsNotFound_WhenInterlocutorUsernameNotFound()
+    {
+        // Arrange.
+        await _test.LoginAsync();
+        const string fakeUserName = "3fahne9uaeasdfa32";
+        var newDialogDto = new NewDialogDto { InterlocutorUserName = fakeUserName };
+        
+        // Act.
+        var dialogResponse = await _test.HttpClient.PostAsJsonAsync("api/conversations/dialogs", newDialogDto);
+
+        // Assert.
+        dialogResponse.StatusCode.Should()!.Be(HttpStatusCode.NotFound);
+    }
     
     [Fact]
     public async Task CreateGroupChat_CreatesGroupChatWithCurrentUser()
@@ -84,6 +99,23 @@ public sealed class ConversationsModifyTest : IClassFixture<IntegrationTest>
             userConversationIdsBeforeAdding!.Should()!.NotBeNull()!.And!.NotContain(addedConversationDto.Id);
             userConversationIdsAfterAdding!.Should()!.NotBeNull()!.And!.Contain(addedConversationDto.Id);
         }
+    }
+
+    [Fact]
+    public async Task AddConversationMember_ReturnsNotFound_WhenConversationMemberUsernameNotFound()
+    {
+        // Arrange.
+        await _test.LoginAsync();
+        const int conversationId = 21;
+        const string fakeUserName = "3fahne9uaeasdfa32";
+        var newGroupMemberDto = new NewGroupMemberDto { ConversationId = conversationId, MemberUserName = fakeUserName };
+
+        // Act.
+        var response = await _test.HttpClient.PostAsJsonAsync("api/conversations/members", newGroupMemberDto);
+        
+        
+        // Assert.
+        response.StatusCode.Should()!.Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
