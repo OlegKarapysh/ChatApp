@@ -33,7 +33,7 @@ public sealed class AuthTest : IClassFixture<IntegrationTest>
             currentUser.UserName.Should()!.Be(_test.RegisteredUser.UserName);
         }
     }
-
+    
     [Fact]
     public async Task ChangePassword_ChangesUserPassword()
     {
@@ -84,5 +84,37 @@ public sealed class AuthTest : IClassFixture<IntegrationTest>
             newTokens.Should()!.NotBeEquivalentTo(tokens);
             currentUserAgain!.Should()!.BeEquivalentTo(currentUser);
         }
+    }
+
+    [Fact]
+    public async Task Login_ReturnsBadRequest_WhenPasswordInvalid()
+    {
+        // Arrange.
+        var invalidPassword = _test.LoggedInUser.Password + "invalid";
+        var loginDto = new LoginDto { Email = _test.LoggedInUser.Email, Password = invalidPassword };
+
+        // Act.
+        var loginResponse = await _test.HttpClient.PostAsJsonAsync("api/auth/login", loginDto);
+
+        // Assert.
+        loginResponse.StatusCode.Should()!.Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Register_ReturnsBadRequest_WhenEmailAlreadyRegistered()
+    {
+        // Arrange.
+        var registeredEmail = _test.LoggedInUser.Email;
+        var password = _test.RegisteredUser.Password;
+        var registerDto = new RegistrationDto
+        {
+            Email = registeredEmail, UserName = "username", Password = password, RepeatPassword = password
+        };
+
+        // Act.
+        var registerResponse = await _test.HttpClient.PostAsJsonAsync("api/auth/register", registerDto);
+
+        // Assert.
+        registerResponse.StatusCode.Should()!.Be(HttpStatusCode.BadRequest);
     }
 }

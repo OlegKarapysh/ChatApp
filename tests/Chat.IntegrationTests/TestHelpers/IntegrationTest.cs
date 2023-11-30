@@ -50,10 +50,10 @@ public class IntegrationTest : IDisposable
         return tokens;
     }
 
-    internal async Task<TokenPairDto> LoginAsync()
+    internal async Task<TokenPairDto> LoginAsync(LoginDto? loginDto = null)
     {
         const string loginRoute = "api/auth/login";
-        var loginResponse = await HttpClient.PostAsJsonAsync(loginRoute, LoggedInUser);
+        var loginResponse = await HttpClient.PostAsJsonAsync(loginRoute, loginDto ?? LoggedInUser);
         if (!loginResponse.IsSuccessStatusCode)
         {
             throw new Exception("Login failed!");

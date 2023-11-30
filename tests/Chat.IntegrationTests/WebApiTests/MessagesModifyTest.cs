@@ -63,6 +63,20 @@ public sealed class MessagesModifyTest : IClassFixture<IntegrationTest>
     }
 
     [Fact]
+    public async Task DeleteMessage_ReturnsNotFound_WhenMessageNotFound()
+    {
+        // Arrange.
+        await _test.LoginAsync();
+        const int fakeMessageId = int.MaxValue;
+        
+        // Act.
+        var deleteMessageResponse = await _test.HttpClient.DeleteAsync($"api/messages/{fakeMessageId}");
+
+        // Assert.
+        deleteMessageResponse.StatusCode.Should()!.Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
     public async Task UpdateMessage_UpdatesExpectedMessage()
     {
         // Arrange.
@@ -87,5 +101,40 @@ public sealed class MessagesModifyTest : IClassFixture<IntegrationTest>
             messageBeforeUpdating.TextContent.Should()!.NotBe(messageDto.TextContent);
             messageAfterUpdating.TextContent.Should()!.Be(messageDto.TextContent);
         }
+    }
+
+    [Fact]
+    public async Task UpdateMessage_ReturnsNotFound_WhenMessageNotFound()
+    {
+        // Arrange.
+        await _test.LoginAsync();
+        const int conversationId = 17;
+        const int fakeMessageId = int.MaxValue;
+        var messageDto = new MessageDto { Id = fakeMessageId, ConversationId = conversationId, TextContent = "a" };
+        
+        // Act.
+        var updateResponse = await _test.HttpClient.PutAsJsonAsync("api/messages", messageDto);
+        
+        // Assert.
+        updateResponse.StatusCode.Should()!.Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task UpdateMessage_ReturnsBadRequest_WhenMessageIsSentByAnotherUser()
+    {
+        // Arrange.
+        await _test.LoginAsync();
+        const int messageIdSentByAnotherUser = 121;
+        const int conversationId = 17;
+        var messageDto = new MessageDto
+        {
+            Id = messageIdSentByAnotherUser, ConversationId = conversationId, TextContent = "a"
+        };
+        
+        // Act.
+        var updateResponse = await _test.HttpClient.PutAsJsonAsync("api/messages", messageDto);
+
+        // Assert.
+        updateResponse.StatusCode.Should()!.Be(HttpStatusCode.BadRequest);
     }
 }
