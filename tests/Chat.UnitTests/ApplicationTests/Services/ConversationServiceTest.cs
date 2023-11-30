@@ -55,10 +55,13 @@ public sealed class ConversationServiceTest
         var result = await _sut.SearchConversationsPagedAsync(pageSearchDto);
         
         // Assert.
-        result.Should()!.BeOfType<ConversationsPageDto>()!.And!.NotBeNull();
-        result.Conversations!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedConversationsPage.Conversations!,
-            o => o.WithStrictOrdering()!.Excluding(x => x.CreatedAt)!.Excluding(x => x.UpdatedAt));
-        result.PageInfo!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedConversationsPage.PageInfo);
+        using (new AssertionScope())
+        {
+            result.Should()!.BeOfType<ConversationsPageDto>()!.And!.NotBeNull();
+            result.Conversations!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedConversationsPage.Conversations!,
+                o => o.WithStrictOrdering()!.Excluding(x => x.CreatedAt)!.Excluding(x => x.UpdatedAt));
+            result.PageInfo!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedConversationsPage.PageInfo);
+        }
     }
 
     [Fact]
@@ -78,10 +81,13 @@ public sealed class ConversationServiceTest
         var result = await _sut.CreateOrGetGroupChatAsync(newGroupDto);
 
         // Assert.
-        result.Should()!.NotBeNull();
-        result.Id.Should()!.Be(existingGroup.Id);
-        result.Title.Should()!.Be(existingGroup.Title);
-        result.Type.Should()!.Be(existingGroup.Type);
+        using (new AssertionScope())
+        {
+            result.Should()!.NotBeNull();
+            result.Id.Should()!.Be(existingGroup.Id);
+            result.Title.Should()!.Be(existingGroup.Title);
+            result.Type.Should()!.Be(existingGroup.Type);
+        }
     }
     
     [Fact]
@@ -104,11 +110,14 @@ public sealed class ConversationServiceTest
         var result = await _sut.CreateOrGetGroupChatAsync(newGroupDto);
 
         // Assert.
-        result.Should()!.NotBeNull();
-        result.Id.Should()!.Be(createdGroup.Id);
-        result.Title.Should()!.Be(createdGroup.Title);
-        result.Type.Should()!.Be(createdGroup.Type);
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        using (new AssertionScope())
+        {
+            result.Should()!.NotBeNull();
+            result.Id.Should()!.Be(createdGroup.Id);
+            result.Title.Should()!.Be(createdGroup.Title);
+            result.Type.Should()!.Be(createdGroup.Type);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
     }
     
     [Fact]
@@ -130,10 +139,13 @@ public sealed class ConversationServiceTest
         var result = await _sut.CreateOrGetDialogAsync(newDialogDto);
 
         // Assert.
-        result.Should()!.NotBeNull();
-        result.Id.Should()!.Be(existingDialog.Id);
-        result.Title.Should()!.Be(existingDialog.Title);
-        result.Type.Should()!.Be(existingDialog.Type);
+        using (new AssertionScope())
+        {
+            result.Should()!.NotBeNull();
+            result.Id.Should()!.Be(existingDialog.Id);
+            result.Title.Should()!.Be(existingDialog.Title);
+            result.Type.Should()!.Be(existingDialog.Type);
+        }
     }
     
     [Fact]
@@ -157,11 +169,14 @@ public sealed class ConversationServiceTest
         var result = await _sut.CreateOrGetDialogAsync(newDialogDto);
 
         // Assert.
-        result.Should()!.NotBeNull();
-        result.Id.Should()!.Be(createdDialog.Id);
-        result.Title.Should()!.Be(createdDialog.Title);
-        result.Type.Should()!.Be(createdDialog.Type);
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        using (new AssertionScope())
+        {
+            result.Should()!.NotBeNull();
+            result.Id.Should()!.Be(createdDialog.Id);
+            result.Title.Should()!.Be(createdDialog.Title);
+            result.Type.Should()!.Be(createdDialog.Type);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
     }
 
     [Fact]
@@ -193,8 +208,11 @@ public sealed class ConversationServiceTest
         var result = await _sut.RemoveUserFromConversationAsync(conversationId, Id);
 
         // Assert.
-        result.Should()!.BeTrue();
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        using (new AssertionScope())
+        {
+            result.Should()!.BeTrue();
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
     }
 
     [Fact]
@@ -240,11 +258,14 @@ public sealed class ConversationServiceTest
         var result = await _sut.AddGroupMemberAsync(newMemberDto);
 
         // Assert.
-        result.Type.Should()!.Be(conversation.Type);
-        result.Id.Should()!.Be(conversation.Id);
-        result.Title.Should()!.Be(conversation.Title);
-        _conversationsRepositoryMock.Verify(x => x.Update(conversation), Times.Once);
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        using (new AssertionScope())
+        {
+            result.Type.Should()!.Be(conversation.Type);
+            result.Id.Should()!.Be(conversation.Id);
+            result.Title.Should()!.Be(conversation.Title);
+            _conversationsRepositoryMock.Verify(x => x.Update(conversation), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
     }
     
     private (List<Conversation> Conversations, ConversationsPageDto ConversationsPage) GetConversationsWithConversationsPage() => new

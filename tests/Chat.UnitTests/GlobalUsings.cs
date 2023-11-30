@@ -7,6 +7,7 @@ global using System.Text;
 global using Xunit;
 global using Moq;
 global using FluentAssertions;
+global using FluentAssertions.Execution;
 global using Bogus;
 global using MockQueryable.Moq;
 global using Microsoft.IdentityModel.Tokens;

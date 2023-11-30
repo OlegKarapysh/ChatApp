@@ -56,12 +56,15 @@ public sealed class UserServiceTest
         var firstUserResult = result.First();
 
         // Assert.
-        result.Should()!.HaveCount(usersCount);
-        firstUserResult.FirstName.Should()!.Be(firstUser.FirstName!);
-        firstUserResult.LastName.Should()!.Be(firstUser.LastName!);
-        firstUserResult.UserName.Should()!.Be(firstUser.UserName!);
-        firstUserResult.Email.Should()!.Be(firstUser.Email!);
-        firstUserResult.PhoneNumber.Should()!.Be(firstUser.PhoneNumber!);
+        using (new AssertionScope())
+        {
+            result.Should()!.HaveCount(usersCount);
+            firstUserResult.FirstName.Should()!.Be(firstUser.FirstName!);
+            firstUserResult.LastName.Should()!.Be(firstUser.LastName!);
+            firstUserResult.UserName.Should()!.Be(firstUser.UserName!);
+            firstUserResult.Email.Should()!.Be(firstUser.Email!);
+            firstUserResult.PhoneNumber.Should()!.Be(firstUser.PhoneNumber!);
+        }
     }
 
     [Fact]
@@ -82,9 +85,12 @@ public sealed class UserServiceTest
         await _sut.UpdateUserAsync(userDto, Id);
 
         // Assert.
-        actualCallSequence.Should()!.BeEquivalentTo(expectedCallSequence, o => o.WithStrictOrdering());
-        _userRepositoryMock.Verify(x => x.Update(user), Times.Once);
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        using (new AssertionScope())
+        {
+            actualCallSequence.Should()!.BeEquivalentTo(expectedCallSequence, o => o.WithStrictOrdering());
+            _userRepositoryMock.Verify(x => x.Update(user), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
     }
 
     [Fact]
@@ -103,10 +109,13 @@ public sealed class UserServiceTest
         var result = await _sut.SearchUsersPagedAsync(pageSearchDto);
         
         // Assert.
-        result.Should()!.BeOfType<UsersPageDto>()!.And!.NotBeNull();
-        result.Users!.Should()!.NotBeNull()!.And!
-              .BeEquivalentTo(expectedUsersPage.Users!, o => o.WithStrictOrdering());
-        result.PageInfo!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedUsersPage.PageInfo);
+        using (new AssertionScope())
+        {
+            result.Should()!.BeOfType<UsersPageDto>()!.And!.NotBeNull();
+            result.Users!.Should()!.NotBeNull()!.And!
+                  .BeEquivalentTo(expectedUsersPage.Users!, o => o.WithStrictOrdering());
+            result.PageInfo!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedUsersPage.PageInfo);
+        }
     }
 
     private (List<User> Users, UsersPageDto UsersPage) GetTestUsersWithUsersPage()

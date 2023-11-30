@@ -64,12 +64,12 @@ public sealed class MessageService : IMessageService
     public async Task<MessageDto> UpdateMessageAsync(MessageDto messageData, int updaterId)
     {
         var message = await GetMessageByIdAsync(messageData.Id);
-        message.SenderId = message.SenderId == default ? updaterId : message.SenderId;
         if (message.SenderId != updaterId)
         {
             throw new InvalidMessageUpdaterException();
         }
 
+        messageData.SenderId = updaterId;
         var updatedMessage = _messageRepository.Update(message.MapFrom(messageData));
         await _unitOfWork.SaveChangesAsync();
         
