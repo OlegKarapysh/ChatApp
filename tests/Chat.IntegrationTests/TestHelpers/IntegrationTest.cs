@@ -31,10 +31,10 @@ public class IntegrationTest : IDisposable
         TestAppFactory.Dispose();
     }
 
-    internal async Task<TokenPairDto> RegisterAsync()
+    internal async Task<TokenPairDto> RegisterAsync(RegistrationDto? registrationDto = null)
     {
         const string registerRoute = "api/auth/register";
-        var registrationResponse = await HttpClient.PostAsJsonAsync(registerRoute, RegisteredUser);
+        var registrationResponse = await HttpClient.PostAsJsonAsync(registerRoute, registrationDto ?? RegisteredUser);
         if (!registrationResponse.IsSuccessStatusCode)
         {
             throw new BadRegistrationException();

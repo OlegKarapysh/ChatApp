@@ -43,23 +43,17 @@ public sealed class ConversationsTest : IClassFixture<IntegrationTest>
     {
         // Arrange.
         await _test.LoginAsync();
-        const string route = "api/conversations/search";
         var expectedPageInfo = new PageInfo
         {
-            CurrentPage = page,
-            PageSize = PageInfo.DefaultPageSize,
-            TotalCount = totalCount,
-            TotalPages = totalPages
+            CurrentPage = page, PageSize = PageInfo.DefaultPageSize, TotalCount = totalCount, TotalPages = totalPages
         };
         var searchDto = new PagedSearchDto
         {
-            Page = expectedPageInfo.CurrentPage,
-            SearchFilter = search,
-            SortingProperty = nameof(Conversation.Title),
+            Page = expectedPageInfo.CurrentPage, SearchFilter = search, SortingProperty = nameof(Conversation.Title),
             SortingOrder = SortingOrder.Descending
         };
         var routeWithParams =
-            $"{route}?{nameof(searchDto.Page)}={searchDto.Page}" +
+            $"api/conversations/search?{nameof(searchDto.Page)}={searchDto.Page}" +
             $"&{nameof(searchDto.SearchFilter)}={searchDto.SearchFilter}" +
             $"&{nameof(searchDto.SortingProperty)}={searchDto.SortingProperty}" +
             $"&{nameof(searchDto.SortingOrder)}={(int)searchDto.SortingOrder}";

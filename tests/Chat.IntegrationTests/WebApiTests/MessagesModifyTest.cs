@@ -1,5 +1,6 @@
 ﻿namespace Chat.IntegrationTests.WebApiTests;
 
+[Collection("Sequential")]
 public sealed class MessagesModifyTest : IClassFixture<IntegrationTest>
 {
     private readonly IntegrationTest _test;
@@ -12,20 +13,19 @@ public sealed class MessagesModifyTest : IClassFixture<IntegrationTest>
     }
 
     [Fact]
-    public async Task AddMessage()
+    public async Task AddMessage_AddExpectedMessage()
     {
         // Arrange.
         await _test.LoginAsync();
         const int conversationId = 16;
+        var allMessagesRoute = $"api/messages/all/{conversationId}";
         var messageDto = new MessageDto { TextContent = "new message", ConversationId = conversationId };
         
         // Act.
-        var messagesBeforeAdding = await _test.HttpClient.GetFromJsonAsync<IList<MessageWithSenderDto>>(
-            $"api/messages/all/{conversationId}");
+        var messagesBeforeAdding = await _test.HttpClient.GetFromJsonAsync<IList<MessageWithSenderDto>>(allMessagesRoute);
         var addMessageResponse = await _test.HttpClient.PostAsJsonAsync("api/messages", messageDto);
         var addedMessage = await addMessageResponse.Content.ReadFromJsonAsync<MessageWithSenderDto>();
-        var messagesAfterAdding = await _test.HttpClient.GetFromJsonAsync<IList<MessageWithSenderDto>>(
-            $"api/messages/all/{conversationId}");
+        var messagesAfterAdding = await _test.HttpClient.GetFromJsonAsync<IList<MessageWithSenderDto>>(allMessagesRoute);
         
         // Assert.
         using (new AssertionScope())
@@ -40,19 +40,18 @@ public sealed class MessagesModifyTest : IClassFixture<IntegrationTest>
     }
     
     [Fact]
-    public async Task DeleteMessage()
+    public async Task DeleteMessage_DeletesMessage()
     {
         // Arrange.
         await _test.LoginAsync();
         const int messageId = 109;
         const int conversationId = 17;
+        var allMessagesRoute = $"api/messages/all/{conversationId}";
         
         // Act.
-        var messagesBeforeAdding = await _test.HttpClient.GetFromJsonAsync<IList<MessageWithSenderDto>>(
-            $"api/messages/all/{conversationId}");
+        var messagesBeforeAdding = await _test.HttpClient.GetFromJsonAsync<IList<MessageWithSenderDto>>(allMessagesRoute);
         var deleteMessageResponse = await _test.HttpClient.DeleteAsync($"api/messages/{messageId}");
-        var messagesAfterAdding = await _test.HttpClient.GetFromJsonAsync<IList<MessageWithSenderDto>>(
-            $"api/messages/all/{conversationId}");
+        var messagesAfterAdding = await _test.HttpClient.GetFromJsonAsync<IList<MessageWithSenderDto>>(allMessagesRoute);
         
         // Assert.
         using (new AssertionScope())
@@ -64,7 +63,7 @@ public sealed class MessagesModifyTest : IClassFixture<IntegrationTest>
     }
 
     [Fact]
-    public async Task UpdateMessage()
+    public async Task UpdateMessage_UpdatesExpectedMessage()
     {
         // Arrange.
         await _test.LoginAsync();

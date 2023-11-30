@@ -23,11 +23,8 @@ public class UsersModifyTest : IClassFixture<IntegrationTest>
         var updatedPhone = user.PhoneNumber += "1";
         var userDto = new UserDto
         {
-            Email = user.Email!,
-            FirstName = updatedFirstName,
-            LastName = user.LastName!,
-            PhoneNumber = updatedPhone,
-            UserName = user.UserName!
+            Email = user.Email!, FirstName = updatedFirstName, LastName = user.LastName!,
+            PhoneNumber = updatedPhone, UserName = user.UserName!
         };
         
         // Act.

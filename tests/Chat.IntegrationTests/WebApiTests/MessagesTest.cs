@@ -1,5 +1,6 @@
 ﻿namespace Chat.IntegrationTests.WebApiTests;
 
+[Collection("Sequential")]
 public sealed class MessagesTest : IClassFixture<IntegrationTest>
 {
     private readonly IntegrationTest _test;
@@ -19,23 +20,17 @@ public sealed class MessagesTest : IClassFixture<IntegrationTest>
     {
         // Arrange.
         await _test.LoginAsync();
-        const string route = "api/messages/search";
         var expectedPageInfo = new PageInfo
         {
-            CurrentPage = page,
-            PageSize = PageInfo.DefaultPageSize,
-            TotalCount = totalCount,
-            TotalPages = totalPages
+            CurrentPage = page, PageSize = PageInfo.DefaultPageSize, TotalCount = totalCount, TotalPages = totalPages
         };
         var searchDto = new PagedSearchDto
         {
-            Page = expectedPageInfo.CurrentPage,
-            SearchFilter = search,
-            SortingProperty = nameof(Message.TextContent),
+            Page = expectedPageInfo.CurrentPage, SearchFilter = search, SortingProperty = nameof(Message.TextContent),
             SortingOrder = SortingOrder.Descending
         };
         var routeWithParams =
-            $"{route}?{nameof(searchDto.Page)}={searchDto.Page}" +
+            $"api/messages/search?{nameof(searchDto.Page)}={searchDto.Page}" +
             $"&{nameof(searchDto.SearchFilter)}={searchDto.SearchFilter}" +
             $"&{nameof(searchDto.SortingProperty)}={searchDto.SortingProperty}" +
             $"&{nameof(searchDto.SortingOrder)}={(int)searchDto.SortingOrder}";
