@@ -10,8 +10,8 @@
 <div class="py-4">
     <input id="channelInput" @bind="_channel" hidden/>
     <button id="startButton" @onclick="StartAction" disabled="@_startDisabled" hidden>Start</button>
-    <button id="callButton" @onclick="CallAction">Ready</button>
-    <button id="hangupButton" @onclick="HangupAction" disabled="@_hangupDisabled">Hang Up</button>
+    <RadzenButton id="callButton" Click="CallAction">Ready</RadzenButton>
+    <RadzenButton id="hangupButton" ButtonStyle="ButtonStyle.Danger" Click="HangupAction" disabled="@_hangupDisabled">Hang Up</RadzenButton>
 </div>
 
 <div class="container">
