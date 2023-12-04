@@ -14,20 +14,24 @@ const servers = {
         }
     ]
 }
-
 let dotNet;
-let localStream;
-let remoteStream;
+let localFullStream, localVideoStream, remoteStream;
 let peerConnection;
-let isOffering;
-let isOffered;
+let isOffering, isOffered;
 
 export function initialize(dotNetRef) {
     dotNet = dotNetRef;
 }
 export async function startLocalStream() {
-    localStream = await navigator.mediaDevices.getUserMedia(mediaStreamConstraints);
-    return localStream;
+    while (!localFullStream) {
+        localFullStream = await navigator.mediaDevices.getUserMedia(mediaStreamConstraints);
+    }
+    
+    const videoTrack = localFullStream.getVideoTracks()[0];
+    localVideoStream = new MediaStream();
+    localVideoStream.addTrack(videoTrack);
+    
+    return localVideoStream;
 }
 export function getRemoteStream() {
     return remoteStream;
@@ -36,7 +40,7 @@ function createPeerConnection() {
     peerConnection = new RTCPeerConnection(servers);
     peerConnection.addEventListener("icecandidate", handleConnection);
     peerConnection.addEventListener("addstream", gotRemoteMediaStream);
-    peerConnection.addStream(localStream);
+    peerConnection.addStream(localFullStream);
 }
 export async function callAction() {
     if (isOffered) return Promise.resolve();
@@ -67,7 +71,8 @@ export async function processCandidate(candidateText) {
 export function hangupAction() {
 
     dotNet = null;
-    localStream = null;
+    localFullStream = null;
+    localVideoStream = null;
     remoteStream = null;
     isOffering = false;
     isOffered = false;

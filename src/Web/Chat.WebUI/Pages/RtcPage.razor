@@ -10,7 +10,7 @@
 <div class="py-4">
     <input id="channelInput" @bind="_channel" hidden/>
     <button id="startButton" @onclick="StartAction" disabled="@_startDisabled" hidden>Start</button>
-    <RadzenButton id="callButton" Click="CallAction">Ready</RadzenButton>
+    <RadzenButton id="callButton" Click="CallAction" disabled="@_callDisabled">Ready</RadzenButton>
     <RadzenButton id="hangupButton" ButtonStyle="ButtonStyle.Danger" Click="HangupAction" disabled="@_hangupDisabled">Hang Up</RadzenButton>
 </div>
 
@@ -28,7 +28,7 @@
     public string ConversationId { get; set; } = string.Empty;
     private IJSObjectReference? _module;
     private bool _startDisabled;
-    //private bool _callDisabled = true;
+    private bool _callDisabled = true;
     private bool _hangupDisabled = true;
     private string _channel = "foo";
 
@@ -49,8 +49,9 @@
     {
         if (firstRender)
         {
-            _module = await Js.InvokeAsync<IJSObjectReference>(
-                "import", "./Pages/RtcPage.razor.js");
+            _module = await Js.InvokeAsync<IJSObjectReference>("import", "./Pages/RtcPage.razor.js");
+            RtcService.OnRemoteStreamAcquired += RtcOnOnRemoteStreamAcquired;
+            RtcService.InterlocutorLeft += OnInterlocutorLeft;
             await StartAction();
             //await CallAction();
         }
@@ -66,9 +67,8 @@
         await RtcService.Join(_channel);
         var stream = await RtcService.StartLocalStream();
         await _module.InvokeVoidAsync("setLocalStream", stream);
-        RtcService.OnRemoteStreamAcquired += RtcOnOnRemoteStreamAcquired;
-        RtcService.InterlocutorLeft += OnInterlocutorLeft;
-    //_callDisabled = false;
+        _callDisabled = false;
+        StateHasChanged();
     }
 
     private async void RtcOnOnRemoteStreamAcquired(object? _, IJSObjectReference e)
@@ -76,7 +76,7 @@
         if (_module == null) throw new InvalidOperationException();
         
         await _module.InvokeVoidAsync("setRemoteStream", e);
-        //_callDisabled = true;
+        _callDisabled = true;
         _hangupDisabled = false;
         _startDisabled = true;
         StateHasChanged();
@@ -85,7 +85,7 @@
     private async Task CallAction()
     {
         //if (_callDisabled) return;
-        //_callDisabled = true;
+        _callDisabled = true;
         await RtcService.Call();
         _hangupDisabled = false;
     }
@@ -95,7 +95,6 @@
         await RtcService.Hangup();
         //_callDisabled = true;
         _hangupDisabled = true;
-        _startDisabled = false;
         Navigation!.NavigateTo(ChatsPage.Path);
     }
 
