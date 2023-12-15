@@ -2,7 +2,7 @@
 
 namespace Chat.Domain.Entities.Conversations;
 
-public sealed class ConversationParticipants : EntityBase<int>
+public sealed class ConversationParticipant : EntityBase<int>
 {
     public int ConversationId { get; set; }
     public int UserId { get; set; }

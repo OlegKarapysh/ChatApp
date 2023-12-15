@@ -1,12 +1,18 @@
-﻿using Chat.Domain.Abstract;
+﻿using System.ComponentModel.DataAnnotations;
+using Chat.Domain.Abstract;
 using Chat.Domain.Entities.Conversations;
+using Chat.Domain.Entities.Groups;
 using Microsoft.AspNetCore.Identity;
 
 namespace Chat.Domain.Entities;
 
 public class User : IdentityUser<int>, ICreatableEntity, IEntity<int>
 {
+    public const int MaxNameLength = 100;
+    
+    [MaxLength(MaxNameLength)]
     public string? FirstName { get; set; }
+    [MaxLength(MaxNameLength)]
     public string? LastName { get; set; }
     public string? AvatarUrl { get; set; }
     public string? RefreshToken { get; set; }
@@ -14,6 +20,9 @@ public class User : IdentityUser<int>, ICreatableEntity, IEntity<int>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public IList<Message> Messages { get; set; } = new List<Message>();
     public IList<Conversation> Conversations { get; set; } = new List<Conversation>();
-    public IList<ConversationParticipants> ConversationParticipants { get; set; } =
-        new List<ConversationParticipants>();
+    public IList<ConversationParticipant> ConversationParticipants { get; set; } =
+        new List<ConversationParticipant>();
+    public IList<Group> OwnGroups { get; set; } = new List<Group>();
+    public IList<Group> ForeignGroups { get; set; } = new List<Group>();
+    public IList<GroupMember> GroupMembers { get; set; } = new List<GroupMember>();
 }
