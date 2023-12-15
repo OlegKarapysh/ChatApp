@@ -16,14 +16,14 @@ public sealed class ConversationService : IConversationService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserService _userService;
-    private readonly IRepository<ConversationParticipants, int> _participantsRepository;
+    private readonly IRepository<ConversationParticipant, int> _participantsRepository;
     private readonly IRepository<Conversation, int> _conversationsRepository;
 
     public ConversationService(IUnitOfWork unitOfWork, IUserService userService)
     {
         _unitOfWork = unitOfWork;
         _userService = userService;
-        _participantsRepository = _unitOfWork.GetRepository<ConversationParticipants, int>();
+        _participantsRepository = _unitOfWork.GetRepository<ConversationParticipant, int>();
         _conversationsRepository = _unitOfWork.GetRepository<Conversation, int>();
     }
 
