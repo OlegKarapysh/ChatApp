@@ -1,10 +1,11 @@
 ﻿using Chat.Application.Services.OpenAI;
 using Chat.Domain.DTOs.AssistantFiles;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Chat.WebAPI.Controllers;
 
-[ApiController, Route("api/[controller]")]
+[ApiController, Authorize, Route("api/[controller]")]
 public class OpenAiController : ControllerBase
 {
     private readonly IOpenAiService _openAiService;

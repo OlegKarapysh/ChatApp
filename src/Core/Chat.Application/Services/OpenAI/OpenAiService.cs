@@ -37,6 +37,18 @@ public sealed class OpenAiService : IOpenAiService
         return await _client.AssistantCreateAsync(assistantCreateParameter);
     }
 
+    public async Task<AssistantObjectResponse> GetAssistantAsync(string assistantId)
+    {
+        var param = new AssistantRetrieveParameter { Assistant_Id = assistantId };
+        return await _client.AssistantRetrieveAsync(param);
+    }
+
+    public async Task<AssistantFileObjectResponse> AddFileToAssistant(string assistantId, string fileId)
+    {
+        var param = new AssistantFileCreateParameter { Assistant_Id = assistantId, File_Id = fileId };
+        return await _client.AssistantFileCreateAsync(param);
+    }
+
     public async Task<UploadedFileDto> UploadFileAsync(IFormFile? file)
     {
         if (file is null || file.Length == 0 || file.FileName is null)
