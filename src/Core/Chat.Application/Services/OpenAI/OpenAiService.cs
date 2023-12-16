@@ -12,7 +12,6 @@ public sealed class OpenAiService : IOpenAiService
     private const string DefaultAiModel = "gpt-4-1106-preview";
     private const string RetrievalToolName = "retrieval";
 
-
     private readonly OpenAIClient _client;
 
     public OpenAiService(IConfiguration configuration)
@@ -69,7 +68,7 @@ public sealed class OpenAiService : IOpenAiService
             throw new OpenAiApiRequestException("Failed to read the provided file!");
         }
         
-        fileUploadParameter.SetFile(file.FileName ?? "Untitled-file", fileStream);
+        fileUploadParameter.SetFile(file.FileName, fileStream);
         var fileResponse = await _client.FileUploadAsync(fileUploadParameter);
         return fileResponse.MapToUploadedDto();
     }

@@ -3,6 +3,7 @@ using Chat.Application.JWT;
 using Chat.Application.Services;
 using Chat.Application.Services.Authentication;
 using Chat.Application.Services.Conversations;
+using Chat.Application.Services.Groups;
 using Chat.Application.Services.JWT;
 using Chat.Application.Services.Messages;
 using Chat.Application.Services.OpenAI;
@@ -30,13 +31,14 @@ public static class ServiceCollectionExtensions
 
     public static void AddCustomServices(this IServiceCollection services)
     {
-        services.AddSingleton<IOpenAiService, OpenAiService>();
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IConversationService, ConversationService>();
         services.AddScoped<IMessageService, MessageService>();
+        services.AddScoped<IOpenAiService, OpenAiService>();
+        services.AddScoped<IGroupService, GroupService>();
     }
     
     public static void AddAndConfigureJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
