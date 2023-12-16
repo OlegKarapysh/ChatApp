@@ -11,7 +11,8 @@ public sealed class OpenAiService : IOpenAiService
     private const string OpenAiApiKeyName = "OPENAI_API_KEY";
     private const string DefaultAiModel = "gpt-4-1106-preview";
     private const string RetrievalToolName = "retrieval";
-    
+
+
     private readonly OpenAIClient _client;
 
     public OpenAiService(IConfiguration configuration)
@@ -20,7 +21,7 @@ public sealed class OpenAiService : IOpenAiService
         ArgumentException.ThrowIfNullOrEmpty(apiKey);
         _client = new OpenAIClient(apiKey);
     }
-    
+
     public async Task<AssistantObjectResponse> CreateAssistantWithRetrievalAsync(
         string name, string instructions, IEnumerable<string>? fileIds = default)
     {
@@ -38,9 +39,14 @@ public sealed class OpenAiService : IOpenAiService
 
     public async Task<UploadedFileDto> UploadFileAsync(IFormFile? file)
     {
-        if (file is null || file.Length == 0)
+        if (file is null || file.Length == 0 || file.FileName is null)
         {
             throw new OpenAiApiRequestException("Failed to upload a file! It has bad format or zero length.");
+        }
+
+        if (IOpenAiService.AcceptableFileExtensions.All(x => !file.FileName.EndsWith(x, StringComparison.Ordinal)))
+        {
+            throw new OpenAiApiRequestException("Provided file format is not supported!");
         }
         
         const string purpose = "assistants";

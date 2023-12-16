@@ -9,7 +9,7 @@
 <div class="col-md-4 p-3">
     <RadzenCard>
         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Single file upload</RadzenText>
-        <InputFile OnChange="OnFileUploaded"></InputFile>
+        <InputFile accept="@AcceptableFileExtensions" OnChange="OnFileUploaded"></InputFile>
     </RadzenCard>
 </div>
 <div>
@@ -19,6 +19,7 @@
 @code 
 {
     public const string Path = "ai-assistant";
+    public string AcceptableFileExtensions { get; } = string.Join(',', IOpenAiService.AcceptableFileExtensions);
     public IBrowserFile? File;
 
     private void OnFileUploaded(InputFileChangeEventArgs fileArgs)
