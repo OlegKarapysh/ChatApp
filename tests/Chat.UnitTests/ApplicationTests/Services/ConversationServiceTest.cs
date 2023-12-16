@@ -8,12 +8,12 @@ public sealed class ConversationServiceTest
     private readonly IConversationService _sut;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
     private readonly Mock<IUserService> _userServiceMock = new();
-    private readonly Mock<IRepository<ConversationParticipants, int>> _participantsRepositoryMock = new();
+    private readonly Mock<IRepository<ConversationParticipant, int>> _participantsRepositoryMock = new();
     private readonly Mock<IRepository<Conversation, int>> _conversationsRepositoryMock = new();
 
     public ConversationServiceTest()
     {
-        _unitOfWorkMock.Setup(x => x.GetRepository<ConversationParticipants, int>())
+        _unitOfWorkMock.Setup(x => x.GetRepository<ConversationParticipant, int>())
                        .Returns(_participantsRepositoryMock.Object);
         _unitOfWorkMock.Setup(x => x.GetRepository<Conversation, int>())
                        .Returns(_conversationsRepositoryMock.Object);
@@ -25,12 +25,12 @@ public sealed class ConversationServiceTest
     {
         // Arrange.
         var conversationIds = new[] { 1, int.MaxValue };
-        var conversationParticipants = new List<ConversationParticipants>
+        var conversationParticipants = new List<ConversationParticipant>
         {
             new() { ConversationId = conversationIds[0] }, new() { ConversationId = conversationIds[1] }
         };
         _participantsRepositoryMock.Setup(x =>
-                                       x.FindAllAsync(It.IsAny<Expression<Func<ConversationParticipants, bool>>>()))
+                                       x.FindAllAsync(It.IsAny<Expression<Func<ConversationParticipant, bool>>>()))
                                    .ReturnsAsync(conversationParticipants);
         // Act.
         var result = await _sut.GetUserConversationIdsAsync(default);
@@ -184,8 +184,8 @@ public sealed class ConversationServiceTest
     {
         // Arrange.
         _participantsRepositoryMock
-            .Setup(x => x.FindAllAsync(It.IsAny<Expression<Func<ConversationParticipants, bool>>>()))
-            .ReturnsAsync(new List<ConversationParticipants>());
+            .Setup(x => x.FindAllAsync(It.IsAny<Expression<Func<ConversationParticipant, bool>>>()))
+            .ReturnsAsync(new List<ConversationParticipant>());
         // Act.
         var tryRemoveUserFromConversation = async () => await _sut.RemoveUserFromConversationAsync(Id, Id);
         
@@ -198,10 +198,10 @@ public sealed class ConversationServiceTest
     {
         // Arrange.
         const int conversationId = 3;
-        var user = new ConversationParticipants { Id = Id, ConversationId = conversationId };
+        var user = new ConversationParticipant { Id = Id, ConversationId = conversationId };
         _participantsRepositoryMock
-            .Setup(x => x.FindAllAsync(It.IsAny<Expression<Func<ConversationParticipants, bool>>>()))
-            .ReturnsAsync(new List<ConversationParticipants> { user });
+            .Setup(x => x.FindAllAsync(It.IsAny<Expression<Func<ConversationParticipant, bool>>>()))
+            .ReturnsAsync(new List<ConversationParticipant> { user });
         _participantsRepositoryMock.Setup(x => x.RemoveAsync(Id)).ReturnsAsync(true);
         
         // Act.

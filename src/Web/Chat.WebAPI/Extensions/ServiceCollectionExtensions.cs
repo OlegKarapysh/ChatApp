@@ -5,6 +5,7 @@ using Chat.Application.Services.Authentication;
 using Chat.Application.Services.Conversations;
 using Chat.Application.Services.JWT;
 using Chat.Application.Services.Messages;
+using Chat.Application.Services.OpenAI;
 using Chat.Application.Services.Users;
 using Chat.DomainServices.UnitsOfWork;
 using Chat.Persistence.UnitsOfWork;
@@ -29,6 +30,7 @@ public static class ServiceCollectionExtensions
 
     public static void AddCustomServices(this IServiceCollection services)
     {
+        services.AddSingleton<IOpenAiService, OpenAiService>();
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthService, AuthService>();

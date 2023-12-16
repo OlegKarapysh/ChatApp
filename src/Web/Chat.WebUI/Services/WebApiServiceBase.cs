@@ -69,7 +69,7 @@ public abstract class WebApiServiceBase
 
     private protected string BuildFullRoute(string relativeRoute) => $"{ApiUrl}{BaseRoute}{relativeRoute}";
 
-    private async Task<WebApiResponse<TResponse>> ParseWebApiResponse<TResponse>(HttpResponseMessage httpResponse)
+    private protected async Task<WebApiResponse<TResponse>> ParseWebApiResponse<TResponse>(HttpResponseMessage httpResponse)
     {
         if (httpResponse.IsSuccessStatusCode)
         {

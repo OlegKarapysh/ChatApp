@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using BlazorSpinner;
+using Chat.Application.Services.OpenAI;
 using Chat.WebUI.HttpHandlers;
 using Chat.WebUI.Providers;
 using Chat.WebUI.Services.Auth;
 using Chat.WebUI.Services.Conversations;
 using Chat.WebUI.Services.Messages;
+using Chat.WebUI.Services.OpenAI;
 using Chat.WebUI.Services.SignalR;
 using Chat.WebUI.Services.Users;
 using Chat.WebUI.Services.WebRtc;
@@ -29,6 +31,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUsersWebApiService, UsersWebApiService>();
         services.AddScoped<IConversationsWebApiService, ConversationsWebApiService>();
         services.AddScoped<IMessagesWebApiService, MessagesWebApiService>();
+        services.AddScoped<IOpenAiWebApiService, OpenAiWebApiService>();
         services.AddScoped<IHubConnectionService, HubConnectionService>();
         services.AddTransient<WebRtcService>();
     }
