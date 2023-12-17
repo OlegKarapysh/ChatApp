@@ -15,18 +15,33 @@ public sealed class GroupsController : ControllerBase
     {
         _groupService = groupService;
     }
-
-    [HttpPost]
-    public async Task<ActionResult<GroupDto>> CreateGroupAsync(NewGroupDto newGroupDto)
-    {
-        newGroupDto.CreatorId ??= HttpContext.User.GetIdClaim();
-        return Ok(await _groupService.CreateGroupAsync(newGroupDto));
-    }
-
+    
     [HttpGet("all")]
     public async Task<ActionResult<IList<GroupInfoDto>>> GetAllGroupsInfoAsync()
     {
         var groupCreatorId = HttpContext.User.GetIdClaim();
         return Ok(await _groupService.GetAllGroupsInfoAsync(groupCreatorId));
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<GroupDto>> CreateGroupAsync(NewGroupDto newGroupDto)
+    {
+        var currentUserId = HttpContext.User.GetIdClaim();
+        newGroupDto.CreatorId ??= currentUserId;
+        return currentUserId == newGroupDto.CreatorId
+            ? Ok(await _groupService.CreateGroupAsync(newGroupDto))
+            : BadRequest();
+    }
+
+    [HttpPost("member")]
+    public async Task<ActionResult<GroupDto>> AddGroupMemberAsync(NewGroupMemberDto newGroupMemberDto)
+    {
+        return Ok(await _groupService.AddGroupMemberAsync(newGroupMemberDto));
+    }
+
+    [HttpDelete("{groupId:int}")]
+    public async Task<IActionResult> DeleteGroupAsync(int groupId)
+    {
+        return await _groupService.DeleteGroupAsync(groupId) ? Ok() : BadRequest();
     }
 }

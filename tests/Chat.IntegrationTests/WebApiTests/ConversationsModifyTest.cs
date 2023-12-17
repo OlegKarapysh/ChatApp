@@ -82,7 +82,7 @@ public sealed class ConversationsModifyTest : IClassFixture<IntegrationTest>
         await _test.LoginAsync();
         const int conversationId = 21;
         const string allIdsRoute = "api/conversations/all-ids";
-        var newGroupMemberDto = new NewGroupMemberDto { ConversationId = conversationId, MemberUserName = "OlehKarapysh" };
+        var newGroupMemberDto = new NewConversationMemberDto { ConversationId = conversationId, MemberUserName = "OlehKarapysh" };
 
         // Act.
         var userConversationIdsBeforeAdding = await _test.HttpClient.GetFromJsonAsync<IList<int>>(allIdsRoute);
@@ -108,7 +108,7 @@ public sealed class ConversationsModifyTest : IClassFixture<IntegrationTest>
         await _test.LoginAsync();
         const int conversationId = 21;
         const string fakeUserName = "3fahne9uaeasdfa32";
-        var newGroupMemberDto = new NewGroupMemberDto { ConversationId = conversationId, MemberUserName = fakeUserName };
+        var newGroupMemberDto = new NewConversationMemberDto { ConversationId = conversationId, MemberUserName = fakeUserName };
 
         // Act.
         var response = await _test.HttpClient.PostAsJsonAsync("api/conversations/members", newGroupMemberDto);

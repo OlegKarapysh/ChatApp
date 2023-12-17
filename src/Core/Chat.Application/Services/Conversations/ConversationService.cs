@@ -31,19 +31,19 @@ public sealed class ConversationService : IConversationService
     {
         return (await _participantsRepository
             .FindAllAsync(x => x.UserId == userId))
-            .Select(x => x.ConversationId)
+            .Select(x => x.ConversationId ?? default)
             .ToArray();
     }
 
-    public async Task<ConversationDto> AddGroupMemberAsync(NewGroupMemberDto groupMemberData)
+    public async Task<ConversationDto> AddGroupMemberAsync(NewConversationMemberDto conversationMemberData)
     {
-        var conversation = await GetConversationByIdAsync(groupMemberData.ConversationId);
+        var conversation = await GetConversationByIdAsync(conversationMemberData.ConversationId);
         if (conversation.Type != ConversationType.Group)
         {
             throw new WrongConversationTypeException();
         }
         
-        var newMember = await _userService.GetUserByNameAsync(groupMemberData.MemberUserName);
+        var newMember = await _userService.GetUserByNameAsync(conversationMemberData.MemberUserName);
         conversation.Members.Add(newMember);
         _conversationsRepository.Update(conversation);
         await _unitOfWork.SaveChangesAsync();

@@ -59,9 +59,9 @@ public sealed class ConversationsController : ControllerBase
     }
 
     [HttpPost("members")]
-    public async Task<ActionResult<ConversationDto>> AddGroupMemberAsync(NewGroupMemberDto groupMemberData)
+    public async Task<ActionResult<ConversationDto>> AddGroupMemberAsync(NewConversationMemberDto conversationMemberData)
     {
-        return Ok(await _conversationService.AddGroupMemberAsync(groupMemberData));
+        return Ok(await _conversationService.AddGroupMemberAsync(conversationMemberData));
     }
     
     [HttpDelete("{conversationId:int}")]

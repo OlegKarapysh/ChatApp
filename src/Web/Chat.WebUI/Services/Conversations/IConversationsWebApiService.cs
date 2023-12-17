@@ -12,6 +12,6 @@ public interface IConversationsWebApiService
     Task<WebApiResponse<IList<ConversationDto>>> GetAllUserConversationsAsync();
     Task<WebApiResponse<DialogDto>> CreateDialogAsync(NewDialogDto dialogData);
     Task<WebApiResponse<ConversationDto>> CreateGroupChatAsync(NewGroupChatDto groupChatData);
-    Task<WebApiResponse<ConversationDto>> AddGroupMemberAsync(NewGroupMemberDto groupMemberData);
+    Task<WebApiResponse<ConversationDto>> AddGroupMemberAsync(NewConversationMemberDto conversationMemberData);
     Task<ErrorDetailsDto?> RemoveUserFromConversationAsync(int conversationId);
 }

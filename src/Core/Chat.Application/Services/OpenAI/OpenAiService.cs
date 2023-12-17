@@ -12,13 +12,15 @@ public sealed class OpenAiService : IOpenAiService
     private const string DefaultAiModel = "gpt-4-1106-preview";
     private const string RetrievalToolName = "retrieval";
 
-    private readonly OpenAIClient _client;
+    private readonly OpenAIClient _clientHigLab;
+    private readonly global::OpenAI.OpenAIClient _clientDotNet;
 
     public OpenAiService(IConfiguration configuration)
     {
         var apiKey = configuration[OpenAiApiKeyName];
         ArgumentException.ThrowIfNullOrEmpty(apiKey);
-        _client = new OpenAIClient(apiKey);
+        _clientHigLab = new OpenAIClient(apiKey);
+        _clientDotNet = new global::OpenAI.OpenAIClient(apiKey);
     }
 
     public async Task<AssistantObjectResponse> CreateAssistantWithRetrievalAsync(
@@ -33,19 +35,24 @@ public sealed class OpenAiService : IOpenAiService
             Tools = new List<ToolObject> { new(RetrievalToolName) }
         };
 
-        return await _client.AssistantCreateAsync(assistantCreateParameter);
+        return await _clientHigLab.AssistantCreateAsync(assistantCreateParameter);
     }
 
     public async Task<AssistantObjectResponse> GetAssistantAsync(string assistantId)
     {
-        var param = new AssistantRetrieveParameter { Assistant_Id = assistantId };
-        return await _client.AssistantRetrieveAsync(param);
+        var parameter = new AssistantRetrieveParameter { Assistant_Id = assistantId };
+        return await _clientHigLab.AssistantRetrieveAsync(parameter);
+    }
+
+    public async Task<bool> DeleteAssistantAsync(string assistantId)
+    {
+        return await _clientDotNet.AssistantsEndpoint!.DeleteAssistantAsync(assistantId)!;
     }
 
     public async Task<AssistantFileObjectResponse> AddFileToAssistant(string assistantId, string fileId)
     {
-        var param = new AssistantFileCreateParameter { Assistant_Id = assistantId, File_Id = fileId };
-        return await _client.AssistantFileCreateAsync(param);
+        var parameter = new AssistantFileCreateParameter { Assistant_Id = assistantId, File_Id = fileId };
+        return await _clientHigLab.AssistantFileCreateAsync(parameter);
     }
 
     public async Task<UploadedFileDto> UploadFileAsync(IFormFile? file)
@@ -69,7 +76,7 @@ public sealed class OpenAiService : IOpenAiService
         }
         
         fileUploadParameter.SetFile(file.FileName, fileStream);
-        var fileResponse = await _client.FileUploadAsync(fileUploadParameter);
+        var fileResponse = await _clientHigLab.FileUploadAsync(fileUploadParameter);
         return fileResponse.MapToUploadedDto();
     }
 }

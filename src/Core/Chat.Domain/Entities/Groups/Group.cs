@@ -18,7 +18,7 @@ public class Group : EntityBase<int>
     public string Instructions { get; set; } = DefaultInstructions;
     [MaxLength(MaxIdLength)]
     public string AssistantId { get; set; } = string.Empty;
-    public int CreatorId { get; set; }
+    public int? CreatorId { get; set; }
     public User? Creator { get; set; }
     public IList<User> Members { get; set; } = new List<User>();
     public IList<GroupMember> GroupMembers { get; set; } = new List<GroupMember>();

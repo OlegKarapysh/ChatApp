@@ -58,4 +58,18 @@ public sealed class EfRepository<T, TId> : IRepository<T, TId>
         _dbContext.Set<T>().Remove(entity);
         return true;
     }
+
+    public async Task<bool> RemoveRangeAsync(IEnumerable<TId> entityIds)
+    {
+        var hasUnsuccessfulDeletions = true;
+        foreach (var id in entityIds)
+        {
+            if (!await RemoveAsync(id))
+            {
+                hasUnsuccessfulDeletions = false;
+            }
+        }
+
+        return hasUnsuccessfulDeletions;
+    }
 }

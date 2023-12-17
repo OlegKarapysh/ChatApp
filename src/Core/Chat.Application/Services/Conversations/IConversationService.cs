@@ -11,7 +11,7 @@ public interface IConversationService
     Task<ConversationsPageDto> SearchConversationsPagedAsync(PagedSearchDto searchData);
     Task<DialogDto> CreateOrGetDialogAsync(NewDialogDto newDialogData);
     Task<ConversationDto> CreateOrGetGroupChatAsync(NewGroupChatDto newGroupChatData);
-    Task<ConversationDto> AddGroupMemberAsync(NewGroupMemberDto groupMemberData);
+    Task<ConversationDto> AddGroupMemberAsync(NewConversationMemberDto conversationMemberData);
     Task<bool> RemoveUserFromConversationAsync(int conversationId, int userId);
     Task<Conversation> GetConversationByIdAsync(int id);
 }

@@ -172,7 +172,7 @@
 
     private async Task AddUserToGroupAsync()
     {
-        var newMemberData = new NewGroupMemberDto
+        var newMemberData = new NewConversationMemberDto
         {
             ConversationId = int.Parse(ConversationId),
             MemberUserName = UserName

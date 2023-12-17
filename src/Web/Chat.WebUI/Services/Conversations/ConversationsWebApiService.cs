@@ -42,9 +42,9 @@ public class ConversationsWebApiService : WebApiServiceBase, IConversationsWebAp
         return await PostAsync<ConversationDto, NewGroupChatDto>(groupChatData, "/groups");
     }
 
-    public async Task<WebApiResponse<ConversationDto>> AddGroupMemberAsync(NewGroupMemberDto groupMemberData)
+    public async Task<WebApiResponse<ConversationDto>> AddGroupMemberAsync(NewConversationMemberDto conversationMemberData)
     {
-        return await PostAsync<ConversationDto, NewGroupMemberDto>(groupMemberData, "/members");
+        return await PostAsync<ConversationDto, NewConversationMemberDto>(conversationMemberData, "/members");
     }
 
     public async Task<ErrorDetailsDto?> RemoveUserFromConversationAsync(int conversationId)

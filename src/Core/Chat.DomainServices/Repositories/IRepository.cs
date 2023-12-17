@@ -17,5 +17,6 @@ public interface IRepository<T, TId>
     Task<T?> FindFirstAsync(Expression<Func<T, bool>> predicate);
     Task<T> AddAsync(T entity);
     Task<bool> RemoveAsync(TId id);
+    Task<bool> RemoveRangeAsync(IEnumerable<TId> entityIds);
     T Update(T entity);
 }

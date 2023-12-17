@@ -232,7 +232,7 @@ public sealed class ConversationServiceTest
     public void AddGroupMemberAsync_ThrowsWrongConversationTypeException_WhenWrongConversationType()
     {
         // Arrange.
-        var newMemberDto = new NewGroupMemberDto { ConversationId = Id };
+        var newMemberDto = new NewConversationMemberDto { ConversationId = Id };
         var conversation = new Conversation { Type = ConversationType.Dialog, Id = Id };
         _conversationsRepositoryMock.Setup(x => x.GetByIdAsync(newMemberDto.ConversationId))
                                     .ReturnsAsync(conversation);
@@ -248,7 +248,7 @@ public sealed class ConversationServiceTest
     public async Task AddGroupMemberAsync_AddsNewGroupMemberAndReturnsGroupDto_WhenValidGroupMemberDto()
     {
         // Arrange.
-        var newMemberDto = new NewGroupMemberDto { ConversationId = Id, MemberUserName = UserName };
+        var newMemberDto = new NewConversationMemberDto { ConversationId = Id, MemberUserName = UserName };
         var member = new User { Id = Id, UserName = UserName };
         var conversation = new Conversation { Id = Id, Title = "title1", Type = ConversationType.Group };
         _conversationsRepositoryMock.Setup(x => x.GetByIdAsync(Id)).ReturnsAsync(conversation);

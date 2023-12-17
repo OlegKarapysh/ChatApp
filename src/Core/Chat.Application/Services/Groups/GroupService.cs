@@ -1,21 +1,24 @@
-﻿using Chat.Application.Mappings;
+﻿using Microsoft.EntityFrameworkCore;
+using Chat.Application.Mappings;
 using Chat.Application.RequestExceptions;
 using Chat.Application.Services.OpenAI;
 using Chat.Application.Services.Users;
 using Chat.Domain.DTOs.Groups;
+using Chat.Domain.Entities;
 using Chat.Domain.Entities.Groups;
 using Chat.DomainServices.Repositories;
 using Chat.DomainServices.UnitsOfWork;
-using Microsoft.EntityFrameworkCore;
 
 namespace Chat.Application.Services.Groups;
 
 public sealed class GroupService : IGroupService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IRepository<Group, int> _groupRepository;
     private readonly IUserService _userService;
     private readonly IOpenAiService _openAiService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IRepository<Group, int> _groupRepository;
+    private readonly IRepository<GroupMember, int> _groupMembersRepository;
+    private readonly IRepository<AssistantFile, int> _filesRepository;
 
     public GroupService(IUserService userService, IUnitOfWork unitOfWork, IOpenAiService openAiService)
     {
@@ -23,13 +26,25 @@ public sealed class GroupService : IGroupService
         _unitOfWork = unitOfWork;
         _openAiService = openAiService;
         _groupRepository = _unitOfWork.GetRepository<Group, int>();
+        _groupMembersRepository = _unitOfWork.GetRepository<GroupMember, int>();
+        _filesRepository = _unitOfWork.GetRepository<AssistantFile, int>();
+    }
+    
+    public async Task<IList<GroupInfoDto>> GetAllGroupsInfoAsync(int groupCreatorId)
+    {
+        var creator = await _userService.GetUserByIdAsync(groupCreatorId);
+        var groupsInfo = await GetGroupsWithFilesAndMembers()
+                               .Where(x => x.CreatorId == creator.Id)
+                               .Select(x => x.MapToInfoDto())
+                               .ToListAsync();
+        return groupsInfo;
     }
 
     public async Task<GroupDto> CreateGroupAsync(NewGroupDto newGroupDto)
     {
         if (newGroupDto.CreatorId is null)
         {
-            throw new EntityNotFoundException("User");
+            throw new EntityNotFoundException(nameof(User));
         }
         
         var creator = await _userService.GetUserByIdAsync((int)newGroupDto.CreatorId);
@@ -52,15 +67,41 @@ public sealed class GroupService : IGroupService
         return createdGroup.MapToDto();
     }
 
-    public async Task<IList<GroupInfoDto>> GetAllGroupsInfoAsync(int groupCreatorId)
+    public async Task<bool> DeleteGroupAsync(int groupId)
     {
-        var creator = await _userService.GetUserByIdAsync(groupCreatorId);
-        var groupsInfo = await _groupRepository.AsQueryable()
-                                               .Include(x => x.Files)
-                                               .Include(x => x.Members)
-                                               .Where(x => x.CreatorId == creator.Id)
-                                               .Select(x => x.MapToInfoDto())
-                                               .ToListAsync();
-        return groupsInfo;
+        var group = await GetGroupsWithFilesAndMembers().FirstOrDefaultAsync(x => x.Id == groupId)
+                    ?? throw new EntityNotFoundException(nameof(Group));
+        var isAssistantDeleted = await _openAiService.DeleteAssistantAsync(group.AssistantId);
+        var areMembersDeleted = await _groupMembersRepository.RemoveRangeAsync(group.GroupMembers.Select(x => x.Id));
+        var areFilesDeleted = await _filesRepository.RemoveRangeAsync(group.Files.Select(x => x.Id));
+        // await _unitOfWork.SaveChangesAsync();
+        var isGroupDeleted = await _groupRepository.RemoveAsync(group.Id);
+        await _unitOfWork.SaveChangesAsync();
+        
+        return isAssistantDeleted && areFilesDeleted && areMembersDeleted && isGroupDeleted;
+    }
+
+    public async Task<GroupDto> AddGroupMemberAsync(NewGroupMemberDto newGroupMemberDto)
+    {
+        var group = await GetGroupByIdAsync(newGroupMemberDto.GroupId);
+        var member = await _userService.GetUserByNameAsync(newGroupMemberDto.MemberUserName);
+        group.Members.Add(member);
+        _groupRepository.Update(group);
+        await _unitOfWork.SaveChangesAsync();
+
+        return group.MapToDto();
+    }
+    
+    public async Task<Group> GetGroupByIdAsync(int id)
+    {
+        return await _groupRepository.GetByIdAsync(id) ?? throw new EntityNotFoundException(nameof(Group), nameof(Group.Id));
+    }
+    
+    private IQueryable<Group> GetGroupsWithFilesAndMembers()
+    {
+        return _groupRepository.AsQueryable()
+                               .Include(x => x.Files)
+                               .Include(x => x.Members)
+                               .Include(x => x.GroupMembers);
     }
 }

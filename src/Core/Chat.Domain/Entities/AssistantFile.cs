@@ -14,6 +14,6 @@ public class AssistantFile : AuditableEntityBase<int>
     [MaxLength(MaxIdLength)]
     public string FileId { get; set; } = string.Empty;
     public int SizeInBytes { get; set; }
-    public int GroupId { get; set; }
+    public int? GroupId { get; set; }
     public Group? Group { get; set; }
 }
