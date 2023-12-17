@@ -1,0 +1,100 @@
+﻿@page "/groups-ai"
+
+@attribute [Authorize]
+
+@inject IToastService ToastService
+@inject IOpenAiWebApiService OpenAiService
+@inject IGroupsWebApiService GroupService
+@inject SpinnerService Spinner
+
+<h1>Your groups</h1>
+
+<RadzenDataGrid TItem="GroupInfoDto" Data="Groups" AllowColumnResize="true" AllowAlternatingRows="false">
+    <HeaderTemplate>
+        <RadzenButton>Create new group</RadzenButton>
+    </HeaderTemplate>
+    <EmptyTemplate>
+        <NoResultsInGridComponent></NoResultsInGridComponent>
+    </EmptyTemplate>
+    <Columns>
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="Name" Title="Group name">
+            <FooterTemplate>
+                Total groups: <strong>@GroupsCount</strong>
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="MembersCount" Width="120px" Title="Members count"/>
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="FilesCount" Width="100px" Title="Files count"/>
+        <RadzenDataGridColumn TItem="GroupInfoDto" Title="Actions">
+            <Template Context="data">
+                <RadzenButton ButtonStyle="ButtonStyle.Secondary">Edit</RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Light">Members</RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Light">Files</RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger">Delete</RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+<RadzenPager @ref="Pager" PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
+             AlwaysVisible="true" Count="GroupsCount"></RadzenPager>
+
+
+<div class="col-md-4 p-3">
+    <RadzenCard>
+        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Single file upload</RadzenText>
+        <InputFile accept="@AcceptableFileExtensions" OnChange="OnFileUploaded"></InputFile>
+    </RadzenCard>
+</div>
+<div>
+    <RadzenButton Click="Submit" Disabled="@(File is null)"></RadzenButton>
+</div>
+
+@code 
+{
+    public const string Path = "groups-ai";
+    public const int DefaultPageNumbersCount = 3;
+
+    public List<GroupInfoDto> Groups = new();
+    public int GroupsCount => Groups.Count;
+    public RadzenPager Pager { get; set; } = default!;
+    
+    public string AcceptableFileExtensions { get; } = string.Join(',', IOpenAiService.AcceptableFileExtensions);
+    public IBrowserFile? File;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var groupsResponse = await GroupService!.GetAllGroupsInfoAsync();
+        if (groupsResponse is { IsSuccessful: true, Content: not null })
+        {
+            Groups = groupsResponse.Content.ToList();
+        }
+        else if (groupsResponse.ErrorDetails is not null)
+        {
+            ToastService!.ShowError(groupsResponse.ErrorDetails.Message);
+        }
+    }
+
+    private void OnFileUploaded(InputFileChangeEventArgs fileArgs)
+    {
+        File = fileArgs.File;
+    }
+
+    private async Task Submit()
+    {
+        if (File is null)
+        {
+            return;
+        }
+        
+        Spinner!.Show();
+        var response = await OpenAiService!.UploadFileAsync(File);
+        if (response.IsSuccessful)
+        {
+            ToastService!.ShowSuccess($"{File.Name} has been uploaded");
+        }
+        else if (response.ErrorDetails is not null)
+        {
+            ToastService!.ShowError(response.ErrorDetails.Message);
+        }
+        Spinner.Hide();
+    }
+}

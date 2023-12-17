@@ -9,10 +9,21 @@ public static class GroupMappings
     {
         return new GroupDto
         {
+            Id = group.Id,
             Name = group.Name,
             Instructions = group.Instructions,
             AssistantId = group.AssistantId,
             CreatorId = group.CreatorId
+        };
+    }
+
+    public static GroupInfoDto MapToInfoDto(this Group group)
+    {
+        return new GroupInfoDto
+        {
+            Name = group.Name,
+            FilesCount = group.Files.Count,
+            MembersCount = group.Members.Count
         };
     }
 }

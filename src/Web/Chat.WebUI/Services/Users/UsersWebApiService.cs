@@ -8,12 +8,11 @@ namespace Chat.WebUI.Services.Users;
 
 public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
 {
-    private protected override string BaseRoute { get; init; }
+    private protected override string BaseRoute { get; init; } = "/users";
 
     public UsersWebApiService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenService)
         : base(httpClientFactory, tokenService)
     {
-        BaseRoute = "/users";
     }
 
     public async Task<WebApiResponse<IList<UserDto>>> GetAllUsers() => await GetAsync<IList<UserDto>>("/all");

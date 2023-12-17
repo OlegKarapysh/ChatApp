@@ -8,12 +8,11 @@ namespace Chat.WebUI.Services.OpenAI;
 public class OpenAiWebApiService : WebApiServiceBase, IOpenAiWebApiService
 {
     public string FileUploadUrl => BuildFullRoute("/file");
-    private protected override string BaseRoute { get; init; }
+    private protected override string BaseRoute { get; init; } = "/openai";
 
     public OpenAiWebApiService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenService)
         : base(httpClientFactory, tokenService)
     {
-        BaseRoute = "/openai";
     }
 
     public async Task<WebApiResponse<UploadedFileDto>> UploadFileAsync(IBrowserFile file)

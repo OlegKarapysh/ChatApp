@@ -9,12 +9,11 @@ namespace Chat.WebUI.Services.Conversations;
 
 public class ConversationsWebApiService : WebApiServiceBase, IConversationsWebApiService
 {
-    private protected override string BaseRoute { get; init; }
+    private protected override string BaseRoute { get; init; } = "/conversations";
     
     public ConversationsWebApiService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenService)
         : base(httpClientFactory, tokenService)
     {
-        BaseRoute = "/conversations";
     }
     
     public async Task<WebApiResponse<ConversationsPageDto>> GetSearchedConversationsPageAsync(PagedSearchDto searchData)

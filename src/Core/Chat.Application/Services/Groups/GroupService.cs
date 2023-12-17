@@ -6,6 +6,7 @@ using Chat.Domain.DTOs.Groups;
 using Chat.Domain.Entities.Groups;
 using Chat.DomainServices.Repositories;
 using Chat.DomainServices.UnitsOfWork;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chat.Application.Services.Groups;
 
@@ -26,7 +27,12 @@ public sealed class GroupService : IGroupService
 
     public async Task<GroupDto> CreateGroupAsync(NewGroupDto newGroupDto)
     {
-        var creator = await _userService.GetUserByIdAsync(newGroupDto.CreatorId);
+        if (newGroupDto.CreatorId is null)
+        {
+            throw new EntityNotFoundException("User");
+        }
+        
+        var creator = await _userService.GetUserByIdAsync((int)newGroupDto.CreatorId);
         if (await _groupRepository.FindFirstAsync(
                 x => x.CreatorId == creator.Id && x.Name == newGroupDto.Name) is not null)
         {
@@ -44,5 +50,17 @@ public sealed class GroupService : IGroupService
         await _unitOfWork.SaveChangesAsync();
 
         return createdGroup.MapToDto();
+    }
+
+    public async Task<IList<GroupInfoDto>> GetAllGroupsInfoAsync(int groupCreatorId)
+    {
+        var creator = await _userService.GetUserByIdAsync(groupCreatorId);
+        var groupsInfo = await _groupRepository.AsQueryable()
+                                               .Include(x => x.Files)
+                                               .Include(x => x.Members)
+                                               .Where(x => x.CreatorId == creator.Id)
+                                               .Select(x => x.MapToInfoDto())
+                                               .ToListAsync();
+        return groupsInfo;
     }
 }
