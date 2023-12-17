@@ -21,6 +21,7 @@ public static class GroupMappings
     {
         return new GroupInfoDto
         {
+            Id = group.Id,
             Name = group.Name,
             FilesCount = group.Files.Count,
             MembersCount = group.Members.Count

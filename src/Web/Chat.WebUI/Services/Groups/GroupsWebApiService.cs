@@ -1,4 +1,5 @@
-﻿using Chat.Domain.DTOs.Groups;
+﻿using Chat.Domain.DTOs;
+using Chat.Domain.DTOs.Groups;
 using Chat.Domain.Web;
 using Chat.WebUI.Services.Auth;
 
@@ -16,5 +17,10 @@ public class GroupsWebApiService : WebApiServiceBase, IGroupsWebApiService
     public async Task<WebApiResponse<IList<GroupInfoDto>>> GetAllGroupsInfoAsync()
     {
         return await GetAsync<IList<GroupInfoDto>>("/all");
+    }
+
+    public async Task<ErrorDetailsDto?> DeleteGroupAsync(int groupId)
+    {
+        return await DeleteAsync($"/{groupId}");
     }
 }
