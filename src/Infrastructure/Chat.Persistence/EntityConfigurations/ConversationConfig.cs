@@ -23,9 +23,5 @@ public sealed class ConversationConfig : IEntityTypeConfiguration<Conversation>
                    r => r.HasOne(x => x.Conversation)
                          .WithMany(x => x.ConversationParticipants)
                          .HasForeignKey(x => x.ConversationId));
-
-        builder.HasMany(x => x.Threads)
-               .WithOne(x => x.Conversation)
-               .HasForeignKey(x => x.ConversationId);
     }
 }

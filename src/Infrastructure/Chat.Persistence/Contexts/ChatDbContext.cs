@@ -20,7 +20,6 @@ public class ChatDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     public DbSet<Group> Groups => Set<Group>();
     public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
     public DbSet<AssistantFile> AssistantFiles => Set<AssistantFile>();
-    public DbSet<AssistantThread> AssistantThreads => Set<AssistantThread>();
     
     public ChatDbContext()
     {
