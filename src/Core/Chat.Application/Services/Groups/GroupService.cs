@@ -3,6 +3,7 @@ using Chat.Application.Mappings;
 using Chat.Application.RequestExceptions;
 using Chat.Application.Services.OpenAI;
 using Chat.Application.Services.Users;
+using Chat.Domain.DTOs.AssistantFiles;
 using Chat.Domain.DTOs.Groups;
 using Chat.Domain.Entities;
 using Chat.Domain.Entities.Groups;
@@ -39,6 +40,15 @@ public sealed class GroupService : IGroupService
                                .ToListAsync();
         return groupsInfo;
     }
+    
+    public async Task<GroupWithFilesDto> GetGroupWithFilesAsync(int groupId)
+    {
+        var group = await _groupRepository.AsQueryable()
+                                          .Include(x => x.Files)
+                                          .FirstOrDefaultAsync(x => x.Id == groupId)
+                    ?? throw new EntityNotFoundException(nameof(Group));
+        return group.MapToWithFilesDto();
+    }
 
     public async Task<GroupDto> CreateGroupAsync(NewGroupDto newGroupDto)
     {
@@ -67,20 +77,6 @@ public sealed class GroupService : IGroupService
         return createdGroup.MapToDto();
     }
 
-    public async Task<bool> DeleteGroupAsync(int groupId)
-    {
-        var group = await GetGroupsWithFilesAndMembers().FirstOrDefaultAsync(x => x.Id == groupId)
-                    ?? throw new EntityNotFoundException(nameof(Group));
-        var isAssistantDeleted = await _openAiService.DeleteAssistantAsync(group.AssistantId);
-        var areMembersDeleted = await _groupMembersRepository.RemoveRangeAsync(group.GroupMembers.Select(x => x.Id));
-        var areFilesDeleted = await _filesRepository.RemoveRangeAsync(group.Files.Select(x => x.Id));
-        // await _unitOfWork.SaveChangesAsync();
-        var isGroupDeleted = await _groupRepository.RemoveAsync(group.Id);
-        await _unitOfWork.SaveChangesAsync();
-        
-        return isAssistantDeleted && areFilesDeleted && areMembersDeleted && isGroupDeleted;
-    }
-
     public async Task<GroupDto> AddGroupMemberAsync(NewGroupMemberDto newGroupMemberDto)
     {
         var group = await GetGroupByIdAsync(newGroupMemberDto.GroupId);
@@ -91,10 +87,52 @@ public sealed class GroupService : IGroupService
 
         return group.MapToDto();
     }
+
+    public async Task<AssistantFileDto> AddFileToGroupAsync(int groupId, UploadedFileDto uploadedFileDto)
+    {
+        var group = await GetGroupByIdAsync(groupId);
+        await _openAiService.AddFileToAssistant(group.AssistantId, uploadedFileDto.FileId);
+        var file = uploadedFileDto.MapToFile();
+        file.Group = group;
+        var addedFile = await _filesRepository.AddAsync(file);
+        await _unitOfWork.SaveChangesAsync();
+
+        return addedFile.MapToDto();
+    }
+
+    public async Task<bool> DeleteFileFromGroupAsync(int fileId, int groupId)
+    {
+        var group = await GetGroupByIdAsync(groupId);
+        var file = await GetFileByIdAsync(fileId);
+        var isFileDeletedFromOpenAi = await _openAiService.DeleteFileAsync(group.AssistantId, file.FileId);
+        var isFileDeleted = await _filesRepository.RemoveAsync(fileId);
+        await _unitOfWork.SaveChangesAsync();
+        
+        return isFileDeletedFromOpenAi && isFileDeleted;
+    }
+    
+    public async Task<bool> DeleteGroupAsync(int groupId)
+    {
+        // TODO: delete all group files from OpenAI file storage.
+        var group = await GetGroupsWithFilesAndMembers().FirstOrDefaultAsync(x => x.Id == groupId)
+                    ?? throw new EntityNotFoundException(nameof(Group));
+        var isAssistantDeleted = await _openAiService.DeleteAssistantAsync(group.AssistantId);
+        var areMembersDeleted = await _groupMembersRepository.RemoveRangeAsync(group.GroupMembers.Select(x => x.Id));
+        var areFilesDeleted = await _filesRepository.RemoveRangeAsync(group.Files.Select(x => x.Id));
+        var isGroupDeleted = await _groupRepository.RemoveAsync(group.Id);
+        await _unitOfWork.SaveChangesAsync();
+        
+        return isAssistantDeleted && areFilesDeleted && areMembersDeleted && isGroupDeleted;
+    }
     
     public async Task<Group> GetGroupByIdAsync(int id)
     {
-        return await _groupRepository.GetByIdAsync(id) ?? throw new EntityNotFoundException(nameof(Group), nameof(Group.Id));
+        return await _groupRepository.GetByIdAsync(id) ?? throw new EntityNotFoundException(nameof(Group));
+    }
+
+    public async Task<AssistantFile> GetFileByIdAsync(int id)
+    {
+        return await _filesRepository.GetByIdAsync(id) ?? throw new EntityNotFoundException(nameof(AssistantFile));
     }
     
     private IQueryable<Group> GetGroupsWithFilesAndMembers()

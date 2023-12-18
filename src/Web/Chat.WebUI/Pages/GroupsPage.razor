@@ -7,6 +7,7 @@
 @inject IGroupsWebApiService GroupService
 @inject SpinnerService Spinner
 @inject DialogService Dialog
+@inject NavigationManager Navigation
 
 <h1>Your groups</h1>
 
@@ -29,7 +30,9 @@
             <Template Context="groupInfo">
                 <RadzenButton ButtonStyle="ButtonStyle.Secondary">Edit</RadzenButton>
                 <RadzenButton ButtonStyle="ButtonStyle.Light">Members</RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Light">Files</RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Click="() => NavigateToFilesPage(groupInfo.Id)">
+                    Files
+                </RadzenButton>
                 <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="async () => await DeleteGroupAsync(groupInfo.Id)">
                     Delete
                 </RadzenButton>
@@ -40,17 +43,6 @@
 <RadzenPager PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
              AlwaysVisible="true" Count="GroupsCount"></RadzenPager>
 
-
-<div class="col-md-4 p-3">
-    <RadzenCard>
-        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Single file upload</RadzenText>
-        <InputFile accept="@AcceptableFileExtensions" OnChange="OnFileUploaded"></InputFile>
-    </RadzenCard>
-    <div>
-        <RadzenButton Click="Submit" Disabled="@(File is null)"></RadzenButton>
-    </div>
-</div>
-
 @code 
 {
     public const string Path = "groups-ai";
@@ -58,10 +50,6 @@
     
     public List<GroupInfoDto> Groups = new();
     public int GroupsCount => Groups.Count;
-    
-    public string AcceptableFileExtensions { get; } = string.Join(',', IOpenAiService.AcceptableFileExtensions);
-    public IBrowserFile? File;
-    
 
     protected override async Task OnInitializedAsync()
     {
@@ -75,31 +63,6 @@
         {
             await RefreshGroupsGrid();
         }
-    }
-
-    private void OnFileUploaded(InputFileChangeEventArgs fileArgs)
-    {
-        File = fileArgs.File;
-    }
-
-    private async Task Submit()
-    {
-        if (File is null)
-        {
-            return;
-        }
-        
-        Spinner!.Show();
-        var response = await OpenAiService!.UploadFileAsync(File);
-        if (response.IsSuccessful)
-        {
-            ToastService!.ShowSuccess($"{File.Name} has been uploaded");
-        }
-        else if (response.ErrorDetails is not null)
-        {
-            ToastService!.ShowError(response.ErrorDetails.Message);
-        }
-        Spinner.Hide();
     }
 
     private async Task DeleteGroupAsync(int groupId)
@@ -126,5 +89,10 @@
         {
             ToastService!.ShowError(groupsResponse.ErrorDetails.Message);
         }
+    }
+
+    private void NavigateToFilesPage(int groupId)
+    {
+        Navigation!.NavigateTo($"{AssistantFilesPage.Path}/{groupId}");
     }
 }

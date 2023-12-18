@@ -27,4 +27,17 @@ public static class GroupMappings
             MembersCount = group.Members.Count
         };
     }
+
+    public static GroupWithFilesDto MapToWithFilesDto(this Group group)
+    {
+        return new GroupWithFilesDto
+        {
+            Id = group.Id,
+            Name = group.Name,
+            Instructions = group.Instructions,
+            AssistantId = group.AssistantId,
+            CreatorId = group.CreatorId,
+            Files = group.Files.Select(x => x.MapToDto()).ToList()
+        };
+    }
 }

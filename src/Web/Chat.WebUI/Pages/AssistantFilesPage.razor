@@ -1,0 +1,95 @@
+﻿@page "/ai-files/{GroupId}"
+
+@attribute [Authorize]
+
+@inject IGroupsWebApiService GroupService
+@inject IToastService ToastService
+@inject DialogService Dialog
+
+<h1>@($"{GroupWithFilesDto.Name} files")</h1>
+
+<div>
+    <NavLink class="nav-link" href="@GroupsPage.Path">
+        <span class="oi oi-arrow-thick-left" aria-hidden="true"></span> 
+        Return to all groups
+    </NavLink>
+</div>
+
+<RadzenDataGrid TItem="AssistantFileDto" Data="GroupWithFilesDto.Files" AllowColumnResize="true" AllowAlternatingRows="false">
+    <HeaderTemplate>
+        <RadzenButton Click="OpenFileUploadDialog">Upload file</RadzenButton>
+    </HeaderTemplate>
+    <EmptyTemplate>
+        <NoResultsInGridComponent></NoResultsInGridComponent>
+    </EmptyTemplate>
+    <Columns>
+        <RadzenDataGridColumn TItem="AssistantFileDto" Property="Name" Title="File name">
+            <FooterTemplate>
+                Total files: <strong>@FilesCount</strong>
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="AssistantFileDto" Property="SizeInBytes" Width="150px" Title="Size in bytes"/>
+        <RadzenDataGridColumn TItem="AssistantFileDto" Property="CreatedAt" Width="180px" Title="Uploaded at"/>
+        <RadzenDataGridColumn TItem="AssistantFileDto" Title="Actions">
+            <Template Context="fileInfo">
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="async () => await DeleteFileAsync(fileInfo.Id)">
+                    Delete
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+<RadzenPager PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
+             AlwaysVisible="true" Count="FilesCount"></RadzenPager>
+
+@code 
+{
+    public const string Path = "/ai-files";
+    public const int DefaultPageNumbersCount = 3;
+
+    [Parameter]
+    public string GroupId { get; set; } = string.Empty;
+    public GroupWithFilesDto GroupWithFilesDto { get; set; } = new();
+    public int FilesCount => GroupWithFilesDto.Files.Count;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshFilesGrid();
+    }
+    
+    private async Task OpenFileUploadDialog()
+    {
+        bool? isUploaded = await Dialog!.OpenAsync<FileUploadFormComponent>(
+            "New file", new Dictionary<string, object> {{ nameof(FileUploadFormComponent.GroupIdParameter), GroupId }})!;
+        if (isUploaded is not null && (bool)isUploaded)
+        {
+            await RefreshFilesGrid();
+        }
+    }
+
+    private async Task DeleteFileAsync(int fileId)
+    {
+        var deletionError = await GroupService!.DeleteFileFromGroupAsync(fileId, int.Parse(GroupId));
+        if (deletionError is not null)
+        {
+            ToastService!.ShowError(deletionError.Message);
+        }
+        else
+        {
+            await RefreshFilesGrid();
+        }
+    }
+
+    private async Task RefreshFilesGrid()
+    {
+        var response = await GroupService!.GetGroupWithFilesAsync(int.Parse(GroupId));
+        if (response is { IsSuccessful: true, Content: not null })
+        {
+            GroupWithFilesDto = response.Content;
+        }
+        else
+        {
+            ToastService!.ShowError(response.ErrorDetails?.Message ?? "Failed to fetch group files");
+        }
+    }
+}

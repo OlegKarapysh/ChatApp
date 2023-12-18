@@ -49,6 +49,12 @@ public sealed class OpenAiService : IOpenAiService
         return await _clientDotNet.AssistantsEndpoint!.DeleteAssistantAsync(assistantId)!;
     }
 
+    public async Task<bool> DeleteFileAsync(string assistantId, string fileId)
+    {
+        var isFileRemovedFromAssistant = await _clientDotNet.AssistantsEndpoint!.RemoveFileAsync(assistantId, fileId)!;
+        return isFileRemovedFromAssistant && await _clientDotNet.FilesEndpoint!.DeleteFileAsync(fileId)!;
+    }
+
     public async Task<AssistantFileObjectResponse> AddFileToAssistant(string assistantId, string fileId)
     {
         var parameter = new AssistantFileCreateParameter { Assistant_Id = assistantId, File_Id = fileId };

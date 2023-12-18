@@ -10,6 +10,7 @@ public interface IOpenAiService
         string name, string instructions, IEnumerable<string>? fileIds = default);
     Task<AssistantObjectResponse> GetAssistantAsync(string assistantId);
     Task<bool> DeleteAssistantAsync(string assistantId);
+    Task<bool> DeleteFileAsync(string assistantId, string fileId);
     Task<AssistantFileObjectResponse> AddFileToAssistant(string assistantId, string fileId);
     Task<UploadedFileDto> UploadFileAsync(IFormFile? file);
 }

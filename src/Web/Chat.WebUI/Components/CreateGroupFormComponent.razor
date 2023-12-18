@@ -37,7 +37,7 @@
         var response = await GroupService!.CreateGroupAsync(NewGroupData);
         if (response.IsSuccessful)
         {
-            Dialog!.Close(true);
+            Dialog!.Close(response.IsSuccessful);
         }
         else
         {
