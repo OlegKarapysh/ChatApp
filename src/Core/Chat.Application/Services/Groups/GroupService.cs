@@ -113,16 +113,16 @@ public sealed class GroupService : IGroupService
     
     public async Task<bool> DeleteGroupAsync(int groupId)
     {
-        // TODO: delete all group files from OpenAI file storage.
         var group = await GetGroupsWithFilesAndMembers().FirstOrDefaultAsync(x => x.Id == groupId)
                     ?? throw new EntityNotFoundException(nameof(Group));
+        var areFilesDeleted = await DeleteFilesFromStorageAsync(group);
         var isAssistantDeleted = await _openAiService.DeleteAssistantAsync(group.AssistantId);
         var areMembersDeleted = await _groupMembersRepository.RemoveRangeAsync(group.GroupMembers.Select(x => x.Id));
-        var areFilesDeleted = await _filesRepository.RemoveRangeAsync(group.Files.Select(x => x.Id));
+        var areFilesRemoved = await _filesRepository.RemoveRangeAsync(group.Files.Select(x => x.Id));
         var isGroupDeleted = await _groupRepository.RemoveAsync(group.Id);
         await _unitOfWork.SaveChangesAsync();
         
-        return isAssistantDeleted && areFilesDeleted && areMembersDeleted && isGroupDeleted;
+        return areFilesRemoved && isAssistantDeleted && areFilesDeleted && areMembersDeleted && isGroupDeleted;
     }
     
     public async Task<Group> GetGroupByIdAsync(int id)
@@ -133,6 +133,20 @@ public sealed class GroupService : IGroupService
     public async Task<AssistantFile> GetFileByIdAsync(int id)
     {
         return await _filesRepository.GetByIdAsync(id) ?? throw new EntityNotFoundException(nameof(AssistantFile));
+    }
+
+    private async Task<bool> DeleteFilesFromStorageAsync(Group group)
+    {
+        var areAllDeleted = true;
+        foreach (var file in group.Files)
+        {
+            if (!await _openAiService.DeleteFileAsync(group.AssistantId, file.FileId))
+            {
+                areAllDeleted = false;
+            }
+        }
+
+        return areAllDeleted;
     }
     
     private IQueryable<Group> GetGroupsWithFilesAndMembers()
