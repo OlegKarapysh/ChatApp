@@ -20,6 +20,11 @@ public class GroupsWebApiService : WebApiServiceBase, IGroupsWebApiService
         return await GetAsync<IList<GroupInfoDto>>("/all");
     }
 
+    public async Task<WebApiResponse<GroupWithMembersDto>> GetGroupWithMembersAsync(int groupId)
+    {
+        return await GetAsync<GroupWithMembersDto>($"/{groupId}/members");
+    }
+
     public async Task<WebApiResponse<GroupWithFilesDto>> GetGroupWithFilesAsync(int groupId)
     {
         return await GetAsync<GroupWithFilesDto>($"/{groupId}/files");
@@ -28,6 +33,11 @@ public class GroupsWebApiService : WebApiServiceBase, IGroupsWebApiService
     public async Task<WebApiResponse<GroupDto>> CreateGroupAsync(NewGroupDto newGroupDto)
     {
         return await PostAsync<GroupDto, NewGroupDto>(newGroupDto);
+    }
+
+    public async Task<WebApiResponse<GroupDto>> AddGroupMemberAsync(NewGroupMemberDto newGroupMemberDto)
+    {
+        return await PostAsync<GroupDto, NewGroupMemberDto>(newGroupMemberDto, "/members");
     }
 
     public async Task<WebApiResponse<AssistantFileDto>> AddFileToGroupAsync(int groupId, UploadedFileDto uploadedFileDto)

@@ -23,6 +23,12 @@ public sealed class GroupsController : ControllerBase
         var groupCreatorId = HttpContext.User.GetIdClaim();
         return Ok(await _groupService.GetAllGroupsInfoAsync(groupCreatorId));
     }
+
+    [HttpGet("{id:int}/members")]
+    public async Task<ActionResult<GroupWithMembersDto>> GetGroupWithMembersAsync(int id)
+    {
+        return Ok(await _groupService.GetGroupWithMembersAsync(id));
+    }
     
     [HttpGet("{id:int}/files")]
     public async Task<ActionResult<GroupWithFilesDto>> GetGroupWithFilesAsync(int id)
@@ -46,7 +52,7 @@ public sealed class GroupsController : ControllerBase
             : BadRequest();
     }
 
-    [HttpPost("member")]
+    [HttpPost("members")]
     public async Task<ActionResult<GroupDto>> AddGroupMemberAsync(NewGroupMemberDto newGroupMemberDto)
     {
         return Ok(await _groupService.AddGroupMemberAsync(newGroupMemberDto));

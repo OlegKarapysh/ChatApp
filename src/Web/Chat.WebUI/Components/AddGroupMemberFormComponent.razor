@@ -1,0 +1,56 @@
+﻿@inject IGroupsWebApiService GroupService
+@inject IToastService ToastService
+@inject DialogService Dialog
+
+<div class="card-body">
+    <EditForm Model="@NewMemberDto" OnValidSubmit="SubmitNewMember">
+        <DataAnnotationsValidator />
+        <ValidationSummary style="color:indianred" Model="@NewMemberDto" />
+        <div class="form-group">
+            <label for="name" class="form-label">Username:</label>
+            <InputText id="name" class="form-control" placeholder="Username..."
+                       @bind-Value="@NewMemberDto.MemberUserName"></InputText>
+            <ValidationMessage For="() => NewMemberDto.MemberUserName"></ValidationMessage>
+        </div>
+
+        <div class="form-group mt-2">
+            <button class="btn btn-outline-primary float-end" disabled="@IsSubmitDisabled" type="submit">Add</button>
+        </div>
+    </EditForm>
+</div>
+
+@code 
+{
+    [Parameter]
+    public object GroupIdParameter { get; set; } = default!;
+    public NewGroupMemberDto NewMemberDto { get; set; } = new();
+    public bool IsSubmitDisabled { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        try
+        {
+            NewMemberDto.GroupId = Convert.ToInt32(GroupIdParameter);
+        }
+        catch
+        {
+            ToastService!.ShowError("Failed to load the group");
+            Dialog!.Close();
+        }
+    }
+
+    private async Task SubmitNewMember()
+    {
+        IsSubmitDisabled = true;
+        var response = await GroupService!.AddGroupMemberAsync(NewMemberDto);
+        if (response.IsSuccessful)
+        {
+            Dialog!.Close(response.IsSuccessful);
+        }
+        else
+        {
+            ToastService!.ShowError(response.ErrorDetails?.Message ?? "Failed to add a member to this group");
+        }
+        IsSubmitDisabled = false;
+    }
+}

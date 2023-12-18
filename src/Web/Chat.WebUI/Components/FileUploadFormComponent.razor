@@ -30,9 +30,8 @@
         {
             GroupId = Convert.ToInt32(GroupIdParameter);
         }
-        catch (Exception e)
+        catch
         {
-            Console.WriteLine(e.Message);
             ToastService!.ShowError("Failed to load the group");
             Dialog!.Close();
         }

@@ -8,12 +8,7 @@
 
 <h1>@($"{GroupWithFilesDto.Name} files")</h1>
 
-<div>
-    <NavLink class="nav-link" href="@GroupsPage.Path">
-        <span class="oi oi-arrow-thick-left" aria-hidden="true"></span> 
-        Return to all groups
-    </NavLink>
-</div>
+<LinkToGroupsComponent></LinkToGroupsComponent>
 
 <RadzenDataGrid TItem="AssistantFileDto" Data="GroupWithFilesDto.Files" AllowColumnResize="true" AllowAlternatingRows="false">
     <HeaderTemplate>

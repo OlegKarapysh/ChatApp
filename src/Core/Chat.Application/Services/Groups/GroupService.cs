@@ -50,6 +50,15 @@ public sealed class GroupService : IGroupService
         return group.MapToWithFilesDto();
     }
 
+    public async Task<GroupWithMembersDto> GetGroupWithMembersAsync(int groupId)
+    {
+        var group = await _groupRepository.AsQueryable()
+                                          .Include(x => x.Members)
+                                          .FirstOrDefaultAsync(x => x.Id == groupId)
+                    ?? throw new EntityNotFoundException(nameof(Group));
+        return group.MapToWithMembersDto();
+    }
+
     public async Task<GroupDto> CreateGroupAsync(NewGroupDto newGroupDto)
     {
         if (newGroupDto.CreatorId is null)

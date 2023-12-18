@@ -1,0 +1,90 @@
+﻿@page "/ai-group-members/{GroupId}"
+
+@attribute [Authorize]
+
+@inject IGroupsWebApiService GroupService
+@inject IToastService ToastService
+@inject DialogService Dialog
+
+<h1>@($"{GroupWithMembersDto.Name} members")</h1>
+
+<LinkToGroupsComponent></LinkToGroupsComponent>
+
+<RadzenDataGrid TItem="UserDto" Data="GroupWithMembersDto.Members" AllowColumnResize="true" AllowAlternatingRows="false">
+    <HeaderTemplate>
+        <RadzenButton Click="OpenAddMemberDialog">Add member</RadzenButton>
+    </HeaderTemplate>
+    <EmptyTemplate>
+        <NoResultsInGridComponent></NoResultsInGridComponent>
+    </EmptyTemplate>
+    <Columns>
+        <RadzenDataGridColumn TItem="UserDto" Property="@nameof(UserDto.UserName)" Title="Username">
+            <FooterTemplate>
+                Total members: <strong>@MembersCount</strong>
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="UserDto" Property="@nameof(UserDto.FirstName)" Title="First name"/>
+        <RadzenDataGridColumn TItem="UserDto" Property="@nameof(UserDto.LastName)"  Title="Last name"/>
+        <RadzenDataGridColumn TItem="UserDto" Title="Actions">
+            <Template Context="userInfo">
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="async () => await DeleteMemberAsync(userInfo.UserName)">
+                    Delete
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+<RadzenPager PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
+             AlwaysVisible="true" Count="MembersCount"></RadzenPager>
+
+@code 
+{
+    public const string Path = "/ai-group-members";
+    public const int DefaultPageNumbersCount = 3;
+
+    [Parameter]
+    public string GroupId { get; set; } = string.Empty;
+    public GroupWithMembersDto GroupWithMembersDto { get; set; } = new();
+    public int MembersCount => GroupWithMembersDto.Members.Count;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshFilesGrid();
+    }
+    
+    private async Task OpenAddMemberDialog()
+    {
+        bool? isAdded = await Dialog!.OpenAsync<AddGroupMemberFormComponent>(
+            "New member", new Dictionary<string, object> {{ nameof(AddGroupMemberFormComponent.GroupIdParameter), GroupId }})!;
+        if (isAdded is not null && (bool)isAdded)
+        {
+            await RefreshFilesGrid();
+        }
+    }
+
+    private async Task DeleteMemberAsync(string userName)
+    {
+        // var deletionError = await GroupService!.DeleteFileFromGroupAsync(fileId, int.Parse(GroupId));
+        // if (deletionError is not null)
+        // {
+        //     ToastService!.ShowError(deletionError.Message);
+        // }
+        // else
+        // {
+        //     await RefreshFilesGrid();
+        // }
+    }
+
+    private async Task RefreshFilesGrid()
+    {
+        var response = await GroupService!.GetGroupWithMembersAsync(int.Parse(GroupId));
+        if (response is { IsSuccessful: true, Content: not null })
+        {
+            GroupWithMembersDto = response.Content;
+        }
+        else
+        {
+            ToastService!.ShowError(response.ErrorDetails?.Message ?? "Failed to fetch group members");
+        }
+    }
+}

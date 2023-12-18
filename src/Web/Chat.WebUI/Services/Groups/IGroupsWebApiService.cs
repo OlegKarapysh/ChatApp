@@ -9,7 +9,9 @@ public interface IGroupsWebApiService
 {
     Task<WebApiResponse<IList<GroupInfoDto>>> GetAllGroupsInfoAsync();
     Task<WebApiResponse<GroupWithFilesDto>> GetGroupWithFilesAsync(int groupId);
+    Task<WebApiResponse<GroupWithMembersDto>> GetGroupWithMembersAsync(int groupId);
     Task<WebApiResponse<GroupDto>> CreateGroupAsync(NewGroupDto newGroupDto);
+    Task<WebApiResponse<GroupDto>> AddGroupMemberAsync(NewGroupMemberDto newGroupMemberDto);
     Task<WebApiResponse<AssistantFileDto>> AddFileToGroupAsync(int groupId, UploadedFileDto uploadedFileDto);
     Task<ErrorDetailsDto?> DeleteFileFromGroupAsync(int fileId, int groupId);
     Task<ErrorDetailsDto?> DeleteGroupAsync(int groupId);

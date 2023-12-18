@@ -3,9 +3,7 @@
 @attribute [Authorize]
 
 @inject IToastService ToastService
-@inject IOpenAiWebApiService OpenAiService
 @inject IGroupsWebApiService GroupService
-@inject SpinnerService Spinner
 @inject DialogService Dialog
 @inject NavigationManager Navigation
 
@@ -25,11 +23,13 @@
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TItem="GroupInfoDto" Property="MembersCount" Width="120px" Title="Members count"/>
-        <RadzenDataGridColumn TItem="GroupInfoDto" Property="FilesCount" Width="100px" Title="Files count"/>
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="MembersCount" Width="100px" Title="Files count"/>
         <RadzenDataGridColumn TItem="GroupInfoDto" Title="Actions">
             <Template Context="groupInfo">
                 <RadzenButton ButtonStyle="ButtonStyle.Secondary">Edit</RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Light">Members</RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Click="() => NavigateToMembersPage(groupInfo.Id)">
+                    Members
+                </RadzenButton>
                 <RadzenButton ButtonStyle="ButtonStyle.Light" Click="() => NavigateToFilesPage(groupInfo.Id)">
                     Files
                 </RadzenButton>
@@ -94,5 +94,10 @@
     private void NavigateToFilesPage(int groupId)
     {
         Navigation!.NavigateTo($"{AssistantFilesPage.Path}/{groupId}");
+    }
+
+    private void NavigateToMembersPage(int groupId)
+    {
+        Navigation!.NavigateTo($"{GroupMembersPage.Path}/{groupId}");
     }
 }

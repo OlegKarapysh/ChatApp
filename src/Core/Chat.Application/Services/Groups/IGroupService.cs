@@ -7,6 +7,7 @@ public interface IGroupService
 {
     Task<IList<GroupInfoDto>> GetAllGroupsInfoAsync(int groupCreatorId);
     Task<GroupWithFilesDto> GetGroupWithFilesAsync(int groupId);
+    Task<GroupWithMembersDto> GetGroupWithMembersAsync(int groupId);
     Task<GroupDto> CreateGroupAsync(NewGroupDto newGroupDto);
     Task<GroupDto> AddGroupMemberAsync(NewGroupMemberDto newGroupMemberDto);
     Task<AssistantFileDto> AddFileToGroupAsync(int groupId, UploadedFileDto uploadedFileDto);
