@@ -19,6 +19,11 @@ public class GroupsWebApiService : WebApiServiceBase, IGroupsWebApiService
         return await GetAsync<IList<GroupInfoDto>>("/all");
     }
 
+    public async Task<WebApiResponse<GroupDto>> CreateGroupAsync(NewGroupDto newGroupDto)
+    {
+        return await PostAsync<GroupDto, NewGroupDto>(newGroupDto);
+    }
+
     public async Task<ErrorDetailsDto?> DeleteGroupAsync(int groupId)
     {
         return await DeleteAsync($"/{groupId}");

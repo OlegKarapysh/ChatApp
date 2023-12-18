@@ -6,12 +6,13 @@
 @inject IOpenAiWebApiService OpenAiService
 @inject IGroupsWebApiService GroupService
 @inject SpinnerService Spinner
+@inject DialogService Dialog
 
 <h1>Your groups</h1>
 
 <RadzenDataGrid TItem="GroupInfoDto" Data="Groups" AllowColumnResize="true" AllowAlternatingRows="false">
     <HeaderTemplate>
-        <RadzenButton>Create new group</RadzenButton>
+        <RadzenButton Click="OpenCreateGroupDialog">Create new group</RadzenButton>
     </HeaderTemplate>
     <EmptyTemplate>
         <NoResultsInGridComponent></NoResultsInGridComponent>
@@ -36,7 +37,7 @@
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
-<RadzenPager @ref="Pager" PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
+<RadzenPager PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
              AlwaysVisible="true" Count="GroupsCount"></RadzenPager>
 
 
@@ -45,9 +46,9 @@
         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Single file upload</RadzenText>
         <InputFile accept="@AcceptableFileExtensions" OnChange="OnFileUploaded"></InputFile>
     </RadzenCard>
-</div>
-<div>
-    <RadzenButton Click="Submit" Disabled="@(File is null)"></RadzenButton>
+    <div>
+        <RadzenButton Click="Submit" Disabled="@(File is null)"></RadzenButton>
+    </div>
 </div>
 
 @code 
@@ -57,15 +58,23 @@
     
     public List<GroupInfoDto> Groups = new();
     public int GroupsCount => Groups.Count;
-    public int CurrentPage { get; set; }
-    public RadzenPager Pager { get; set; } = default!;
     
     public string AcceptableFileExtensions { get; } = string.Join(',', IOpenAiService.AcceptableFileExtensions);
     public IBrowserFile? File;
+    
 
     protected override async Task OnInitializedAsync()
     {
         await RefreshGroupsGrid();
+    }
+
+    private async Task OpenCreateGroupDialog()
+    {
+        bool? isCreated = await Dialog!.OpenAsync<CreateGroupFormComponent>("New group")!;
+        if (isCreated is not null && (bool)isCreated)
+        {
+            await RefreshGroupsGrid();
+        }
     }
 
     private void OnFileUploaded(InputFileChangeEventArgs fileArgs)
