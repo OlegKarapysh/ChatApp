@@ -85,4 +85,14 @@ public sealed class OpenAiService : IOpenAiService
         var fileResponse = await _clientHigLab.FileUploadAsync(fileUploadParameter);
         return fileResponse.MapToUploadedDto();
     }
+
+    public async Task<ThreadObjectResponse> CreateThreadAsync()
+    {
+        return await _clientHigLab.ThreadCreateAsync();
+    }
+
+    // public async Task<Type> SendMessageAsync(string message, string assistantId, string threadId)
+    // {
+    //     
+    // }
 }

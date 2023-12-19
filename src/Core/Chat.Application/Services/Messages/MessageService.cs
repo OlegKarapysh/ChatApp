@@ -14,14 +14,14 @@ namespace Chat.Application.Services.Messages;
 
 public sealed class MessageService : IMessageService
 {
+    private readonly IUserService _userService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IRepository<Message, int> _messageRepository;
-    private readonly IUserService _userService;
 
-    public MessageService(IUnitOfWork unitOfWork, IUserService userService)
+    public MessageService(IUserService userService, IUnitOfWork unitOfWork)
     {
-        _unitOfWork = unitOfWork;
         _userService = userService;
+        _unitOfWork = unitOfWork;
         _messageRepository = _unitOfWork.GetRepository<Message, int>();
     }
     

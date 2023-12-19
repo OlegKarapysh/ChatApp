@@ -13,4 +13,5 @@ public interface IOpenAiService
     Task<bool> DeleteFileAsync(string assistantId, string fileId);
     Task<AssistantFileObjectResponse> AddFileToAssistant(string assistantId, string fileId);
     Task<UploadedFileDto> UploadFileAsync(IFormFile? file);
+    Task<ThreadObjectResponse> CreateThreadAsync();
 }

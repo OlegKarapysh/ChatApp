@@ -90,7 +90,18 @@ public sealed class GroupService : IGroupService
     {
         var group = await GetGroupByIdAsync(newGroupMemberDto.GroupId);
         var member = await _userService.GetUserByNameAsync(newGroupMemberDto.MemberUserName);
-        group.Members.Add(member);
+        var groups = await _groupRepository.AsQueryable()
+                                           .Include(x => x.Members)
+                                           .Where(x => x.CreatorId == group.CreatorId && x.Members.Contains(member))
+                                           .ToListAsync();
+        if (groups.Any())
+        {
+            throw new UserAlreadyAddedToGroupException();
+        }
+
+        var thread = await _openAiService.CreateThreadAsync();
+        var groupMember = new GroupMember { Group = group, User = member, ThreadId = thread.Id };
+        group.GroupMembers.Add(groupMember);
         _groupRepository.Update(group);
         await _unitOfWork.SaveChangesAsync();
 
