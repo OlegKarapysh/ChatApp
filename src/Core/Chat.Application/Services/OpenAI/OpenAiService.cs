@@ -1,8 +1,9 @@
-﻿using Chat.Application.Mappings;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using OpenAI.Threads;
+using Chat.Application.Mappings;
 using Chat.Application.RequestExceptions;
 using Chat.Domain.DTOs.AssistantFiles;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 
 namespace Chat.Application.Services.OpenAI;
 
@@ -91,8 +92,25 @@ public sealed class OpenAiService : IOpenAiService
         return await _clientHigLab.ThreadCreateAsync();
     }
 
-    // public async Task<Type> SendMessageAsync(string message, string assistantId, string threadId)
-    // {
-    //     
-    // }
+    public async Task<MessageResponse> SendMessageAsync(string message, string assistantId, string threadId)
+    {
+        var createMessageParameter = new CreateMessageRequest(message);
+        var messageResponse = await _clientDotNet.ThreadsEndpoint!.CreateMessageAsync(threadId, createMessageParameter)!;
+        var createRunParameter = new CreateRunRequest(assistantId);
+        var runResponse = await _clientDotNet.ThreadsEndpoint!.CreateRunAsync(threadId, createRunParameter)!;
+        if (runResponse is null || messageResponse is null)
+        {
+            throw new OpenAiApiRequestException("Failed to initialize a run for this message");
+        }
+        
+        RunStatus runStatus;
+        do
+        {
+            runStatus = (await _clientDotNet.ThreadsEndpoint!.RetrieveRunAsync(threadId, runResponse.Id)).Status;
+            await Task.Delay(TimeSpan.FromMilliseconds(400));
+        } while (runStatus != RunStatus.Completed);
+        
+        var responseMessages = await _clientDotNet.ThreadsEndpoint!.ListMessagesAsync(threadId)!;
+        return responseMessages.Items[0];
+    }
 }

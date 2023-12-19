@@ -1,5 +1,6 @@
 ﻿using Chat.Domain.DTOs.Messages;
 using Chat.Domain.DTOs.Users;
+using OpenAI.Threads;
 
 namespace Chat.Application.Services.Messages;
 
@@ -10,4 +11,5 @@ public interface IMessageService
     Task<IList<MessageWithSenderDto>> GetAllConversationMessagesAsync(int conversationId);
     Task<bool> DeleteMessageAsync(int messageId);
     Task<MessageDto> UpdateMessageAsync(MessageDto messageData, int updaterId);
+    Task<MessageResponse> AssistWithMessageAsync(MessageForAssistDto messageDto);
 }

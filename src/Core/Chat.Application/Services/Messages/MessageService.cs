@@ -2,13 +2,17 @@
 using Chat.Application.Extensions;
 using Chat.Application.Mappings;
 using Chat.Application.RequestExceptions;
+using Chat.Application.Services.Groups;
+using Chat.Application.Services.OpenAI;
 using Chat.Application.Services.Users;
 using Chat.Domain.DTOs.Messages;
 using Chat.Domain.DTOs.Users;
-using Chat.Domain.Entities;
+using Chat.Domain.Entities.Groups;
 using Chat.Domain.Web;
 using Chat.DomainServices.Repositories;
 using Chat.DomainServices.UnitsOfWork;
+using OpenAI.Threads;
+using Message = Chat.Domain.Entities.Message;
 
 namespace Chat.Application.Services.Messages;
 
@@ -16,12 +20,14 @@ public sealed class MessageService : IMessageService
 {
     private readonly IUserService _userService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IOpenAiService _openAiService;
     private readonly IRepository<Message, int> _messageRepository;
 
-    public MessageService(IUserService userService, IUnitOfWork unitOfWork)
+    public MessageService(IUserService userService, IUnitOfWork unitOfWork, IOpenAiService openAiService)
     {
         _userService = userService;
         _unitOfWork = unitOfWork;
+        _openAiService = openAiService;
         _messageRepository = _unitOfWork.GetRepository<Message, int>();
     }
     
@@ -59,6 +65,26 @@ public sealed class MessageService : IMessageService
         createdMessage.Sender = await _userService.GetUserByIdAsync(messageData.SenderId);
         
         return createdMessage.MapToDtoWithSender();
+    }
+
+    public async Task<MessageResponse> AssistWithMessageAsync(MessageForAssistDto messageDto)
+    {
+        var message = await GetMessageByIdAsync(messageDto.MessageId);
+        var sender = await _userService.GetUserByIdAsync((int)message.SenderId);
+        var receiver = await _userService.GetUserByNameAsync(messageDto.ReceiverUserName);
+        var groupRepository = _unitOfWork.GetRepository<Group, int>();
+        var group = await groupRepository.AsQueryable()
+                                         .Include(x => x.Members)
+                                         .Include(x => x.GroupMembers)
+                                         .FirstOrDefaultAsync(x =>
+                                             x.CreatorId == receiver.Id && x.Members.Contains(sender));
+        if (group is null)
+        {
+            throw new EntityNotFoundException(nameof(Group));
+        }
+
+        var threadId = group.GroupMembers.FirstOrDefault(x => x.UserId == sender.Id)?.ThreadId;
+        return await _openAiService.SendMessageAsync(message.TextContent, group.AssistantId, threadId);
     }
 
     public async Task<MessageDto> UpdateMessageAsync(MessageDto messageData, int updaterId)

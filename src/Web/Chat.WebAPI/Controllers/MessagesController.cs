@@ -4,6 +4,7 @@ using Chat.Application.Extensions;
 using Chat.Application.Services.Messages;
 using Chat.Domain.DTOs.Messages;
 using Chat.Domain.DTOs.Users;
+using OpenAI.Threads;
 
 namespace Chat.WebAPI.Controllers;
 
@@ -34,6 +35,12 @@ public sealed class MessagesController : ControllerBase
     {
         messageData.SenderId = HttpContext.User.GetIdClaim();
         return Ok(await _messageService.CreateMessageAsync(messageData));
+    }
+
+    [HttpPost("assist")]
+    public async Task<ActionResult<MessageResponse>> AssistWithMessage(MessageForAssistDto message)
+    {
+        return Ok(await _messageService.AssistWithMessageAsync(message));
     }
     
     [HttpPut]
