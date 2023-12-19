@@ -4,6 +4,7 @@ using Chat.Domain.DTOs.Messages;
 using Chat.Domain.DTOs.Users;
 using Chat.Domain.Web;
 using Chat.WebUI.Services.Auth;
+using OpenAI.Threads;
 
 namespace Chat.WebUI.Services.Messages;
 
@@ -30,6 +31,11 @@ public class MessagesWebApiService : WebApiServiceBase, IMessagesWebApiService
     public async Task<WebApiResponse<MessageWithSenderDto>> SendMessageAsync(MessageDto messageData)
     {
         return await PostAsync<MessageWithSenderDto, MessageDto>(messageData);
+    }
+
+    public async Task<WebApiResponse<MessageResponse>> AssistWithMessageAsync(MessageForAssistDto messageDto)
+    {
+        return await PostAsync<MessageResponse, MessageForAssistDto>(messageDto, "/assist");
     }
 
     public async Task<WebApiResponse<MessageDto>> UpdateMessageAsync(MessageDto messageData)

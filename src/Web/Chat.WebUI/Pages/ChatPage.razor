@@ -43,6 +43,12 @@
                             Update
                         </RadzenButton>
                     }
+                    else
+                    {
+                        <RadzenButton ButtonStyle="ButtonStyle.Secondary" Click="async () => await AssistWithMessageAsync(message)">
+                            AI Assist
+                        </RadzenButton>
+                    }
                     <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="async () => await DeleteMessageAsync(message)">
                         Delete
                     </RadzenButton>
@@ -220,6 +226,25 @@
         messageData.TextContent = updatedMessageResponse.Content!.TextContent;
         await HubConnectionService!.UpdateMessageAsync(ConversationId, messageData);
         ResetTextInMessageTextBox();
+    }
+
+    private async Task AssistWithMessageAsync(MessageWithSenderDto messageDto)
+    {
+        Spinner!.Show();
+        var messageForAssist = new MessageForAssistDto
+        {
+            MessageId = messageDto.Id, ReceiverUserName = CurrentUser.UserName
+        };
+        var assistResponse = await MessageService!.AssistWithMessageAsync(messageForAssist);
+        if (assistResponse is { IsSuccessful: true, Content: not null })
+        {
+            MessageText = assistResponse.Content.Content[0].Text.Value;
+        }
+        else if (assistResponse.ErrorDetails is not null)
+        {
+            ToastService!.ShowError(assistResponse.ErrorDetails?.Message ?? "Failed to get AI assist");
+        }
+        Spinner.Hide();
     }
 
     private async Task DeleteMessageAsync(MessageWithSenderDto messageData)
