@@ -7,6 +7,8 @@
 @inject IHubConnectionService HubConnectionService
 @inject NavigationManager Navigation
 
+<PageTitle>Chats</PageTitle>
+
 <h1>Your chats</h1>
 <div style="margin: 10px">
     <RadzenTextBox @bind-Value="InterlocutorUserName" Placeholder="Enter username..."></RadzenTextBox>
@@ -21,12 +23,14 @@
     @foreach (var conversation in Conversations)
     {
         <RadzenCard Variant="Variant.Outlined">
-                <RadzenText Style="cursor: pointer"
-                            @onclick="() => NavigateToConversation(conversation.Id, conversation.Title, conversation.Type)">
+            <div class="chat-container">
+                <p class="chat-name" @onclick="() => NavigateToConversation(conversation.Id, conversation.Title, conversation.Type)">
                     @conversation.Title
-                </RadzenText>
-                <RadzenButton Variant="Variant.Flat"
-                              Click="() => RemoveUserFromConversationAsync(conversation)">Remove</RadzenButton>
+                </p>
+                <RadzenButton Variant="Variant.Flat" Click="() => RemoveUserFromConversationAsync(conversation)">
+                    Remove
+                </RadzenButton>
+            </div>
         </RadzenCard>
     }
 </div>

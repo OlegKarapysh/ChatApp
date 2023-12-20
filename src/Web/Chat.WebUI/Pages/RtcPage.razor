@@ -1,11 +1,12 @@
 ﻿@page "/call/{ConversationId}"
+
 @implements IDisposable
-@using Chat.WebUI.Services.WebRtc
+
 @inject WebRtcService RtcService;
 @inject IJSRuntime Js
 @inject NavigationManager Navigation
 
-<PageTitle>Call</PageTitle>
+<PageTitle>Video call</PageTitle>
 
 <div class="py-4">
     <input id="channelInput" @bind="_channel" hidden/>

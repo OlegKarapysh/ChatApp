@@ -1,6 +1,7 @@
 ﻿@page "/chat/{ConversationId}/{ConversationTitle}/{ConversationType}"
+
 @attribute [Authorize]
-@using Chat.Domain.DTOs.Calls
+
 @implements IDisposable
 
 @inject IHubConnectionService HubConnectionService
@@ -11,13 +12,16 @@
 @inject NavigationManager Navigation
 @inject SpinnerService Spinner
 
+<PageTitle>Chat</PageTitle>
+
 <RadzenCard Style="margin: 10px">
     <h3>@ConversationTitle</h3>
     @if (Enum.Parse<ConversationType>(ConversationType) == Domain.Entities.Conversations.ConversationType.Group)
     {
         <div style="margin: 10px">
             <RadzenTextBox @bind-Value="UserName" Placeholder="Enter username..."></RadzenTextBox>
-            <RadzenButton Click="async () => await AddUserToGroupAsync()" Disabled="@(string.IsNullOrWhiteSpace(UserName))">
+            <RadzenButton Click="async () => await AddUserToGroupAsync()" 
+                          Disabled="@(string.IsNullOrWhiteSpace(UserName))">
                 Add user to group
             </RadzenButton>
         </div>
@@ -26,7 +30,7 @@
     {
         <div style="margin: 10px">
             <RadzenButton Click="async () => await CallUserAsync(CancellationSource.Token)">
-                Call
+                Video call
             </RadzenButton>
         </div>
     }
@@ -34,31 +38,39 @@
         @foreach (var message in Messages)
         {
             <RadzenCard>
-                <RadzenStack Orientation="Orientation.Horizontal">
-                    <RadzenText Style="text-wrap: normal"><strong>@(message.UserName): </strong> @message.TextContent</RadzenText>
-                    @if (CurrentUser.UserName == message.UserName)
-                    {
-                        <RadzenButton ButtonStyle="ButtonStyle.Secondary" Disabled="@(string.IsNullOrWhiteSpace(MessageText))" 
-                                      Click="async () => await UpdateMessageAsync(message)">
-                            Update
+                <div class="message-container">
+                    <RadzenText Style="text-wrap: normal">
+                        <strong>@(message.UserName): </strong> @message.TextContent
+                    </RadzenText>
+                    <div class="message-buttons-container">
+                        <RadzenButton Style="@MessageButtonStyle" ButtonStyle="ButtonStyle.Danger" 
+                                      Click="async () => await DeleteMessageAsync(message)">
+                            Delete
                         </RadzenButton>
-                    }
-                    else
-                    {
-                        <RadzenButton ButtonStyle="ButtonStyle.Secondary" Click="async () => await AssistWithMessageAsync(message)">
-                            AI Assist
-                        </RadzenButton>
-                    }
-                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="async () => await DeleteMessageAsync(message)">
-                        Delete
-                    </RadzenButton>
-                </RadzenStack>
+                        @if (CurrentUser.UserName == message.UserName)
+                        {
+                            <RadzenButton Style="@MessageButtonStyle" ButtonStyle="ButtonStyle.Secondary"
+                                          Disabled="@(string.IsNullOrWhiteSpace(MessageText))"
+                                          Click="async () => await UpdateMessageAsync(message)">
+                                Update
+                            </RadzenButton>
+                        }
+                        else
+                        {
+                            <RadzenButton Style="@MessageButtonStyle" ButtonStyle="ButtonStyle.Secondary"
+                                          Click="async () => await AssistWithMessageAsync(message)">
+                                AI Assist
+                            </RadzenButton>
+                        }
+                    </div>
+                </div>
             </RadzenCard>
         }
     </div>
-    <div style="display: flex; flex-direction: column; align-content: flex-end; align-self: flex-end; gap: 10px">
+    <div class="send-message-container">
         <RadzenTextBox @bind-Value="MessageText" Placeholder="Message... "></RadzenTextBox>
-        <RadzenButton ButtonStyle="ButtonStyle.Primary" Click="SendMessageAsync" disabled="@(string.IsNullOrWhiteSpace(MessageText))">
+        <RadzenButton Style="@MessageButtonStyle" ButtonStyle="ButtonStyle.Primary" 
+                      Click="SendMessageAsync" disabled="@(string.IsNullOrWhiteSpace(MessageText))">
             Send
         </RadzenButton>
     </div>
@@ -67,6 +79,7 @@
 @code 
 {
     public const string Path = "/chat";
+    public const string MessageButtonStyle = "width: 90px";
 
     [Parameter]
     public string ConversationTitle { get; set; } = string.Empty;

@@ -1,10 +1,13 @@
 ﻿@page "/registration"
 
 @attribute [AllowAnonymous]
+
 @inject NavigationManager Navigation
 @inject IJwtAuthService AuthService
 @inject IToastService Notification
 @layout AuthLayout
+
+<PageTitle>Registration</PageTitle>
 
 <div class="card col-md-6 offset-3" style="margin: auto">
     <div class="card-header">
