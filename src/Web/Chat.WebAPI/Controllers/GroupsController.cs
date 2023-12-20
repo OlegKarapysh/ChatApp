@@ -1,9 +1,10 @@
-﻿using Chat.Application.Extensions;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Chat.Application.Extensions;
+using Chat.Application.Mappings;
 using Chat.Application.Services.Groups;
 using Chat.Domain.DTOs.AssistantFiles;
 using Chat.Domain.DTOs.Groups;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Chat.WebAPI.Controllers;
 
@@ -15,6 +16,12 @@ public sealed class GroupsController : ControllerBase
     public GroupsController(IGroupService groupService)
     {
         _groupService = groupService;
+    }
+    
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<GroupDto>> GetGroupAsync(int id)
+    {
+        return Ok((await _groupService.GetGroupByIdAsync(id)).MapToDto());
     }
     
     [HttpGet("all")]
@@ -56,6 +63,12 @@ public sealed class GroupsController : ControllerBase
     public async Task<ActionResult<GroupDto>> AddGroupMemberAsync(NewGroupMemberDto newGroupMemberDto)
     {
         return Ok(await _groupService.AddGroupMemberAsync(newGroupMemberDto));
+    }
+    
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<GroupDto>> EditGroupAsync(int id, [FromBody] NewGroupDto groupDto)
+    {
+        return Ok(await _groupService.EditGroupAsync(id, groupDto));
     }
     
     [HttpDelete("{groupId:int}/files/{fileId}")]

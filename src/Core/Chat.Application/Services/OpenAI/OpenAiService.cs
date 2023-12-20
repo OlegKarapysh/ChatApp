@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using OpenAI.Threads;
+using OpenAI.Assistants;
 using Chat.Application.Mappings;
 using Chat.Application.RequestExceptions;
 using Chat.Domain.DTOs.AssistantFiles;
@@ -43,6 +44,23 @@ public sealed class OpenAiService : IOpenAiService
     {
         var parameter = new AssistantRetrieveParameter { Assistant_Id = assistantId };
         return await _clientHigLab.AssistantRetrieveAsync(parameter);
+    }
+
+    public async Task<AssistantObjectResponse> EditAssistantAsync(string assistantId, string instructions, string name)
+    {
+        var assistant = await GetAssistantAsync(assistantId);
+        var parameter = new AssistantModifyParameter
+        {
+            Assistant_Id = assistantId,
+            Description = assistant.Description,
+            File_Ids = assistant.File_Ids,
+            Instructions = instructions,
+            Metadata = assistant.MetaData,
+            Model = assistant.Model,
+            Name = name,
+            Tools = assistant.Tools
+        };
+        return await _clientHigLab.AssistantModifyAsync(parameter);
     }
 
     public async Task<bool> DeleteAssistantAsync(string assistantId)

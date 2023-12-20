@@ -26,7 +26,9 @@
         <RadzenDataGridColumn TItem="GroupInfoDto" Property="FilesCount" Width="100px" Title="Files count"/>
         <RadzenDataGridColumn TItem="GroupInfoDto" Title="Actions">
             <Template Context="groupInfo">
-                <RadzenButton ButtonStyle="ButtonStyle.Secondary">Edit</RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Secondary" Click="async () => await OpenEditGroupDialogAsync(groupInfo.Id)">
+                    Edit
+                </RadzenButton>
                 <RadzenButton ButtonStyle="ButtonStyle.Light" Click="() => NavigateToMembersPage(groupInfo.Id)">
                     Members
                 </RadzenButton>
@@ -58,7 +60,7 @@
 
     private async Task OpenCreateGroupDialog()
     {
-        bool? isCreated = await Dialog!.OpenAsync<CreateGroupFormComponent>("New group")!;
+        bool? isCreated = await Dialog!.OpenAsync<GroupFormComponent>("New group")!;
         if (isCreated is not null && (bool)isCreated)
         {
             await RefreshGroupsGrid();
@@ -99,5 +101,18 @@
     private void NavigateToMembersPage(int groupId)
     {
         Navigation!.NavigateTo($"{GroupMembersPage.Path}/{groupId}");
+    }
+
+    private async Task OpenEditGroupDialogAsync(int groupId)
+    {
+        bool? isEdited = await Dialog!.OpenAsync<GroupFormComponent>("Edit group", new Dictionary<string, object>
+            {
+                { nameof(GroupFormComponent.GroupIdParameter), groupId },
+                { nameof(GroupFormComponent.IsEditParameter), true }
+            })!;
+        if (isEdited is not null && (bool)isEdited)
+        {
+            await RefreshGroupsGrid();
+        }
     }
 }

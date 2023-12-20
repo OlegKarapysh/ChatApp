@@ -73,7 +73,7 @@ public sealed class GroupService : IGroupService
             throw new GroupAlreadyExistsException();
         }
 
-        var assistantName = $"{creator.UserName}_{newGroupDto.Name}";
+        var assistantName = GenerateAssistantName(creator.UserName ?? string.Empty, newGroupDto.Name);
         var assistant = await _openAiService.CreateAssistantWithRetrievalAsync(assistantName, newGroupDto.Instructions);
         var group = new Group
         {
@@ -84,6 +84,20 @@ public sealed class GroupService : IGroupService
         await _unitOfWork.SaveChangesAsync();
 
         return createdGroup.MapToDto();
+    }
+
+    public async Task<GroupDto> EditGroupAsync(int groupId, NewGroupDto groupDto)
+    {
+        var group = await GetGroupByIdAsync(groupId);
+        var creator = await _userService.GetUserByIdAsync(group.CreatorId ?? default);
+        var name = GenerateAssistantName(creator.UserName ?? string.Empty, groupDto.Name);
+        var editedAssistant = await _openAiService.EditAssistantAsync(group.AssistantId, groupDto.Instructions, name);
+        group.Name = groupDto.Name;
+        group.Instructions = editedAssistant.Instructions;
+        var editedGroup = _groupRepository.Update(group);
+        await _unitOfWork.SaveChangesAsync();
+
+        return editedGroup.MapToDto();
     }
 
     public async Task<GroupDto> AddGroupMemberAsync(NewGroupMemberDto newGroupMemberDto)
@@ -176,4 +190,6 @@ public sealed class GroupService : IGroupService
                                .Include(x => x.Members)
                                .Include(x => x.GroupMembers);
     }
+
+    private string GenerateAssistantName(string creatorName, string groupName) => $"{creatorName}_{groupName}";
 }

@@ -10,6 +10,7 @@ public interface IOpenAiService
     Task<AssistantObjectResponse> CreateAssistantWithRetrievalAsync(
         string name, string instructions, IEnumerable<string>? fileIds = default);
     Task<AssistantObjectResponse> GetAssistantAsync(string assistantId);
+    Task<AssistantObjectResponse> EditAssistantAsync(string assistantId, string instructions, string name);
     Task<bool> DeleteAssistantAsync(string assistantId);
     Task<bool> DeleteFileAsync(string assistantId, string fileId);
     Task<AssistantFileObjectResponse> AddFileToAssistant(string assistantId, string fileId);
