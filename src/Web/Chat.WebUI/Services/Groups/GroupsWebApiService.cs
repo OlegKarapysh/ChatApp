@@ -59,6 +59,11 @@ public class GroupsWebApiService : WebApiServiceBase, IGroupsWebApiService
     {
         return await DeleteAsync($"/{groupId}/files/{fileId}");
     }
+    
+    public async Task<ErrorDetailsDto?> DeleteGroupMemberAsync(int groupId, string memberUserName)
+    {
+        return await DeleteAsync($"/{groupId}/members/{memberUserName}");
+    }
 
     public async Task<ErrorDetailsDto?> DeleteGroupAsync(int groupId)
     {

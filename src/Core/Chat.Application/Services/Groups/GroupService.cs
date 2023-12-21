@@ -134,6 +134,23 @@ public sealed class GroupService : IGroupService
         return addedFile.MapToDto();
     }
 
+    public async Task<bool> DeleteGroupMember(string memberUserName, int groupId)
+    {
+        var group = await GetGroupByIdAsync(groupId);
+        var member = await _userService.GetUserByNameAsync(memberUserName);
+        var groupMember = await _groupMembersRepository.FindFirstAsync(
+            x => x.GroupId == group.Id && x.UserId == member.Id);
+        if (groupMember is null)
+        {
+            throw new EntityNotFoundException(nameof(GroupMember));
+        }
+
+        var isThreadDeleted = await _openAiService.DeleteThreadAsync(groupMember.ThreadId);
+        var isMemberDeleted = await _groupMembersRepository.RemoveAsync(groupMember.Id);
+        await _unitOfWork.SaveChangesAsync();
+        return isThreadDeleted && isMemberDeleted;
+    }
+
     public async Task<bool> DeleteFileFromGroupAsync(int fileId, int groupId)
     {
         var group = await GetGroupByIdAsync(groupId);

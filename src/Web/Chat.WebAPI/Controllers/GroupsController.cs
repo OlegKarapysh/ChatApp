@@ -74,12 +74,18 @@ public sealed class GroupsController : ControllerBase
     [HttpDelete("{groupId:int}/files/{fileId}")]
     public async Task<IActionResult> DeleteFileFromGroupAsync(int groupId, int fileId)
     {
-        return await _groupService.DeleteFileFromGroupAsync(fileId, groupId) ? Ok() : BadRequest();
+        return await _groupService.DeleteFileFromGroupAsync(fileId, groupId) ? NoContent() : BadRequest();
+    }
+    
+    [HttpDelete("{groupId:int}/members/{userName}")]
+    public async Task<IActionResult> DeleteGroupMemberAsync(int groupId, string userName)
+    {
+        return await _groupService.DeleteGroupMember(userName, groupId) ? NoContent() : BadRequest();
     }
 
     [HttpDelete("{groupId:int}")]
     public async Task<IActionResult> DeleteGroupAsync(int groupId)
     {
-        return await _groupService.DeleteGroupAsync(groupId) ? Ok() : BadRequest();
+        return await _groupService.DeleteGroupAsync(groupId) ? NoContent() : BadRequest();
     }
 }

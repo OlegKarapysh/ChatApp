@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using OpenAI.Threads;
-using OpenAI.Assistants;
 using Chat.Application.Mappings;
 using Chat.Application.RequestExceptions;
 using Chat.Domain.DTOs.AssistantFiles;
@@ -66,6 +65,11 @@ public sealed class OpenAiService : IOpenAiService
     public async Task<bool> DeleteAssistantAsync(string assistantId)
     {
         return await _clientDotNet.AssistantsEndpoint!.DeleteAssistantAsync(assistantId)!;
+    }
+
+    public async Task<bool> DeleteThreadAsync(string? threadId)
+    {
+        return !string.IsNullOrWhiteSpace(threadId) && await _clientDotNet.ThreadsEndpoint!.DeleteThreadAsync(threadId)!;
     }
 
     public async Task<bool> DeleteFileAsync(string assistantId, string fileId)

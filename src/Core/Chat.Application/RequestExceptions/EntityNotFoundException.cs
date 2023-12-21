@@ -6,14 +6,14 @@ namespace Chat.Application.RequestExceptions;
 public sealed class EntityNotFoundException : RequestException
 {
     public EntityNotFoundException(string entityName) : base(
-        $"Entity '{entityName}' is not found",
+        $"'{entityName}' is not found",
         ErrorType.NotFound,
         HttpStatusCode.NotFound)
     {
     }
 
     public EntityNotFoundException(string entityName, string property) : base(
-        $"Entity '{entityName}' is not found by '{property}' ",
+        $"'{entityName}' is not found by '{property}' ",
         ErrorType.NotFound,
         HttpStatusCode.NotFound)
     {

@@ -66,15 +66,15 @@
 
     private async Task DeleteMemberAsync(string userName)
     {
-        // var deletionError = await GroupService!.DeleteFileFromGroupAsync(fileId, int.Parse(GroupId));
-        // if (deletionError is not null)
-        // {
-        //     ToastService!.ShowError(deletionError.Message);
-        // }
-        // else
-        // {
-        //     await RefreshFilesGrid();
-        // }
+        var deletionError = await GroupService!.DeleteGroupMemberAsync(int.Parse(GroupId), userName);
+        if (deletionError is not null)
+        {
+            ToastService!.ShowError(deletionError.Message);
+        }
+        else
+        {
+            await RefreshFilesGrid();
+        }
     }
 
     private async Task RefreshFilesGrid()

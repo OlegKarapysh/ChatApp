@@ -16,5 +16,6 @@ public interface IGroupsWebApiService
     Task<WebApiResponse<AssistantFileDto>> AddFileToGroupAsync(int groupId, UploadedFileDto uploadedFileDto);
     Task<WebApiResponse<GroupDto>> EditGroupAsync(int groupId, NewGroupDto groupDto);
     Task<ErrorDetailsDto?> DeleteFileFromGroupAsync(int fileId, int groupId);
+    Task<ErrorDetailsDto?> DeleteGroupMemberAsync(int groupId, string memberUserName);
     Task<ErrorDetailsDto?> DeleteGroupAsync(int groupId);
 }

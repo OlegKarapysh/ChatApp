@@ -15,5 +15,6 @@ public interface IGroupService
     Task<GroupDto> AddGroupMemberAsync(NewGroupMemberDto newGroupMemberDto);
     Task<AssistantFileDto> AddFileToGroupAsync(int groupId, UploadedFileDto uploadedFileDto);
     Task<bool> DeleteFileFromGroupAsync(int fileId, int groupId);
+    Task<bool> DeleteGroupMember(string memberUserName, int groupId);
     Task<bool> DeleteGroupAsync(int groupId);
 }

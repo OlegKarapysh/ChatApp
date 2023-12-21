@@ -6,6 +6,7 @@
 @inject IGroupsWebApiService GroupService
 @inject DialogService Dialog
 @inject NavigationManager Navigation
+@inject SpinnerService Spinner
 
 <PageTitle>Groups</PageTitle>
 
@@ -57,7 +58,9 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Spinner!.Show();
         await RefreshGroupsGrid();
+        Spinner.Hide();
     }
 
     private async Task OpenCreateGroupDialog()
