@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using Blazored.Toast.Services;
+using Microsoft.AspNetCore.SignalR.Client;
 using Chat.Application.SignalR;
 using Chat.Domain.DTOs.Calls;
-using Chat.Domain.DTOs.Conversations;
 using Chat.Domain.DTOs.Messages;
 using Chat.WebUI.Services.Auth;
+using Microsoft.AspNetCore.Components;
 
 namespace Chat.WebUI.Services.SignalR;
 
@@ -15,12 +16,18 @@ public sealed class HubConnectionService : IHubConnectionService
     public event Func<CallDto, Task>? ReceivedCallRequest;
     public event Func<CallDto, Task>? ReceivedCallAnswer;
     private readonly ITokenStorageService _tokenService;
+    private readonly IJwtAuthService _jwtAuthService;
+    private readonly IToastService _toastService;
+    private readonly NavigationManager _navigationManager;
     private readonly string _hubUrl;
     private HubConnection? _connection;
     
-    public HubConnectionService(ITokenStorageService tokenService, IConfiguration configuration)
+    public HubConnectionService(ITokenStorageService tokenService, IConfiguration configuration, IJwtAuthService jwtAuthService, NavigationManager navigationManager, IToastService toastService)
     {
         _tokenService = tokenService;
+        _jwtAuthService = jwtAuthService;
+        _navigationManager = navigationManager;
+        _toastService = toastService;
         _hubUrl = configuration["SignalR:HubUrl"]!;
     }
 
@@ -78,18 +85,29 @@ public sealed class HubConnectionService : IHubConnectionService
 
     private async Task InvokeHubMethodAsync(Func<Task?> methodCall)
     {
-        if (_connection is null)
+        try
         {
-            await ConnectAsync();
-        }
+            if (_connection is null)
+            {
+                await ConnectAsync();
+            }
 
-        var task = methodCall.Invoke();
-        if (task is null)
+            var task = methodCall.Invoke();
+            if (task is null)
+            {
+                return;
+            }
+
+            await task;
+        }
+        catch (Exception e)
         {
-            return;
+            Console.WriteLine(e.Message);
+            // TODO: refresh
+            await _jwtAuthService.LogoutAsync();
+            _navigationManager.NavigateTo("/login", true);
+            _toastService.ShowInfo("Session expired");
         }
-
-        await task;
     }
 
     private async Task OnReceivedMessageAsync(MessageWithSenderDto message)
