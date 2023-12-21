@@ -3,10 +3,12 @@
     [Name]         NVARCHAR (100)  NOT NULL,
     [Instructions] NVARCHAR (1000) NOT NULL,
     [AssistantId]  NVARCHAR (200)  NOT NULL,
-    [CreatorId]    INT             NOT NULL,
+    [CreatorId]    INT             NULL,
     CONSTRAINT [PK_Groups] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_Groups_AspNetUsers_CreatorId] FOREIGN KEY ([CreatorId]) REFERENCES [dbo].[AspNetUsers] ([Id]) ON DELETE CASCADE
+    CONSTRAINT [FK_Groups_AspNetUsers_CreatorId] FOREIGN KEY ([CreatorId]) REFERENCES [dbo].[AspNetUsers] ([Id])
 );
+
+
 
 
 GO

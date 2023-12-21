@@ -3,12 +3,14 @@
     [Name]        NVARCHAR (100) NOT NULL,
     [FileId]      NVARCHAR (200) NOT NULL,
     [SizeInBytes] INT            NOT NULL,
-    [GroupId]     INT            NOT NULL,
+    [GroupId]     INT            NULL,
     [CreatedAt]   DATETIME2 (7)  NOT NULL,
     [UpdatedAt]   DATETIME2 (7)  DEFAULT (getutcdate()) NOT NULL,
     CONSTRAINT [PK_AssistantFiles] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_AssistantFiles_Groups_GroupId] FOREIGN KEY ([GroupId]) REFERENCES [dbo].[Groups] ([Id]) ON DELETE CASCADE
+    CONSTRAINT [FK_AssistantFiles_Groups_GroupId] FOREIGN KEY ([GroupId]) REFERENCES [dbo].[Groups] ([Id])
 );
+
+
 
 
 GO
