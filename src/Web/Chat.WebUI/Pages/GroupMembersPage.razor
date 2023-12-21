@@ -10,7 +10,7 @@
 
 <h1>@($"{GroupWithMembersDto.Name} members")</h1>
 
-<LinkToGroupsComponent></LinkToGroupsComponent>
+<LinkForGoBackComponent Path="@GroupsPage.Path" Text="Go back to all groups"></LinkForGoBackComponent>
 
 <RadzenDataGrid TItem="UserDto" Data="GroupWithMembersDto.Members" AllowColumnResize="true" AllowAlternatingRows="false">
     <HeaderTemplate>

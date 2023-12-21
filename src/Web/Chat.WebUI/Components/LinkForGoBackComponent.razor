@@ -1,0 +1,12 @@
+﻿<div>
+    <NavLink class="nav-link" href="@Path">
+        <span class="oi oi-arrow-thick-left" aria-hidden="true"></span> 
+        @Text
+    </NavLink>
+</div>
+
+@code 
+{
+    [Parameter] public string Path { get; set; } = string.Empty;
+    [Parameter] public string Text { get; set; } = "Go back";
+}

@@ -10,7 +10,7 @@
 
 <h1>@($"{GroupWithFilesDto.Name} files")</h1>
 
-<LinkToGroupsComponent></LinkToGroupsComponent>
+<LinkForGoBackComponent Path="@GroupsPage.Path" Text="Go back to all groups"></LinkForGoBackComponent>
 
 <RadzenDataGrid TItem="AssistantFileDto" Data="GroupWithFilesDto.Files" AllowColumnResize="true" AllowAlternatingRows="false">
     <HeaderTemplate>
