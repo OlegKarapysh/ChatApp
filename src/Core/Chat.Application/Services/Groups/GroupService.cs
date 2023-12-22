@@ -41,21 +41,25 @@ public sealed class GroupService : IGroupService
         return groupsInfo;
     }
     
-    public async Task<GroupWithFilesDto> GetGroupWithFilesAsync(int groupId)
+    public async Task<GroupWithFilesDto> GetGroupWithFilesAsync(int groupId, int creatorId)
     {
         var group = await _groupRepository.AsQueryable()
                                           .Include(x => x.Files)
                                           .FirstOrDefaultAsync(x => x.Id == groupId)
                     ?? throw new EntityNotFoundException(nameof(Group));
+        ThrowIfInvalidCreator(creatorId, group.CreatorId);
+        
         return group.MapToWithFilesDto();
     }
 
-    public async Task<GroupWithMembersDto> GetGroupWithMembersAsync(int groupId)
+    public async Task<GroupWithMembersDto> GetGroupWithMembersAsync(int groupId, int creatorId)
     {
         var group = await _groupRepository.AsQueryable()
                                           .Include(x => x.Members)
                                           .FirstOrDefaultAsync(x => x.Id == groupId)
                     ?? throw new EntityNotFoundException(nameof(Group));
+        ThrowIfInvalidCreator(creatorId, group.CreatorId);
+        
         return group.MapToWithMembersDto();
     }
 
@@ -206,6 +210,14 @@ public sealed class GroupService : IGroupService
                                .Include(x => x.Files)
                                .Include(x => x.Members)
                                .Include(x => x.GroupMembers);
+    }
+
+    private void ThrowIfInvalidCreator(int claimedCreatorId, int? actualCreatorId)
+    {
+        if (claimedCreatorId != actualCreatorId)
+        {
+            throw new EntityNotFoundException(nameof(Group));
+        }
     }
 
     private string GenerateAssistantName(string creatorName, string groupName) => $"{creatorName}_{groupName}";

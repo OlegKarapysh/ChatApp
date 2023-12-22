@@ -34,13 +34,15 @@ public sealed class GroupsController : ControllerBase
     [HttpGet("{id:int}/members")]
     public async Task<ActionResult<GroupWithMembersDto>> GetGroupWithMembersAsync(int id)
     {
-        return Ok(await _groupService.GetGroupWithMembersAsync(id));
+        var groupCreatorId = HttpContext.User.GetIdClaim();
+        return Ok(await _groupService.GetGroupWithMembersAsync(id, groupCreatorId));
     }
     
     [HttpGet("{id:int}/files")]
     public async Task<ActionResult<GroupWithFilesDto>> GetGroupWithFilesAsync(int id)
     {
-        return Ok(await _groupService.GetGroupWithFilesAsync(id));
+        var groupCreatorId = HttpContext.User.GetIdClaim();
+        return Ok(await _groupService.GetGroupWithFilesAsync(id, groupCreatorId));
     }
     
     [HttpPost("{id:int}/files")]
@@ -68,6 +70,7 @@ public sealed class GroupsController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<ActionResult<GroupDto>> EditGroupAsync(int id, [FromBody] NewGroupDto groupDto)
     {
+        groupDto.CreatorId = HttpContext.User.GetIdClaim();
         return Ok(await _groupService.EditGroupAsync(id, groupDto));
     }
     
