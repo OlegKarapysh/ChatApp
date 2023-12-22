@@ -10,9 +10,10 @@
 
 <h1>@($"{GroupWithMembersDto.Name} members")</h1>
 
-<LinkForGoBackComponent Path="@GroupsPage.Path" Text="Go back to all groups"></LinkForGoBackComponent>
+<LinkComponent Path="@GroupsPage.Path" Text=" Go back to all groups"></LinkComponent>
 
-<RadzenDataGrid TItem="UserDto" Data="GroupWithMembersDto.Members" AllowColumnResize="true" AllowAlternatingRows="false">
+<RadzenDataGrid TItem="UserDto" Data="GroupWithMembersDto.Members" AllowColumnResize="true" AllowAlternatingRows="false"
+                AllowFiltering="true" AllowPaging="true" PagerAlwaysVisible="false" PageSize="PageInfo.DefaultPageSize" Responsive="true">
     <HeaderTemplate>
         <RadzenButton Click="OpenAddMemberDialog">Add member</RadzenButton>
     </HeaderTemplate>
@@ -36,13 +37,10 @@
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
-<RadzenPager PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
-             AlwaysVisible="true" Count="MembersCount"></RadzenPager>
 
 @code 
 {
     public const string Path = "/ai-group-members";
-    public const int DefaultPageNumbersCount = 3;
 
     [Parameter]
     public string GroupId { get; set; } = string.Empty;

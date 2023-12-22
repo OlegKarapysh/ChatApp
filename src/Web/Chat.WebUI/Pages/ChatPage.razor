@@ -16,7 +16,7 @@
 
 <RadzenCard Style="margin: 10px">
     <h3>@ConversationTitle</h3>
-    <LinkForGoBackComponent Path="@ChatsPage.Path" Text="Go back to all chats"></LinkForGoBackComponent>
+    <LinkComponent Path="@ChatsPage.Path" Text=" Go back to all chats"></LinkComponent>
     @if (Enum.Parse<ConversationType>(ConversationType) == Domain.Entities.Conversations.ConversationType.Group)
     {
         <div style="margin: 10px">

@@ -8,12 +8,13 @@ public sealed class MessageServiceTest
     private readonly IMessageService _sut;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
     private readonly Mock<IUserService> _userServiceMock = new();
+    private readonly Mock<IOpenAiService> _openAiServiceMock = new();
     private readonly Mock<IRepository<Message, int>> _messageRepositoryMock = new();
 
     public MessageServiceTest()
     {
         _unitOfWorkMock.Setup(x => x.GetRepository<Message, int>()).Returns(_messageRepositoryMock.Object);
-        _sut = new MessageService(_unitOfWorkMock.Object, _userServiceMock.Object);
+        _sut = new MessageService( _userServiceMock.Object, _unitOfWorkMock.Object, _openAiServiceMock.Object);
     }
 
     [Fact]

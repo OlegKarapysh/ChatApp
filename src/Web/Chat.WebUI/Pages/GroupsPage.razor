@@ -5,14 +5,14 @@
 @inject IToastService ToastService
 @inject IGroupsWebApiService GroupService
 @inject DialogService Dialog
-@inject NavigationManager Navigation
 @inject SpinnerService Spinner
 
 <PageTitle>Groups</PageTitle>
 
 <h1>Your groups</h1>
 
-<RadzenDataGrid TItem="GroupInfoDto" Data="Groups" AllowColumnResize="true" AllowAlternatingRows="false">
+<RadzenDataGrid TItem="GroupInfoDto" Data="Groups" AllowColumnResize="true" AllowAlternatingRows="false" AllowFiltering="true"  
+                AllowPaging="true" PagerAlwaysVisible="false" PageSize="PageInfo.DefaultPageSize" Responsive="true">
     <HeaderTemplate>
         <RadzenButton Click="OpenCreateGroupDialog">Create new group</RadzenButton>
     </HeaderTemplate>
@@ -20,23 +20,37 @@
         <NoResultsInGridComponent></NoResultsInGridComponent>
     </EmptyTemplate>
     <Columns>
-        <RadzenDataGridColumn TItem="GroupInfoDto" Property="Name" Title="Group name">
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="@nameof(GroupInfoDto.Name)" Title="Group name"
+                               MinWidth="100px" Width="150px">
             <FooterTemplate>
                 Total groups: <strong>@GroupsCount</strong>
             </FooterTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="GroupInfoDto" Property="MembersCount" Width="120px" Title="Members count"/>
-        <RadzenDataGridColumn TItem="GroupInfoDto" Property="FilesCount" Width="100px" Title="Files count"/>
-        <RadzenDataGridColumn TItem="GroupInfoDto" Title="Actions">
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="@nameof(GroupInfoDto.Instructions)" Title="Instructions">
+            <Template Context="groupInfo">
+                <RadzenText Style="text-wrap: normal; word-wrap: break-word; white-space: normal">
+                    @groupInfo.Instructions
+                </RadzenText>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="@nameof(GroupInfoDto.MembersCount)" Title="Members"
+                              MinWidth="80px" Width="110px">
+            <Template Context="groupInfo">
+                <LinkComponent Path="@($"{GroupMembersPage.Path}/{groupInfo.Id}")" IconClass="@null"
+                               Text="@groupInfo.MembersCount.ToString()"/>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="@nameof(GroupInfoDto.FilesCount)" Title="Files"
+                              MinWidth="80px" Width="110px">
+            <Template Context="groupInfo">
+                <LinkComponent Path="@($"{AssistantFilesPage.Path}/{groupInfo.Id}")" IconClass="@null"
+                               Text="@groupInfo.FilesCount.ToString()"/>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="GroupInfoDto" MinWidth="145px" Width="150px" Title="Actions">
             <Template Context="groupInfo">
                 <RadzenButton ButtonStyle="ButtonStyle.Secondary" Click="async () => await OpenEditGroupDialogAsync(groupInfo.Id)">
                     Edit
-                </RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Light" Click="() => NavigateToMembersPage(groupInfo.Id)">
-                    Members
-                </RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Light" Click="() => NavigateToFilesPage(groupInfo.Id)">
-                    Files
                 </RadzenButton>
                 <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="async () => await DeleteGroupAsync(groupInfo.Id)">
                     Delete
@@ -45,13 +59,10 @@
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
-<RadzenPager PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
-             AlwaysVisible="true" Count="GroupsCount"></RadzenPager>
 
 @code 
 {
     public const string Path = "groups-ai";
-    public const int DefaultPageNumbersCount = 3;
     
     public List<GroupInfoDto> Groups = new();
     public int GroupsCount => Groups.Count;
@@ -97,17 +108,7 @@
             ToastService!.ShowError(groupsResponse.ErrorDetails.Message);
         }
     }
-
-    private void NavigateToFilesPage(int groupId)
-    {
-        Navigation!.NavigateTo($"{AssistantFilesPage.Path}/{groupId}");
-    }
-
-    private void NavigateToMembersPage(int groupId)
-    {
-        Navigation!.NavigateTo($"{GroupMembersPage.Path}/{groupId}");
-    }
-
+    
     private async Task OpenEditGroupDialogAsync(int groupId)
     {
         bool? isEdited = await Dialog!.OpenAsync<GroupFormComponent>("Edit group", new Dictionary<string, object>

@@ -23,6 +23,7 @@ public static class GroupMappings
         {
             Id = group.Id,
             Name = group.Name,
+            Instructions = group.Instructions,
             FilesCount = group.Files.Count,
             MembersCount = group.Members.Count
         };

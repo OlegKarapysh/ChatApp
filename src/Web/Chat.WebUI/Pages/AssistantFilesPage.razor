@@ -10,9 +10,10 @@
 
 <h1>@($"{GroupWithFilesDto.Name} files")</h1>
 
-<LinkForGoBackComponent Path="@GroupsPage.Path" Text="Go back to all groups"></LinkForGoBackComponent>
+<LinkComponent Path="@GroupsPage.Path" Text=" Go back to all groups"></LinkComponent>
 
-<RadzenDataGrid TItem="AssistantFileDto" Data="GroupWithFilesDto.Files" AllowColumnResize="true" AllowAlternatingRows="false">
+<RadzenDataGrid TItem="AssistantFileDto" Data="GroupWithFilesDto.Files" AllowColumnResize="true" AllowAlternatingRows="false" 
+                AllowFiltering="true" AllowPaging="true" PagerAlwaysVisible="false" PageSize="PageInfo.DefaultPageSize" Responsive="true">
     <HeaderTemplate>
         <RadzenButton Click="OpenFileUploadDialog">Upload file</RadzenButton>
     </HeaderTemplate>
@@ -20,13 +21,13 @@
         <NoResultsInGridComponent></NoResultsInGridComponent>
     </EmptyTemplate>
     <Columns>
-        <RadzenDataGridColumn TItem="AssistantFileDto" Property="Name" Title="File name">
+        <RadzenDataGridColumn TItem="AssistantFileDto" Property="@nameof(AssistantFileDto.Name)" Title="File name">
             <FooterTemplate>
                 Total files: <strong>@FilesCount</strong>
             </FooterTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="AssistantFileDto" Property="SizeInBytes" Width="150px" Title="Size in bytes"/>
-        <RadzenDataGridColumn TItem="AssistantFileDto" Property="CreatedAt" Width="180px" Title="Uploaded at"/>
+        <RadzenDataGridColumn TItem="AssistantFileDto" Property="@nameof(AssistantFileDto.SizeInBytes)" Width="150px" Title="Size in bytes"/>
+        <RadzenDataGridColumn TItem="AssistantFileDto" Property="@nameof(AssistantFileDto.CreatedAt)" Width="180px" Title="Uploaded at"/>
         <RadzenDataGridColumn TItem="AssistantFileDto" Title="Actions">
             <Template Context="fileInfo">
                 <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="async () => await DeleteFileAsync(fileInfo.Id)">
@@ -36,13 +37,10 @@
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
-<RadzenPager PageSize="@PageInfo.DefaultPageSize" PageNumbersCount="DefaultPageNumbersCount" 
-             AlwaysVisible="true" Count="FilesCount"></RadzenPager>
 
 @code 
 {
     public const string Path = "/ai-files";
-    public const int DefaultPageNumbersCount = 3;
 
     [Parameter]
     public string GroupId { get; set; } = string.Empty;
