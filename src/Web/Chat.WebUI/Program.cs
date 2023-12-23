@@ -1,12 +1,3 @@
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Blazored.LocalStorage;
-using Blazored.Toast;
-using BlazorSpinner;
-using Radzen;
-using Chat.WebUI;
-using Chat.WebUI.Extensions;
-
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.RootComponents.Add<App>("#app");

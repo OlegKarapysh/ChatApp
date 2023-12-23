@@ -1,9 +1,4 @@
-﻿using System.Net.Http.Json;
-using Chat.Domain.DTOs;
-using Chat.Domain.DTOs.Authentication;
-using Chat.Domain.Web;
-
-namespace Chat.WebUI.Services.Auth;
+﻿namespace Chat.WebUI.Services.Auth;
 
 public sealed class AuthWebApiService : WebApiServiceBase, IAuthWebApiService
 {

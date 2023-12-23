@@ -1,12 +1,4 @@
-﻿using Blazored.Toast.Services;
-using Microsoft.AspNetCore.SignalR.Client;
-using Chat.Application.SignalR;
-using Chat.Domain.DTOs.Calls;
-using Chat.Domain.DTOs.Messages;
-using Chat.WebUI.Services.Auth;
-using Microsoft.AspNetCore.Components;
-
-namespace Chat.WebUI.Services.SignalR;
+﻿namespace Chat.WebUI.Services.SignalR;
 
 public sealed class HubConnectionService : IHubConnectionService
 {

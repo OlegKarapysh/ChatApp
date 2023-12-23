@@ -1,9 +1,4 @@
-﻿using Chat.Domain.DTOs;
-using Chat.Domain.DTOs.AssistantFiles;
-using Chat.Domain.DTOs.Groups;
-using Chat.Domain.Web;
-
-namespace Chat.WebUI.Services.Groups;
+﻿namespace Chat.WebUI.Services.Groups;
 
 public interface IGroupsWebApiService
 {

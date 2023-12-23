@@ -1,17 +1,4 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using BlazorSpinner;
-using Chat.WebUI.HttpHandlers;
-using Chat.WebUI.Providers;
-using Chat.WebUI.Services.Auth;
-using Chat.WebUI.Services.Conversations;
-using Chat.WebUI.Services.Groups;
-using Chat.WebUI.Services.Messages;
-using Chat.WebUI.Services.OpenAI;
-using Chat.WebUI.Services.SignalR;
-using Chat.WebUI.Services.Users;
-using Chat.WebUI.Services.WebRtc;
-
-namespace Chat.WebUI.Extensions;
+﻿namespace Chat.WebUI.Extensions;
 
 public static class ServiceCollectionExtensions
 {

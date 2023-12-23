@@ -1,7 +1,4 @@
-﻿using Chat.Domain.DTOs.Calls;
-using Chat.Domain.DTOs.Messages;
-
-namespace Chat.WebUI.Services.SignalR;
+﻿namespace Chat.WebUI.Services.SignalR;
 
 public interface IHubConnectionService
 {

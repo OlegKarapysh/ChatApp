@@ -1,9 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.JSInterop;
-using Chat.Application.SignalR;
-using Chat.WebUI.Services.Auth;
-
-namespace Chat.WebUI.Services.WebRtc;
+﻿namespace Chat.WebUI.Services.WebRtc;
 
 public sealed class WebRtcService
 {

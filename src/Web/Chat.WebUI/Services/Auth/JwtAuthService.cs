@@ -1,8 +1,4 @@
-﻿using Chat.Domain.DTOs;
-using Chat.Domain.DTOs.Authentication;
-using Chat.WebUI.Providers;
-
-namespace Chat.WebUI.Services.Auth;
+﻿namespace Chat.WebUI.Services.Auth;
 
 public sealed class JwtAuthService : IJwtAuthService
 {
