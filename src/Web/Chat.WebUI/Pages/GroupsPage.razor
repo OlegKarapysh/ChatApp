@@ -1,0 +1,124 @@
+﻿@page "/groups-ai"
+
+@attribute [Authorize]
+
+@inject IToastService ToastService
+@inject IGroupsWebApiService GroupService
+@inject DialogService Dialog
+@inject SpinnerService Spinner
+
+<PageTitle>Groups</PageTitle>
+
+<h1>Your groups</h1>
+
+<RadzenDataGrid TItem="GroupInfoDto" Data="Groups" AllowColumnResize="true" AllowAlternatingRows="false" AllowFiltering="true"  
+                AllowPaging="true" PagerAlwaysVisible="false" PageSize="PageInfo.DefaultPageSize" Responsive="true">
+    <HeaderTemplate>
+        <RadzenButton Click="OpenCreateGroupDialog">Create new group</RadzenButton>
+    </HeaderTemplate>
+    <EmptyTemplate>
+        <NoResultsInGridComponent></NoResultsInGridComponent>
+    </EmptyTemplate>
+    <Columns>
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="@nameof(GroupInfoDto.Name)" Title="Group name"
+                               MinWidth="100px" Width="150px">
+            <FooterTemplate>
+                Total groups: <strong>@GroupsCount</strong>
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="@nameof(GroupInfoDto.Instructions)" Title="Instructions">
+            <Template Context="groupInfo">
+                <RadzenText Style="text-wrap: normal; word-wrap: break-word; white-space: normal">
+                    @groupInfo.Instructions
+                </RadzenText>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="@nameof(GroupInfoDto.MembersCount)" Title="Members"
+                              MinWidth="80px" Width="110px">
+            <Template Context="groupInfo">
+                <LinkComponent Path="@($"{GroupMembersPage.Path}/{groupInfo.Id}")" IconClass="@null"
+                               Text="@groupInfo.MembersCount.ToString()"/>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="GroupInfoDto" Property="@nameof(GroupInfoDto.FilesCount)" Title="Files"
+                              MinWidth="80px" Width="110px">
+            <Template Context="groupInfo">
+                <LinkComponent Path="@($"{AssistantFilesPage.Path}/{groupInfo.Id}")" IconClass="@null"
+                               Text="@groupInfo.FilesCount.ToString()"/>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="GroupInfoDto" MinWidth="145px" Width="150px" Title="Actions">
+            <Template Context="groupInfo">
+                <RadzenButton ButtonStyle="ButtonStyle.Secondary" Click="async () => await OpenEditGroupDialogAsync(groupInfo.Id)">
+                    Edit
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="async () => await DeleteGroupAsync(groupInfo.Id)">
+                    Delete
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code 
+{
+    public const string Path = "groups-ai";
+    
+    public List<GroupInfoDto> Groups = new();
+    public int GroupsCount => Groups.Count;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Spinner!.Show();
+        await RefreshGroupsGrid();
+        Spinner.Hide();
+    }
+
+    private async Task OpenCreateGroupDialog()
+    {
+        bool? isCreated = await Dialog!.OpenAsync<GroupFormComponent>("New group")!;
+        if (isCreated is not null && (bool)isCreated)
+        {
+            await RefreshGroupsGrid();
+        }
+    }
+
+    private async Task DeleteGroupAsync(int groupId)
+    {
+        var deletionErrorResponse = await GroupService!.DeleteGroupAsync(groupId);
+        if (deletionErrorResponse is not null)
+        {
+            ToastService!.ShowError(deletionErrorResponse.Message);
+        }
+        else
+        {
+            await RefreshGroupsGrid();
+        }
+    }
+
+    private async Task RefreshGroupsGrid()
+    {
+        var groupsResponse = await GroupService!.GetAllGroupsInfoAsync();
+        if (groupsResponse is { IsSuccessful: true, Content: not null })
+        {
+            Groups = groupsResponse.Content.ToList();
+        }
+        else if (groupsResponse.ErrorDetails is not null)
+        {
+            ToastService!.ShowError(groupsResponse.ErrorDetails.Message);
+        }
+    }
+    
+    private async Task OpenEditGroupDialogAsync(int groupId)
+    {
+        bool? isEdited = await Dialog!.OpenAsync<GroupFormComponent>("Edit group", new Dictionary<string, object>
+            {
+                { nameof(GroupFormComponent.GroupIdParameter), groupId },
+                { nameof(GroupFormComponent.IsEditParameter), true }
+            })!;
+        if (isEdited is not null && (bool)isEdited)
+        {
+            await RefreshGroupsGrid();
+        }
+    }
+}

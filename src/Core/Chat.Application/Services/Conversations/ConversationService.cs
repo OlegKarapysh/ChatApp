@@ -16,14 +16,14 @@ public sealed class ConversationService : IConversationService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserService _userService;
-    private readonly IRepository<ConversationParticipants, int> _participantsRepository;
+    private readonly IRepository<ConversationParticipant, int> _participantsRepository;
     private readonly IRepository<Conversation, int> _conversationsRepository;
 
     public ConversationService(IUnitOfWork unitOfWork, IUserService userService)
     {
         _unitOfWork = unitOfWork;
         _userService = userService;
-        _participantsRepository = _unitOfWork.GetRepository<ConversationParticipants, int>();
+        _participantsRepository = _unitOfWork.GetRepository<ConversationParticipant, int>();
         _conversationsRepository = _unitOfWork.GetRepository<Conversation, int>();
     }
 
@@ -31,19 +31,19 @@ public sealed class ConversationService : IConversationService
     {
         return (await _participantsRepository
             .FindAllAsync(x => x.UserId == userId))
-            .Select(x => x.ConversationId)
+            .Select(x => x.ConversationId ?? default)
             .ToArray();
     }
 
-    public async Task<ConversationDto> AddGroupMemberAsync(NewGroupMemberDto groupMemberData)
+    public async Task<ConversationDto> AddGroupMemberAsync(NewConversationMemberDto conversationMemberData)
     {
-        var conversation = await GetConversationByIdAsync(groupMemberData.ConversationId);
+        var conversation = await GetConversationByIdAsync(conversationMemberData.ConversationId);
         if (conversation.Type != ConversationType.Group)
         {
             throw new WrongConversationTypeException();
         }
         
-        var newMember = await _userService.GetUserByNameAsync(groupMemberData.MemberUserName);
+        var newMember = await _userService.GetUserByNameAsync(conversationMemberData.MemberUserName);
         conversation.Members.Add(newMember);
         _conversationsRepository.Update(conversation);
         await _unitOfWork.SaveChangesAsync();

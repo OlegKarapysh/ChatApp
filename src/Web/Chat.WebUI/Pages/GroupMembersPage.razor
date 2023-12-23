@@ -1,0 +1,90 @@
+﻿@page "/ai-group-members/{GroupId}"
+
+@attribute [Authorize]
+
+@inject IGroupsWebApiService GroupService
+@inject IToastService ToastService
+@inject DialogService Dialog
+
+<PageTitle>@GroupWithMembersDto.Name</PageTitle>
+
+<h1>@($"{GroupWithMembersDto.Name} members")</h1>
+
+<LinkComponent Path="@GroupsPage.Path" Text=" Go back to all groups"></LinkComponent>
+
+<RadzenDataGrid TItem="UserDto" Data="GroupWithMembersDto.Members" AllowColumnResize="true" AllowAlternatingRows="false"
+                AllowFiltering="true" AllowPaging="true" PagerAlwaysVisible="false" PageSize="PageInfo.DefaultPageSize" Responsive="true">
+    <HeaderTemplate>
+        <RadzenButton Click="OpenAddMemberDialog">Add member</RadzenButton>
+    </HeaderTemplate>
+    <EmptyTemplate>
+        <NoResultsInGridComponent></NoResultsInGridComponent>
+    </EmptyTemplate>
+    <Columns>
+        <RadzenDataGridColumn TItem="UserDto" Property="@nameof(UserDto.UserName)" Title="Username">
+            <FooterTemplate>
+                Total members: <strong>@MembersCount</strong>
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="UserDto" Property="@nameof(UserDto.FirstName)" Title="First name"/>
+        <RadzenDataGridColumn TItem="UserDto" Property="@nameof(UserDto.LastName)"  Title="Last name"/>
+        <RadzenDataGridColumn TItem="UserDto" Title="Actions">
+            <Template Context="userInfo">
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="async () => await DeleteMemberAsync(userInfo.UserName)">
+                    Delete
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code 
+{
+    public const string Path = "/ai-group-members";
+
+    [Parameter]
+    public string GroupId { get; set; } = string.Empty;
+    public GroupWithMembersDto GroupWithMembersDto { get; set; } = new();
+    public int MembersCount => GroupWithMembersDto.Members.Count;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshFilesGrid();
+    }
+    
+    private async Task OpenAddMemberDialog()
+    {
+        bool? isAdded = await Dialog!.OpenAsync<AddGroupMemberFormComponent>(
+            "New member", new Dictionary<string, object> {{ nameof(AddGroupMemberFormComponent.GroupIdParameter), GroupId }})!;
+        if (isAdded is not null && (bool)isAdded)
+        {
+            await RefreshFilesGrid();
+        }
+    }
+
+    private async Task DeleteMemberAsync(string userName)
+    {
+        var deletionError = await GroupService!.DeleteGroupMemberAsync(int.Parse(GroupId), userName);
+        if (deletionError is not null)
+        {
+            ToastService!.ShowError(deletionError.Message);
+        }
+        else
+        {
+            await RefreshFilesGrid();
+        }
+    }
+
+    private async Task RefreshFilesGrid()
+    {
+        var response = await GroupService!.GetGroupWithMembersAsync(int.Parse(GroupId));
+        if (response is { IsSuccessful: true, Content: not null })
+        {
+            GroupWithMembersDto = response.Content;
+        }
+        else
+        {
+            ToastService!.ShowError(response.ErrorDetails?.Message ?? "Failed to fetch group members");
+        }
+    }
+}

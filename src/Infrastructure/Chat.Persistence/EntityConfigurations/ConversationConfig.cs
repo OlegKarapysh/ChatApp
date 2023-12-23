@@ -16,7 +16,7 @@ public sealed class ConversationConfig : IEntityTypeConfiguration<Conversation>
         
         builder.HasMany(x => x.Members)
                .WithMany(x => x.Conversations)
-               .UsingEntity<ConversationParticipants>(
+               .UsingEntity<ConversationParticipant>(
                    l => l.HasOne(x => x.User)
                          .WithMany(x => x.ConversationParticipants)
                          .HasForeignKey(x => x.UserId),

@@ -7,18 +7,20 @@
 @inject IJSRuntime JsRuntime
 @inject NavigationManager Navigation
 
+<PageTitle>Conversations</PageTitle>
+
 <h1>Conversations</h1>
 
 <RadzenTextBox Placeholder="Type to search..." @bind-Value="SearchFilter"></RadzenTextBox>
 <RadzenDropDown TValue="string" Data="ConversationsProperties" @bind-Value="SortingProperty" Change="OnSortingPropertyChanged">
 </RadzenDropDown>
-<RadzenRadioButtonList @bind-Value="SortingOrder" TValue="int" class="mb-5" Change="OnSortingOrderChanged">
+<RadzenRadioButtonList TValue="int" class="mb-3" @bind-Value="SortingOrder" Change="OnSortingOrderChanged">
     <Items>
         <RadzenRadioButtonListItem Text="Ascending" Value="1" />
         <RadzenRadioButtonListItem Text="Descending" Value="2" />
     </Items>
 </RadzenRadioButtonList>
-<RadzenButton Click="OnSearch">Search</RadzenButton>
+<RadzenButton Style="margin-bottom: 15px" Click="OnSearch">Search</RadzenButton>
 
 <RadzenDataGrid TItem="ConversationBasicInfoDto" Data="ConversationsOnPage" ColumnWidth="300px"
                 AllowColumnResize="true" AllowAlternatingRows="false">

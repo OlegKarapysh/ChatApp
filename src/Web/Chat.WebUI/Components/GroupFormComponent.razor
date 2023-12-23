@@ -1,0 +1,105 @@
+﻿@inject IGroupsWebApiService GroupService
+@inject IToastService ToastService
+@inject DialogService Dialog
+
+<div class="card-body">
+    <EditForm Model="@GroupData" OnValidSubmit="SubmitGroupInfo">
+        <DataAnnotationsValidator />
+        <ValidationSummary style="color:indianred" Model="@GroupData" />
+        <div class="form-group">
+            <label for="name" class="form-label">Group name:</label>
+            <InputText id="name" class="form-control" placeholder="Name..."
+                       @bind-Value="@GroupData.Name"></InputText>
+            <ValidationMessage For="() => GroupData.Name"></ValidationMessage>
+        </div>
+
+        <div class="form-group mt-2">
+            <label for="instructions" class="form-label">AI assistant instructions:</label>
+            <InputText id="instructions" class="form-control" placeholder="You are my personal assistant..."
+                       @bind-Value="@GroupData.Instructions"></InputText>
+            <ValidationMessage For="() => GroupData.Instructions"></ValidationMessage>
+        </div>
+
+        <div class="form-group mt-2">
+            <button class="btn btn-outline-primary float-end" disabled="@IsSubmitDisabled" type="submit">Submit</button>
+        </div>
+    </EditForm>
+</div>
+
+@code 
+{
+    [Parameter]
+    public object? IsEditParameter { get; set; }
+    [Parameter]
+    public object GroupIdParameter { get; set; } = default!;
+    public int GroupId { get; set; }
+    public NewGroupDto GroupData { get; set; } = new();
+    public bool IsSubmitDisabled { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsEditParameter is not null)
+        {
+            try
+            {
+                GroupId = Convert.ToInt32(GroupIdParameter);
+            }
+            catch
+            {
+                ToastService!.ShowError("Failed to load the group");
+                Dialog!.Close();
+            }
+
+            var groupDataResponse = await GroupService!.GetGroupAsync(GroupId);
+            if (groupDataResponse is { IsSuccessful: true, Content: not null })
+            {
+                GroupData.Name = groupDataResponse.Content.Name;
+                GroupData.Instructions = groupDataResponse.Content.Instructions;
+                return;
+            }
+            
+            if (groupDataResponse.ErrorDetails is not null)
+            {
+                ToastService!.ShowError(groupDataResponse.ErrorDetails.Message);
+            }
+            Dialog!.Close();
+        }
+    }
+
+    private async Task SubmitGroupInfo()
+    {
+        IsSubmitDisabled = true;
+        if (IsEditParameter is not null)
+        {
+            await EditGroup();
+        }
+        else
+        {
+            await CreateNewGroup();
+        }
+        
+        IsSubmitDisabled = false;
+    }
+
+    private async Task EditGroup()
+    {
+        HandleApiResponse(await GroupService!.EditGroupAsync(GroupId, GroupData));
+    }
+
+    private async Task CreateNewGroup()
+    {
+        HandleApiResponse(await GroupService!.CreateGroupAsync(GroupData));
+    }
+
+    private void HandleApiResponse<T>(WebApiResponse<T> response)
+    {
+        if (response.IsSuccessful)
+        {
+            Dialog!.Close(response.IsSuccessful);
+        }
+        else
+        {
+            ToastService!.ShowError(response.ErrorDetails?.Message ?? "Failed to create a group");
+        }
+    }
+}

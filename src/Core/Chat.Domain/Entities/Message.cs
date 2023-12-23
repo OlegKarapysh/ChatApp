@@ -16,5 +16,5 @@ public class Message : AuditableEntityBase<int>
     public int? ConversationId { get; set; }
     public Conversation? Conversation { get; set; }
     public User? Sender { get; set; }
-    public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
+    public IList<Attachment> Attachments { get; set; } = new List<Attachment>();
 }

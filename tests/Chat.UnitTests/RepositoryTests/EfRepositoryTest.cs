@@ -76,7 +76,7 @@ public sealed class EfRepositoryTest : IDisposable
     {
         // Arrange.
         var context = CreateDbContext();
-        var sut = new EfRepository<ConversationParticipants, int>(context);
+        var sut = new EfRepository<ConversationParticipant, int>(context);
         var all = await sut.GetAllAsync();
         var expectedCount = all.Count - 1;
         var existingId = all.First().Id;
@@ -99,7 +99,7 @@ public sealed class EfRepositoryTest : IDisposable
     {
         // Arrange.
         var context = CreateDbContext();
-        var sut = new EfRepository<ConversationParticipants, int>(context);
+        var sut = new EfRepository<ConversationParticipant, int>(context);
         const int invalidId = int.MinValue;
         var expectedCount = (await sut.GetAllAsync()).Count;
         

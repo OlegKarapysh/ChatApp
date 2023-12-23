@@ -7,12 +7,11 @@ namespace Chat.WebUI.Services.Auth;
 
 public sealed class AuthWebApiService : WebApiServiceBase, IAuthWebApiService
 {
-    private protected override string BaseRoute { get; init; }
+    private protected override string BaseRoute { get; init; } = "/auth";
 
     public AuthWebApiService(IHttpClientFactory httpClientFactory, ITokenStorageService tokenService)
         : base(httpClientFactory, tokenService)
     {
-        BaseRoute = "/auth";
     }
 
     public async Task<WebApiResponse<TokenPairDto>> LoginAsync(LoginDto loginData)

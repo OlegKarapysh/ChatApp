@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Chat.Application.Services.Authentication;
 using Chat.Application.Services.JWT;
 using Chat.Domain.DTOs.Authentication;
+using Chat.Persistence.Contexts;
 
 namespace Chat.WebAPI.Controllers;
 

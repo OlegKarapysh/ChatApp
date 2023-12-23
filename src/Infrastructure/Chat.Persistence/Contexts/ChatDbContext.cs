@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Chat.Domain.Entities;
 using Chat.Domain.Entities.Attachments;
 using Chat.Domain.Entities.Conversations;
+using Chat.Domain.Entities.Groups;
 using Chat.Persistence.EntityConfigurations;
 
 namespace Chat.Persistence.Contexts;
@@ -15,7 +16,10 @@ public class ChatDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     public DbSet<Conversation> Conversations => Set<Conversation>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<Attachment> Attachments => Set<Attachment>();
-    public DbSet<ConversationParticipants> ConversationParticipants => Set<ConversationParticipants>();
+    public DbSet<ConversationParticipant> ConversationParticipants => Set<ConversationParticipant>();
+    public DbSet<Group> Groups => Set<Group>();
+    public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
+    public DbSet<AssistantFile> AssistantFiles => Set<AssistantFile>();
     
     public ChatDbContext()
     {

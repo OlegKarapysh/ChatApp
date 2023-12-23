@@ -3,8 +3,10 @@ using Chat.Application.JWT;
 using Chat.Application.Services;
 using Chat.Application.Services.Authentication;
 using Chat.Application.Services.Conversations;
+using Chat.Application.Services.Groups;
 using Chat.Application.Services.JWT;
 using Chat.Application.Services.Messages;
+using Chat.Application.Services.OpenAI;
 using Chat.Application.Services.Users;
 using Chat.DomainServices.UnitsOfWork;
 using Chat.Persistence.UnitsOfWork;
@@ -35,6 +37,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IConversationService, ConversationService>();
         services.AddScoped<IMessageService, MessageService>();
+        services.AddScoped<IOpenAiService, OpenAiService>();
+        services.AddScoped<IGroupService, GroupService>();
     }
     
     public static void AddAndConfigureJwtAuthentication(this IServiceCollection services, IConfiguration configuration)

@@ -1,0 +1,73 @@
+﻿@inject IOpenAiWebApiService OpenAiService
+@inject IGroupsWebApiService GroupService
+@inject IToastService ToastService
+@inject SpinnerService Spinner
+@inject DialogService Dialog
+
+
+<div class="col-md-4 p-3">
+    <div style="margin: 10px">
+        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Single file upload</RadzenText>
+        <InputFile accept="@AcceptableFileExtensions" OnChange="OnFileUploaded"></InputFile>
+    </div>
+    <div style="margin: 10px">
+        <RadzenButton Click="UploadAsync" Disabled="IsUploadDisabled">Upload</RadzenButton>
+    </div>
+</div>
+
+@code 
+{
+    [Parameter]
+    public object GroupIdParameter { get; set; } = default!;
+    public int GroupId { get; set; }
+    public string AcceptableFileExtensions { get; } = string.Join(',', IOpenAiService.AcceptableFileExtensions);
+    public IBrowserFile? File;
+    public bool IsUploadDisabled => File is null;
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            GroupId = Convert.ToInt32(GroupIdParameter);
+        }
+        catch
+        {
+            ToastService!.ShowError("Failed to load the group");
+            Dialog!.Close();
+        }
+    }
+
+    private void OnFileUploaded(InputFileChangeEventArgs fileArgs)
+    {
+        File = fileArgs.File;
+    }
+
+    private async Task UploadAsync()
+    {
+        if (File is null)
+        {
+            return;
+        }
+        
+        Spinner!.Show();
+        var uploadResponse = await OpenAiService!.UploadFileAsync(File);
+        if (uploadResponse is { IsSuccessful: true, Content: not null })
+        {
+            var addFileToGroupResponse = await GroupService!.AddFileToGroupAsync(GroupId, uploadResponse.Content);
+            if (addFileToGroupResponse.IsSuccessful)
+            {
+                ToastService!.ShowSuccess($"{File.Name} has been uploaded");
+                Dialog!.Close(addFileToGroupResponse.IsSuccessful);
+            }
+            else if (addFileToGroupResponse.ErrorDetails is not null)
+            {
+                ToastService!.ShowError(addFileToGroupResponse.ErrorDetails.Message);
+            }
+        }
+        else if (uploadResponse.ErrorDetails is not null)
+        {
+            ToastService!.ShowError(uploadResponse.ErrorDetails.Message);
+        }
+        Spinner.Hide();
+    }
+}

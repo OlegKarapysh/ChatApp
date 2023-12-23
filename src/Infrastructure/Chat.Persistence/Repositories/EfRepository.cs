@@ -40,6 +40,9 @@ public sealed class EfRepository<T, TId> : IRepository<T, TId>
     public async Task<IList<T>> FindAllAsync(Expression<Func<T, bool>> predicate)
         => await _dbContext.Set<T>().Where(predicate).ToListAsync();
 
+    public async Task<T?> FindFirstAsync(Expression<Func<T, bool>> predicate)
+        => await _dbContext.Set<T>().FirstOrDefaultAsync(predicate);
+
     public async Task<T> AddAsync(T entity) => (await _dbContext.Set<T>().AddAsync(entity)).Entity;
 
     public T Update(T entity) => _dbContext.Set<T>().Update(entity).Entity;
@@ -54,5 +57,19 @@ public sealed class EfRepository<T, TId> : IRepository<T, TId>
         
         _dbContext.Set<T>().Remove(entity);
         return true;
+    }
+
+    public async Task<bool> RemoveRangeAsync(IEnumerable<TId> entityIds)
+    {
+        var hasUnsuccessfulDeletions = true;
+        foreach (var id in entityIds)
+        {
+            if (!await RemoveAsync(id))
+            {
+                hasUnsuccessfulDeletions = false;
+            }
+        }
+
+        return hasUnsuccessfulDeletions;
     }
 }

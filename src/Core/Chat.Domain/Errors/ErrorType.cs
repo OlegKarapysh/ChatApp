@@ -8,6 +8,7 @@ public enum ErrorType
     InvalidEmailOrPassword,
     InvalidToken,
     InvalidAction,
+    InvalidNaming,
     NotFound,
     Internal,
     TokenExpired,

@@ -40,3 +40,6 @@ global using Chat.Domain.Enums;
 global using Chat.Persistence.Contexts;
 global using Chat.Persistence.Repositories;
 global using Chat.Domain.DTOs.Messages;
+global using Chat.Application.Services.OpenAI;
+global using Chat.Application.Services.Groups;
+global using Chat.Domain.Entities.Groups;

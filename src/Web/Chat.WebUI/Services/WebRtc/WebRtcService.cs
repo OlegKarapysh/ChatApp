@@ -1,6 +1,6 @@
-﻿using Chat.Application.SignalR;
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
+using Chat.Application.SignalR;
 using Chat.WebUI.Services.Auth;
 
 namespace Chat.WebUI.Services.WebRtc;
@@ -16,11 +16,13 @@ public sealed class WebRtcService
     private DotNetObjectReference<WebRtcService>? _jsThis;
     private HubConnection? _hub;
     private string? _signalingChannel;
+    private readonly string _hubUrl;
 
-    public WebRtcService(IJSRuntime js, ITokenStorageService tokenService)
+    public WebRtcService(IJSRuntime js, ITokenStorageService tokenService, IConfiguration config)
     {
         _js = js;
         _tokenService = tokenService;
+        _hubUrl = config["SignalR:HubUrl"]!;
     }
 
     public async Task Join(string signalingChannel)
@@ -99,7 +101,7 @@ public sealed class WebRtcService
         if (_hub != null) return _hub;
 
         var hub = new HubConnectionBuilder()
-                  .WithUrl("https://localhost:7146/chat-hub",
+                  .WithUrl(_hubUrl,
                       options =>
                       {
                           options.AccessTokenProvider = async () => (await _tokenService.GetTokensAsync()).AccessToken;
