@@ -43,9 +43,9 @@ function createPeerConnection() {
     peerConnection.addStream(localFullStream);
 }
 export async function callAction() {
-    if (isOffered) return Promise.resolve();
+    //if (isOffered) return Promise.resolve();
 
-    isOffering = true;
+    //isOffering = true;
     createPeerConnection();
     let offerDescription = await peerConnection.createOffer(offerOptions);
     await peerConnection.setLocalDescription(offerDescription);
@@ -56,7 +56,7 @@ export async function processAnswer(descriptionText) {
     await peerConnection.setRemoteDescription(description);
 }
 export async function processOffer(descriptionText) {
-    if (isOffering) return;
+    //if (isOffering) return;
     createPeerConnection();
     const description = JSON.parse(descriptionText);
     await peerConnection.setRemoteDescription(description);
@@ -70,7 +70,9 @@ export async function processCandidate(candidateText) {
 }
 export async function hangupAction() {
 
-    await peerConnection.close();
+    if (peerConnection) {
+        await peerConnection.close();
+    }
     dotNet = null;
     localFullStream = null;
     localVideoStream = null;

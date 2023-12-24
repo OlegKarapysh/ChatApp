@@ -9,7 +9,7 @@ public sealed class WebRtcService : IWebRtcService
     private readonly ISignallingConnectionService _connectionService;
     private IJSObjectReference _jsModule;
     private DotNetObjectReference<WebRtcService>? _jsThis;
-    private string? _signalingChannel;
+    private string _signalingChannel = string.Empty;
 
     public WebRtcService(IJSRuntime js, ISignallingConnectionService connectionService)
     {
@@ -25,13 +25,8 @@ public sealed class WebRtcService : IWebRtcService
         _connectionService.InterlocutorLeft -= OnInterlocutorLeft;
     }
 
-    public async Task Join(string signalingChannel)
+    public async Task InitializeAsync(string signalingChannel)
     {
-        if (_signalingChannel is not null)
-        {
-            throw new InvalidOperationException();
-        }
-
         Console.WriteLine("Joining in webRTC service...");
         _signalingChannel = signalingChannel;
         _jsModule = await _js.InvokeAsync<IJSObjectReference>("import", "/js/WebRtcService.cs.js");
@@ -41,12 +36,9 @@ public sealed class WebRtcService : IWebRtcService
         await _jsModule.InvokeVoidAsync("initialize", _jsThis);
     }
     
-    public async Task<IJSObjectReference> StartLocalStream()
+    public async Task<IJSObjectReference> StartLocalStreamAsync()
     {
-        if (_jsModule == null) throw new InvalidOperationException();
-        
-        var stream = await _jsModule.InvokeAsync<IJSObjectReference>("startLocalStream");
-        return stream;
+        return await _jsModule.InvokeAsync<IJSObjectReference>("startLocalStream");
     }
     
     public async Task Call()

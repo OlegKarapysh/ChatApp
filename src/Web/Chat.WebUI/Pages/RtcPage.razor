@@ -55,8 +55,8 @@
     {
         if (string.IsNullOrWhiteSpace(ConversationId)) return;
         
-        await RtcService!.Join(ConversationId);
-        var localMediaStream = await RtcService.StartLocalStream();
+        await RtcService!.InitializeAsync(ConversationId);
+        var localMediaStream = await RtcService.StartLocalStreamAsync();
         await _jsModule.InvokeVoidAsync("setLocalStream", localMediaStream);
         _callDisabled = false;
         StateHasChanged();

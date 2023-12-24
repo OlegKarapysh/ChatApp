@@ -5,8 +5,8 @@ public interface IWebRtcService : IDisposable
     event Func<IJSObjectReference, Task>? RemoteStreamAcquired;
     event Func<string, Task>? InterlocutorLeft;
     
-    Task Join(string signalingChannel);
-    Task<IJSObjectReference> StartLocalStream();
+    Task InitializeAsync(string signalingChannel);
+    Task<IJSObjectReference> StartLocalStreamAsync();
     Task Call();
     Task Hangup();
     [JSInvokable]
