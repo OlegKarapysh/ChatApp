@@ -4,6 +4,7 @@
 
 @implements IDisposable
 
+@inject IVideoCallSignallingService VideoCallSignallingService
 @inject IChatSignallingService ChatSignallingService
 @inject ISignallingConnectionService SignallingConnectionService
 @inject IMessagesWebApiService MessageService
@@ -279,7 +280,7 @@
     {
         Spinner!.Show();
         IsCalling = true;
-        await ChatSignallingService!.CallUserAsync(GetCallData());
+        await VideoCallSignallingService!.CallUserAsync(GetCallData());
         var timeout = TimeSpan.FromSeconds(11);
         try
         {

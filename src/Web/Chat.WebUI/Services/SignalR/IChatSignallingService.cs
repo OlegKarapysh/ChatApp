@@ -6,6 +6,4 @@ public interface IChatSignallingService
     Task SendMessageAsync(string conversationId, MessageWithSenderDto message);
     Task UpdateMessageAsync(string conversationId, MessageWithSenderDto message);
     Task DeleteMessageAsync(string conversationId, MessageDto message);
-    Task CallUserAsync(CallDto call);
-    Task AnswerCallAsync(CallDto call);
 }

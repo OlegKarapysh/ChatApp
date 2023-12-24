@@ -7,6 +7,7 @@ public sealed class SignallingConnectionService : ISignallingConnectionService
     public event Func<MessageDto, Task>? DeletedMessage;
     public event Func<CallDto, Task>? ReceivedCallRequest;
     public event Func<CallDto, Task>? ReceivedCallAnswer;
+    public event Func<string, Task>? InterlocutorLeft;
     private HubConnection? _hubConnection;
     private readonly string _hubUrl;
     private readonly ITokenStorageService _tokenService;
@@ -38,6 +39,7 @@ public sealed class SignallingConnectionService : ISignallingConnectionService
         _hubConnection.On<MessageDto>(nameof(IChatClient.DeleteMessage), OnDeletedMessageAsync);
         _hubConnection.On<CallDto>(nameof(IChatClient.ReceiveCallRequest), OnReceivedCallRequest);
         _hubConnection.On<CallDto>(nameof(IChatClient.ReceiveCallAnswer), OnReceivedCallAnswer);
+        _hubConnection.On<string>(nameof(IChatClient.Leave), OnInterlocutorLeft);
         await _hubConnection.StartAsync();
     }
     
@@ -104,5 +106,10 @@ public sealed class SignallingConnectionService : ISignallingConnectionService
     private async Task OnReceivedCallAnswer(CallDto call)
     {
         await InvokeEventAsync(ReceivedCallAnswer, call);
+    }
+
+    private async Task OnInterlocutorLeft(string id)
+    {
+        await InvokeEventAsync(InterlocutorLeft, id);
     }
 }

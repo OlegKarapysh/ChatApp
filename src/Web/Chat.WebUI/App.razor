@@ -1,4 +1,5 @@
 ﻿@inject IChatSignallingService ChatSignallingService
+@inject IVideoCallSignallingService VideoCallSignallingService
 @inject ISignallingConnectionService SignallingConnectionService
 @inject IConversationsWebApiService ConversationService
 @inject IToastService ToastService
@@ -89,7 +90,7 @@
             call.Status = CallStatus.Declined;
         }
         Console.WriteLine("answered status: " + call.Status.ToString());
-        await ChatSignallingService!.AnswerCallAsync(call);
+        await VideoCallSignallingService!.AnswerCallAsync(call);
         DialogService.Close();
     }
 

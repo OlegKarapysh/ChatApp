@@ -29,14 +29,4 @@ public sealed class ChatSignallingService : SignallingServiceBase, IChatSignalli
         await ConnectionService.InvokeHubMethodAsync(connection => connection?.InvokeAsync(
             nameof(IChatHub.DeleteMessage), conversationId, message));
     }
-
-    public async Task CallUserAsync(CallDto call)
-    {
-        await ConnectionService.InvokeHubMethodAsync(connection => connection?.InvokeAsync(nameof(IChatHub.CallUser), call));
-    }
-
-    public async Task AnswerCallAsync(CallDto call)
-    {
-        await ConnectionService.InvokeHubMethodAsync(connection => connection?.InvokeAsync(nameof(IChatHub.AnswerCall), call));
-    }
 }

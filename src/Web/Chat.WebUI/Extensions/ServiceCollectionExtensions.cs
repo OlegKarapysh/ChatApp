@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<ISignallingConnectionService, SignallingConnectionService>();
         services.AddScoped<IChatSignallingService, ChatSignallingService>();
+        services.AddScoped<IVideoCallSignallingService, VideoCallSignallingService>();
         services.AddTransient<WebRtcService>();
     }
 }
