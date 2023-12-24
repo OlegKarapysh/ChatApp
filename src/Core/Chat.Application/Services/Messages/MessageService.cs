@@ -1,16 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Chat.Application.Extensions;
-using Chat.Application.Mappings;
-using Chat.Application.RequestExceptions;
-using Chat.Application.Services.Groups;
-using Chat.Application.Services.OpenAI;
-using Chat.Application.Services.Users;
-using Chat.Domain.DTOs.Messages;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Entities.Groups;
-using Chat.Domain.Web;
-using Chat.DomainServices.Repositories;
-using Chat.DomainServices.UnitsOfWork;
+﻿using Chat.Application.Services.OpenAI;
 using OpenAI.Threads;
 using Message = Chat.Domain.Entities.Message;
 

@@ -1,15 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Security.Principal;
-using System.Text;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using Chat.Application.JWT;
-using Chat.Application.RequestExceptions;
-using Chat.Domain.Entities;
-
-namespace Chat.Application.Services.JWT;
+﻿namespace Chat.Application.Services.JWT;
 
 public sealed class JwtService : IJwtService
 {

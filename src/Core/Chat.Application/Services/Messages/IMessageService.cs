@@ -1,6 +1,4 @@
-﻿using Chat.Domain.DTOs.Messages;
-using Chat.Domain.DTOs.Users;
-using OpenAI.Threads;
+﻿using OpenAI.Threads;
 
 namespace Chat.Application.Services.Messages;
 

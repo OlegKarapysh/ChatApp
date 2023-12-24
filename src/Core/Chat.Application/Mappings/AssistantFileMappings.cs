@@ -1,7 +1,4 @@
-﻿using Chat.Domain.DTOs.AssistantFiles;
-using Chat.Domain.Entities;
-
-namespace Chat.Application.Mappings;
+﻿namespace Chat.Application.Mappings;
 
 public static class AssistantFileMappings
 {

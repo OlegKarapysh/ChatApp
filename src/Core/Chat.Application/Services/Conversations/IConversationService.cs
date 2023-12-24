@@ -1,8 +1,4 @@
-﻿using Chat.Domain.DTOs.Conversations;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Entities.Conversations;
-
-namespace Chat.Application.Services.Conversations;
+﻿namespace Chat.Application.Services.Conversations;
 
 public interface IConversationService
 {

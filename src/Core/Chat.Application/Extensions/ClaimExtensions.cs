@@ -1,8 +1,4 @@
-﻿using System.Security.Claims;
-using Chat.Application.RequestExceptions;
-using Chat.Application.Services.JWT;
-
-namespace Chat.Application.Extensions;
+﻿namespace Chat.Application.Extensions;
 
 public static class ClaimExtensions
 {

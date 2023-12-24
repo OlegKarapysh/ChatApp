@@ -1,7 +1,4 @@
-﻿using Chat.Domain.DTOs.Users;
-using Chat.Domain.Entities;
-
-namespace Chat.Application.Services.Users;
+﻿namespace Chat.Application.Services.Users;
 
 public interface IUserService
 {

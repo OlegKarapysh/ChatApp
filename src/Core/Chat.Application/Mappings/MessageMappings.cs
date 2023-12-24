@@ -1,8 +1,4 @@
-﻿using System.Globalization;
-using Chat.Domain.DTOs.Messages;
-using Chat.Domain.Entities;
-
-namespace Chat.Application.Mappings;
+﻿namespace Chat.Application.Mappings;
 
 public static class MessageMappings
 {

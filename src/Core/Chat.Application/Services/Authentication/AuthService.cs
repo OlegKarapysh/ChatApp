@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Chat.Application.RequestExceptions;
-using Chat.Application.Services.JWT;
-using Chat.Domain.DTOs.Authentication;
-using Chat.Domain.Entities;
-
-namespace Chat.Application.Services.Authentication;
+﻿namespace Chat.Application.Services.Authentication;
 
 public sealed class AuthService : IAuthService
 {

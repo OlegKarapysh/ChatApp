@@ -1,14 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Chat.Application.Mappings;
-using Chat.Application.RequestExceptions;
-using Chat.Application.Services.OpenAI;
-using Chat.Application.Services.Users;
-using Chat.Domain.DTOs.AssistantFiles;
-using Chat.Domain.DTOs.Groups;
-using Chat.Domain.Entities;
-using Chat.Domain.Entities.Groups;
-using Chat.DomainServices.Repositories;
-using Chat.DomainServices.UnitsOfWork;
+﻿using Chat.Application.Services.OpenAI;
 
 namespace Chat.Application.Services.Groups;
 

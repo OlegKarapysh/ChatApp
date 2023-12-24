@@ -1,7 +1,4 @@
-﻿using System.Security.Claims;
-using Chat.Domain.Entities;
-
-namespace Chat.Application.Services.JWT;
+﻿namespace Chat.Application.Services.JWT;
 
 public interface IJwtService
 {

@@ -1,7 +1,4 @@
-﻿using Chat.Domain.DTOs.Calls;
-using Chat.Domain.DTOs.Messages;
-
-namespace Chat.Application.SignalR;
+﻿namespace Chat.Application.SignalR;
 
 public interface IChatHub
 {

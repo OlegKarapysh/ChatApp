@@ -1,14 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Chat.Application.Mappings;
-using Chat.Application.RequestExceptions;
-using Chat.Application.Extensions;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Entities;
-using Chat.Domain.Web;
-using Chat.DomainServices.Repositories;
-using Chat.DomainServices.UnitsOfWork;
-
-namespace Chat.Application.Services.Users;
+﻿namespace Chat.Application.Services.Users;
 
 public sealed class UserService : IUserService
 {
