@@ -7,6 +7,8 @@ public interface ISignallingConnectionService
     event Func<MessageDto, Task>? DeletedMessage;
     event Func<CallDto, Task>? ReceivedCallRequest;
     event Func<CallDto, Task>? ReceivedCallAnswer;
+    event Func<WebRtcSignalDto, Task>? ReceivedWebRtcSignal;
+    event Func<string, Task>? InterlocutorLeft;
     Task ConnectAsync();
     Task InvokeHubMethodAsync(Func<HubConnection?, Task?> methodCall);
 }

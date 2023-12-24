@@ -7,6 +7,7 @@ public sealed class SignallingConnectionService : ISignallingConnectionService
     public event Func<MessageDto, Task>? DeletedMessage;
     public event Func<CallDto, Task>? ReceivedCallRequest;
     public event Func<CallDto, Task>? ReceivedCallAnswer;
+    public event Func<WebRtcSignalDto, Task>? ReceivedWebRtcSignal;
     public event Func<string, Task>? InterlocutorLeft;
     private HubConnection? _hubConnection;
     private readonly string _hubUrl;
@@ -40,6 +41,7 @@ public sealed class SignallingConnectionService : ISignallingConnectionService
         _hubConnection.On<CallDto>(nameof(IChatClient.ReceiveCallRequest), OnReceivedCallRequest);
         _hubConnection.On<CallDto>(nameof(IChatClient.ReceiveCallAnswer), OnReceivedCallAnswer);
         _hubConnection.On<string>(nameof(IChatClient.Leave), OnInterlocutorLeft);
+        _hubConnection.On<WebRtcSignalDto>(nameof(IChatClient.SignalWebRtc), OnReceivedWebRtcSignal);
         await _hubConnection.StartAsync();
     }
     
@@ -111,5 +113,10 @@ public sealed class SignallingConnectionService : ISignallingConnectionService
     private async Task OnInterlocutorLeft(string id)
     {
         await InvokeEventAsync(InterlocutorLeft, id);
+    }
+
+    private async Task OnReceivedWebRtcSignal(WebRtcSignalDto signal)
+    {
+        await InvokeEventAsync(ReceivedWebRtcSignal, signal);
     }
 }
