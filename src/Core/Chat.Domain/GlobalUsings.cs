@@ -1,0 +1,14 @@
+﻿global using System.ComponentModel.DataAnnotations;
+global using System.Text.RegularExpressions;
+global using Microsoft.AspNetCore.Identity;
+global using Chat.Domain.Entities;
+global using Chat.Domain.ValidationAttributes;
+global using Chat.Domain.DTOs.AssistantFiles;
+global using Chat.Domain.Enums;
+global using Chat.Domain.Errors;
+global using Chat.Domain.Abstract;
+global using Chat.Domain.DTOs;
+global using Chat.Domain.Entities.Groups;
+global using Chat.Domain.Entities.Attachments;
+global using Chat.Domain.Entities.Conversations;
+global using Chat.Domain.Web;

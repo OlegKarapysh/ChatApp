@@ -1,8 +1,4 @@
-﻿using System.Linq.Expressions;
-using Chat.Domain.Abstract;
-using Chat.Domain.Enums;
-
-namespace Chat.DomainServices.Repositories;
+﻿namespace Chat.DomainServices.Repositories;
 
 public interface IRepository<T, TId>
     where T : IEntity<TId>

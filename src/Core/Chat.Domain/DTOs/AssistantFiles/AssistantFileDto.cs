@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Chat.Domain.Entities;
-
-namespace Chat.Domain.DTOs.AssistantFiles;
+﻿namespace Chat.Domain.DTOs.AssistantFiles;
 
 public class AssistantFileDto
 {

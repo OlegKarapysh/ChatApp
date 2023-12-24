@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Chat.Domain.ValidationAttributes;
-
-namespace Chat.Domain.DTOs.Authentication;
+﻿namespace Chat.Domain.DTOs.Authentication;
 
 public class ChangePasswordDto
 {

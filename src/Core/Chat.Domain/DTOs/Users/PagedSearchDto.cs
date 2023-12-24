@@ -1,6 +1,4 @@
-﻿using Chat.Domain.Enums;
-
-namespace Chat.Domain.DTOs.Users;
+﻿namespace Chat.Domain.DTOs.Users;
 
 public class PagedSearchDto
 {
