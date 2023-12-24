@@ -4,6 +4,7 @@ public static class ServiceCollectionExtensions
 {
     public static void AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddScoped<DialogService>();
         services.AddScoped<SpinnerService>();
         services.AddScoped<ITokenStorageService, TokenStorageService>();
         services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
