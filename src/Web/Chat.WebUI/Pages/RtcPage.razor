@@ -9,7 +9,7 @@
 <PageTitle>Video call</PageTitle>
 
 <div class="py-4">
-    <input id="channelInput" @bind="_channel" hidden/>
+    <input id="channelInput" @bind="ConversationId" hidden/>
     <RadzenButton id="callButton" Click="CallAction" disabled="@_callDisabled">Ready</RadzenButton>
     <RadzenButton id="hangupButton" ButtonStyle="ButtonStyle.Danger" Click="HangupAction" disabled="@_hangupDisabled">Hang Up</RadzenButton>
 </div>
@@ -29,21 +29,6 @@
     private IJSObjectReference _jsModule;
     private bool _callDisabled = true;
     private bool _hangupDisabled = true;
-    private string _channel = "foo";
-
-    protected override async Task OnInitializedAsync()
-    {
-        _channel = ConversationId;
-        await base.OnInitializedAsync();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await RtcService!.Hangup();
-        RtcService.RemoteStreamAcquired -= OnRemoteStreamAcquired;
-        RtcService.InterlocutorLeft -= OnInterlocutorLeft;
-        RtcService.Dispose();
-    }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -52,17 +37,25 @@
             _jsModule = await Js!.InvokeAsync<IJSObjectReference>("import", "./Pages/RtcPage.razor.js");
             RtcService!.RemoteStreamAcquired += OnRemoteStreamAcquired;
             RtcService.InterlocutorLeft += OnInterlocutorLeft;
-            await InitializeStreamAndChannel();
+            await InitializeStreamAndChannelAsync();
             //await CallAction();
         }
         await base.OnAfterRenderAsync(firstRender);
     }
-
-    private async Task InitializeStreamAndChannel()
+    
+    public async ValueTask DisposeAsync()
     {
-        if (string.IsNullOrWhiteSpace(_channel)) return;
+        await RtcService!.Hangup();
+        RtcService.RemoteStreamAcquired -= OnRemoteStreamAcquired;
+        RtcService.InterlocutorLeft -= OnInterlocutorLeft;
+        RtcService.Dispose();
+    }
+
+    private async Task InitializeStreamAndChannelAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ConversationId)) return;
         
-        await RtcService!.Join(_channel);
+        await RtcService!.Join(ConversationId);
         var localMediaStream = await RtcService.StartLocalStream();
         await _jsModule.InvokeVoidAsync("setLocalStream", localMediaStream);
         _callDisabled = false;
