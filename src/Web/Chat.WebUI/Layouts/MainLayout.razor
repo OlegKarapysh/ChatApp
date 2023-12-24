@@ -22,7 +22,10 @@
                 </AuthorizeView>
             </div>
             <article class="content px-4">
-                @Body
+                @if (Body is not null)
+                {
+                    @Body
+                }
             </article>
         </main>
     </div>

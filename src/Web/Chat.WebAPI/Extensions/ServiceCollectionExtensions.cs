@@ -52,10 +52,10 @@ public static class ServiceCollectionExtensions
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
-                ValidIssuer = jwtOptions[nameof(JwtOptions.Issuer)],
+                ValidIssuer = jwtOptions[nameof(JwtOptions.Issuer)]!,
         
                 ValidateAudience = true,
-                ValidAudience = jwtOptions[nameof(JwtOptions.Audience)],
+                ValidAudience = jwtOptions[nameof(JwtOptions.Audience)]!,
         
                 ValidateLifetime = true,
                 RequireExpirationTime = false,

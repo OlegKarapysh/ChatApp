@@ -21,7 +21,7 @@ public static class TestDataGenerator
                .RuleFor(x => x.UpdatedAt, _ => DefaultDate)!
                .RuleFor(x => x.ConversationId, _ => conversationId)!
                .RuleFor(x => x.Sender, f => f.PickRandom(interlocutors))!
-               .RuleFor(x => x.SenderId, (f, p) => p.Sender!.Id)!
+               .RuleFor(x => x.SenderId, (_, p) => p.Sender!.Id)!
                .Generate(count)!;
     }
 

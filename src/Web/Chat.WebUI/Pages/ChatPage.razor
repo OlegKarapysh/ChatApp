@@ -93,7 +93,7 @@
     public List<MessageWithSenderDto> Messages { get; } = new();
     public UserDto CurrentUser { get; set; } = new();
     public CancellationTokenSource CancellationSource { get; set; } = new();
-    public bool IsCalling { get; set; } = false;
+    public bool IsCalling { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -252,7 +252,7 @@
         var assistResponse = await MessageService!.AssistWithMessageAsync(messageForAssist);
         if (assistResponse is { IsSuccessful: true, Content: not null })
         {
-            MessageText = assistResponse.Content.Content[0].Text.Value;
+            MessageText = assistResponse.Content.Content?[0]?.Text?.Value ?? string.Empty;
         }
         else if (assistResponse.ErrorDetails is not null)
         {
@@ -290,7 +290,10 @@
                 ToastService!.ShowError("No answer");
             }
         }
-        catch { }
+        catch
+        {
+            // Just stop calling.
+        }
     }
 
     private MessageDto GetCurrentMessageData() => new()

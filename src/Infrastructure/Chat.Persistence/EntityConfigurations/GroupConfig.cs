@@ -1,6 +1,4 @@
-﻿
-
-namespace Chat.Persistence.EntityConfigurations;
+﻿namespace Chat.Persistence.EntityConfigurations;
 
 public sealed class GroupConfig : IEntityTypeConfiguration<Group>
 {

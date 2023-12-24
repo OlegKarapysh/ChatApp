@@ -50,9 +50,14 @@ public sealed class UserService : IUserService
         });
     }
 
-    public async Task<User> GetUserByIdAsync(int id)
+    public async Task<User> GetUserByIdAsync(int? id)
     {
-        return await _userRepository.GetByIdAsync(id) ?? throw new EntityNotFoundException(nameof(User));
+        if (id is null)
+        {
+            throw new EntityNotFoundException(nameof(User));
+        }
+        
+        return await _userRepository.GetByIdAsync((int)id) ?? throw new EntityNotFoundException(nameof(User));
     }
     
     public async Task<User> GetUserByNameAsync(string userName)

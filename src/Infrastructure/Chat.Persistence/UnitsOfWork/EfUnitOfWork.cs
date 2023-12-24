@@ -22,6 +22,11 @@ public sealed class EfUnitOfWork : IUnitOfWork
 
         var repositoryType = typeof(EfRepository<T, TId>);
         var newRepository = Activator.CreateInstance(repositoryType, _dbContext);
+        if (newRepository is null)
+        {
+            throw new InvalidOperationException($"Cannot instantiate a repository of {repositoryType.FullName} type");
+        }
+        
         _repositories.Add(entityType, newRepository);
 
         return (IRepository<T, TId>)newRepository;

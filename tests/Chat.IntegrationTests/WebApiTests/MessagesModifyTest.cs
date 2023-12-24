@@ -33,7 +33,7 @@ public sealed class MessagesModifyTest : IClassFixture<IntegrationTest>
             addMessageResponse.EnsureSuccessStatusCode();
             addedMessage!.Should()!.NotBeNull();
             addedMessage!.ConversationId.Should()!.Be(conversationId);
-            addedMessage!.TextContent.Should()!.Be(messageDto.TextContent);
+            addedMessage.TextContent.Should()!.Be(messageDto.TextContent);
             messagesBeforeAdding!.Should()!.NotContain(x => x.Id == addedMessage.Id);
             messagesAfterAdding!.Should()!.ContainSingle(x => x.Id == addedMessage.Id);
         }

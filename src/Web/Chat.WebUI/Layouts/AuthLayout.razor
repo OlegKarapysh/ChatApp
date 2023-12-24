@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
 <div style="margin-top: 4%; margin-bottom: auto">
-    @Body
+    @if (Body is not null)
+    {
+        @Body
+    }
 </div>

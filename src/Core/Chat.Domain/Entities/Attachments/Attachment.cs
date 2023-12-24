@@ -1,6 +1,4 @@
-﻿
-
-namespace Chat.Domain.Entities.Attachments;
+﻿namespace Chat.Domain.Entities.Attachments;
 
 public class Attachment : EntityBase<int>
 {

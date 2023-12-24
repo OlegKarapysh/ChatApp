@@ -1,5 +1,4 @@
-﻿
-namespace Chat.Persistence.EntityConfigurations;
+﻿namespace Chat.Persistence.EntityConfigurations;
 
 public sealed class AttachmentConfig : IEntityTypeConfiguration<Attachment>
 {
