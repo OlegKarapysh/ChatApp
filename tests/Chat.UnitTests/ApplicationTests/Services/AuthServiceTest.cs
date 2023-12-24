@@ -1,6 +1,4 @@
-﻿using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
-
-namespace Chat.UnitTests.ApplicationTests.Services;
+﻿namespace Chat.UnitTests.ApplicationTests.Services;
 
 public sealed class AuthServiceTest
 {
@@ -11,13 +9,11 @@ public sealed class AuthServiceTest
     private readonly IAuthService _sut;
     private readonly Mock<IJwtService> _jwtServiceMock = new();
     private readonly Mock<UserManager<User>> _userManagerMock;
-    private readonly Mock<SignInManager<User>> _signInManagerMock;
     
     public AuthServiceTest()
     {
         _userManagerMock = MockHelper.MockUserManager();
-        _signInManagerMock = MockHelper.MockSignInManager(_userManagerMock.Object);
-        _sut = new AuthService(_jwtServiceMock.Object, _userManagerMock.Object, _signInManagerMock.Object);
+        _sut = new AuthService(_jwtServiceMock.Object, _userManagerMock.Object);
     }
 
     [Fact]
@@ -105,9 +101,8 @@ public sealed class AuthServiceTest
             Password = Password
         };
         _userManagerMock.Setup(x => x.FindByEmailAsync(loginDto.Email)).ReturnsAsync(new User());
-        _signInManagerMock.Setup(x =>
-                              x.CheckPasswordSignInAsync(It.IsAny<User>(), loginDto.Password, It.IsAny<bool>()))
-                          .ReturnsAsync(SignInResult.Failed);
+        _userManagerMock.Setup(x => x.CheckPasswordAsync(It.IsAny<User>(), loginDto.Password)).ReturnsAsync(false);
+        
         // Act.
         var tryLogin = async () => await _sut.LoginAsync(loginDto);
         
@@ -125,8 +120,7 @@ public sealed class AuthServiceTest
         var refreshToken = new RefreshToken(Token);
         var expectedTokenPair = new TokenPairDto { AccessToken = Token, RefreshToken = refreshToken.Token };
         _userManagerMock.Setup(x => x.FindByEmailAsync(Email)).ReturnsAsync(user);
-        _signInManagerMock.Setup(x => x.CheckPasswordSignInAsync(user, Password, It.IsAny<bool>()))
-                          .ReturnsAsync(SignInResult.Success);
+        _userManagerMock.Setup(x => x.CheckPasswordAsync(user, Password)).ReturnsAsync(true);
         _jwtServiceMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
         _jwtServiceMock.Setup(x => x.CreateAccessToken(id, UserName, Email)).Returns(Token);
         

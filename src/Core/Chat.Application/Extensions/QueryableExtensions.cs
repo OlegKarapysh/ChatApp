@@ -1,6 +1,4 @@
-﻿
-
-namespace Chat.Application.Extensions;
+﻿namespace Chat.Application.Extensions;
 
 public static class QueryableExtensions
 {

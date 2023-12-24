@@ -4,20 +4,18 @@ public sealed class AuthService : IAuthService
 {
     private readonly IJwtService _jwtService;
     private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
     
-    public AuthService(IJwtService jwtService, UserManager<User> userManager, SignInManager<User> signInManager)
+    public AuthService(IJwtService jwtService, UserManager<User> userManager)
     {
         _jwtService = jwtService;
         _userManager = userManager;
-        _signInManager = signInManager;
     }
     
     public async Task<TokenPairDto> LoginAsync(LoginDto loginData)
     {
         var user = await _userManager.FindByEmailAsync(loginData.Email) ?? throw new InvalidEmailException();
-        var signInResult = await _signInManager.CheckPasswordSignInAsync(user, loginData.Password, false);
-        if (!signInResult.Succeeded)
+        var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, loginData.Password);
+        if (!isPasswordCorrect)
         {
             throw new InvalidPasswordException();
         }
