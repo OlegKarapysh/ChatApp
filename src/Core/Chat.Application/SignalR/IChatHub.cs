@@ -8,4 +8,5 @@ public interface IChatHub
     Task JoinConversations(string[] conversationIds);
     Task CallUser(CallDto callData);
     Task AnswerCall(CallDto callData);
+    Task SignalWebRtc(WebRtcSignalDto signal);
 }

@@ -35,6 +35,7 @@ global using Chat.Domain.DTOs.AssistantFiles;
 global using Chat.Domain.DTOs.Groups;
 global using Chat.Domain.DTOs.Conversations;
 global using Chat.Domain.DTOs.Authentication;
+global using Chat.Domain.Enums;
 global using Chat.WebUI.Providers;
 global using Chat.WebUI.Pages;
 global using Chat.Domain.Attributes;
