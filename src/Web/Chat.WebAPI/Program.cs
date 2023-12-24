@@ -1,11 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Chat.Persistence.Contexts;
-using Chat.Domain.Entities;
-using Chat.WebAPI.Extensions;
-using Chat.WebAPI.Middlewares;
-using Chat.WebAPI.SignalR;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

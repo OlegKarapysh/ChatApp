@@ -1,11 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
-using Chat.Domain.DTOs.Messages;
-using Chat.Application.SignalR;
-using Chat.Domain.DTOs.Calls;
-using Chat.Domain.Entities.Conversations;
-
-namespace Chat.WebAPI.SignalR;
+﻿namespace Chat.WebAPI.SignalR;
 
 [Authorize]
 public sealed class ChatHub : Hub<IChatClient>, IChatHub

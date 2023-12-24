@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Chat.Application.Services.JWT;
-using Chat.Application.Services.Users;
-using Chat.Domain.DTOs.Users;
-
-namespace Chat.WebAPI.Controllers;
+﻿namespace Chat.WebAPI.Controllers;
 
 [ApiController, Authorize, Route("api/[controller]")]
 public sealed class UsersController : ControllerBase

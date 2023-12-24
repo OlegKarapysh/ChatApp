@@ -1,9 +1,4 @@
-﻿using Chat.Application.Services.OpenAI;
-using Chat.Domain.DTOs.AssistantFiles;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace Chat.WebAPI.Controllers;
+﻿namespace Chat.WebAPI.Controllers;
 
 [ApiController, Authorize, Route("api/[controller]")]
 public class OpenAiController : ControllerBase
