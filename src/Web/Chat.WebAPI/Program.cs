@@ -1,11 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Chat.Persistence.Contexts;
-using Chat.Domain.Entities;
-using Chat.WebAPI.Extensions;
-using Chat.WebAPI.Middlewares;
-using Chat.WebAPI.SignalR;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -20,8 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddIdentity<User, IdentityRole<int>>()
        .AddEntityFrameworkStores<ChatDbContext>()
-       .AddUserManager<UserManager<User>>()
-       .AddSignInManager<SignInManager<User>>();
+       .AddUserManager<UserManager<User>>();
 builder.Services.AddDefaultCors(builder.Configuration);
 builder.Services.AddAndConfigureJwtAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();

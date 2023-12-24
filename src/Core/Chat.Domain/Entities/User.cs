@@ -1,8 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Chat.Domain.Abstract;
-using Chat.Domain.Entities.Conversations;
-using Chat.Domain.Entities.Groups;
-using Microsoft.AspNetCore.Identity;
+﻿using Group = Chat.Domain.Entities.Groups.Group;
 
 namespace Chat.Domain.Entities;
 

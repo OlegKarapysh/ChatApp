@@ -82,7 +82,7 @@
         if (isFirstRender)
         {
             var pageIndex = Page - 1;
-            await Pager.GoToPage(pageIndex, true);
+            await Pager.GoToPage(pageIndex, true)!;
         }
     }
 
@@ -90,7 +90,7 @@
     {
         Page = 1;
         var pageIndex = Page - 1;
-        await Pager.GoToPage(pageIndex, true);
+        await Pager.GoToPage(pageIndex, true)!;
         await UpdateQueryStringParameters();
     }
 
@@ -136,11 +136,11 @@
     private async Task SendAndHandleSearchRequest()
     {
         var searchResult = await SendSearchRequest();
-        if (!searchResult.IsSuccessful)
+        if (searchResult is { IsSuccessful: false, ErrorDetails: not null })
         {
             ToastNotification!.ShowError(searchResult.ErrorDetails!.Message);
         }
-        else
+        else if (searchResult.Content?.PageInfo is not null && searchResult.Content?.Users is not null)
         {
             UpdateUsers(searchResult.Content!.Users);
             UpdatePagerItemsCount(searchResult.Content.PageInfo);
@@ -152,7 +152,7 @@
         Page = Page,
         SearchFilter = SearchFilter,
         SortingProperty = SortingProperty,
-        SortingOrder = (Chat.Domain.Enums.SortingOrder)SortingOrder
+        SortingOrder = (SortingOrder)SortingOrder
     };
 
     private async Task<WebApiResponse<UsersPageDto>> SendSearchRequest()

@@ -4,7 +4,7 @@
 
 @inject IConversationsWebApiService ConversationService
 @inject IToastService ToastService
-@inject IHubConnectionService HubConnectionService
+@inject IChatSignallingService ChatSignallingService
 @inject NavigationManager Navigation
 
 <PageTitle>Chats</PageTitle>
@@ -84,7 +84,7 @@
             UpdatedAt = dialog.UpdatedAt,
             Type = dialog.Type
         });
-        await HubConnectionService!.JoinConversationsAsync(new[] { dialog.Id.ToString() });
+        await ChatSignallingService!.JoinConversationsAsync(new[] { dialog.Id.ToString() });
         InterlocutorUserName = string.Empty;
     }
 
@@ -106,7 +106,7 @@
         }
         
         Conversations.Add(group);
-        await HubConnectionService!.JoinConversationsAsync(new[] { group.Id.ToString() });
+        await ChatSignallingService!.JoinConversationsAsync(new[] { group.Id.ToString() });
         GroupChatTitle = string.Empty;
     }
 

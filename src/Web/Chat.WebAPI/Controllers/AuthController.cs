@@ -1,11 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Chat.Application.Services.Authentication;
-using Chat.Application.Services.JWT;
-using Chat.Domain.DTOs.Authentication;
-using Chat.Persistence.Contexts;
-
-namespace Chat.WebAPI.Controllers;
+﻿namespace Chat.WebAPI.Controllers;
 
 [ApiController, Route("api/[controller]")]
 public sealed class AuthController : ControllerBase

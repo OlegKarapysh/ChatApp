@@ -1,14 +1,4 @@
-﻿using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Text.Json;
-using Microsoft.AspNetCore.Components;
-using Chat.Domain.DTOs.Authentication;
-using Chat.WebUI.Pages;
-using Chat.WebUI.Providers;
-using Chat.WebUI.Services.Auth;
-
-namespace Chat.WebUI.HttpHandlers;
+﻿namespace Chat.WebUI.HttpHandlers;
 
 public sealed class JwtAuthInterceptor : DelegatingHandler
 {

@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using Chat.Application.RequestExceptions;
-
-namespace Chat.WebAPI.Middlewares;
+﻿namespace Chat.WebAPI.Middlewares;
 
 public sealed class GenericExceptionHandlerMiddleware
 {

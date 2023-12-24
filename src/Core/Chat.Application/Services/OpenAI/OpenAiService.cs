@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using OpenAI.Threads;
-using Chat.Application.Mappings;
-using Chat.Application.RequestExceptions;
-using Chat.Domain.DTOs.AssistantFiles;
 
 namespace Chat.Application.Services.OpenAI;
 

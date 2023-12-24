@@ -1,8 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Chat.Domain.Entities.Groups;
-
-namespace Chat.Persistence.EntityConfigurations;
+﻿namespace Chat.Persistence.EntityConfigurations;
 
 public sealed class GroupConfig : IEntityTypeConfiguration<Group>
 {

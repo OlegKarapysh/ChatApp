@@ -1,16 +1,4 @@
-﻿using Chat.Application.Extensions;
-using Chat.Application.Mappings;
-using Chat.Application.RequestExceptions;
-using Chat.Application.Services.Users;
-using Chat.Domain.DTOs.Conversations;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Entities;
-using Chat.Domain.Entities.Conversations;
-using Chat.Domain.Web;
-using Chat.DomainServices.Repositories;
-using Chat.DomainServices.UnitsOfWork;
-
-namespace Chat.Application.Services.Conversations;
+﻿namespace Chat.Application.Services.Conversations;
 
 public sealed class ConversationService : IConversationService
 {

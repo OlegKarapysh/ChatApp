@@ -1,9 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Chat.Domain.Entities;
-using Chat.Persistence.Contexts;
-
-namespace Chat.Persistence.EntityConfigurations;
+﻿namespace Chat.Persistence.EntityConfigurations;
 
 public sealed class AssistantFileConfig : IEntityTypeConfiguration<AssistantFile>
 {

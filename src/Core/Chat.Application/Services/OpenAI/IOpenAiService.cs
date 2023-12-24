@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Chat.Domain.DTOs.AssistantFiles;
 using OpenAI.Threads;
 
 namespace Chat.Application.Services.OpenAI;

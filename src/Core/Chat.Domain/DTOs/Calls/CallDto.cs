@@ -1,6 +1,4 @@
-﻿using Chat.Domain.Entities.Conversations;
-
-namespace Chat.Domain.DTOs.Calls;
+﻿namespace Chat.Domain.DTOs.Calls;
 
 public class CallDto
 {

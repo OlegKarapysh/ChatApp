@@ -1,12 +1,6 @@
-﻿using Chat.Domain.DTOs;
-using Chat.Domain.DTOs.AssistantFiles;
-using Chat.Domain.DTOs.Groups;
-using Chat.Domain.Web;
-using Chat.WebUI.Services.Auth;
+﻿namespace Chat.WebUI.Services.Groups;
 
-namespace Chat.WebUI.Services.Groups;
-
-public class GroupsWebApiService : WebApiServiceBase, IGroupsWebApiService
+public sealed class GroupsWebApiService : WebApiServiceBase, IGroupsWebApiService
 {
     private protected override string BaseRoute { get; init; } = "/groups";
 

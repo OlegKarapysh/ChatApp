@@ -1,8 +1,4 @@
-﻿using System.Net;
-using Chat.Domain.DTOs;
-using Chat.Domain.Errors;
-
-namespace Chat.Application.RequestExceptions;
+﻿namespace Chat.Application.RequestExceptions;
 
 public static class ExceptionExtensions
 {

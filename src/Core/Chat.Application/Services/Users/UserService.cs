@@ -1,14 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Chat.Application.Mappings;
-using Chat.Application.RequestExceptions;
-using Chat.Application.Extensions;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Entities;
-using Chat.Domain.Web;
-using Chat.DomainServices.Repositories;
-using Chat.DomainServices.UnitsOfWork;
-
-namespace Chat.Application.Services.Users;
+﻿namespace Chat.Application.Services.Users;
 
 public sealed class UserService : IUserService
 {
@@ -60,9 +50,14 @@ public sealed class UserService : IUserService
         });
     }
 
-    public async Task<User> GetUserByIdAsync(int id)
+    public async Task<User> GetUserByIdAsync(int? id)
     {
-        return await _userRepository.GetByIdAsync(id) ?? throw new EntityNotFoundException(nameof(User));
+        if (id is null)
+        {
+            throw new EntityNotFoundException(nameof(User));
+        }
+        
+        return await _userRepository.GetByIdAsync((int)id) ?? throw new EntityNotFoundException(nameof(User));
     }
     
     public async Task<User> GetUserByNameAsync(string userName)

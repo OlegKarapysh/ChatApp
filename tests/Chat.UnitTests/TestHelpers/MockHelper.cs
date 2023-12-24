@@ -10,10 +10,4 @@ public static class MockHelper
         mock.Object.PasswordValidators.Add(new PasswordValidator<User>());
         return mock;
     }
-
-    public static Mock<SignInManager<User>> MockSignInManager(UserManager<User> userManager)
-    {
-        return new Mock<SignInManager<User>>(userManager, Mock.Of<IHttpContextAccessor>(),
-            Mock.Of<IUserClaimsPrincipalFactory<User>>(), null!, null!, null!, null!);
-    }
 }

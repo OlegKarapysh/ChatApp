@@ -1,12 +1,4 @@
-﻿using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using Chat.Application.Extensions;
-using Chat.Domain.Abstract;
-using Chat.Domain.Enums;
-using Chat.DomainServices.Repositories;
-using Chat.Persistence.Contexts;
-
-namespace Chat.Persistence.Repositories;
+﻿namespace Chat.Persistence.Repositories;
 
 public sealed class EfRepository<T, TId> : IRepository<T, TId>
     where T : class, IEntity<TId>

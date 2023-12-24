@@ -1,7 +1,4 @@
-﻿using Chat.Domain.DTOs.Users;
-using Chat.Domain.Entities;
-
-namespace Chat.Application.Mappings;
+﻿namespace Chat.Application.Mappings;
 
 public static class UserMappings
 {

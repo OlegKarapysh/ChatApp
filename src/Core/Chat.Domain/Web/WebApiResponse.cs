@@ -1,6 +1,4 @@
-﻿using Chat.Domain.DTOs;
-
-namespace Chat.Domain.Web;
+﻿namespace Chat.Domain.Web;
 
 public class WebApiResponse<T>
 {

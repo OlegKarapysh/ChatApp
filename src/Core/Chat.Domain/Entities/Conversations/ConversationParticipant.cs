@@ -1,6 +1,4 @@
-﻿using Chat.Domain.Abstract;
-
-namespace Chat.Domain.Entities.Conversations;
+﻿namespace Chat.Domain.Entities.Conversations;
 
 public sealed class ConversationParticipant : EntityBase<int>
 {

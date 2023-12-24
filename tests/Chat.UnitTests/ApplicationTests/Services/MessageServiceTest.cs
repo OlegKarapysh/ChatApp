@@ -14,7 +14,7 @@ public sealed class MessageServiceTest
     public MessageServiceTest()
     {
         _unitOfWorkMock.Setup(x => x.GetRepository<Message, int>()).Returns(_messageRepositoryMock.Object);
-        _sut = new MessageService( _userServiceMock.Object, _unitOfWorkMock.Object, _openAiServiceMock.Object);
+        _sut = new MessageService(_userServiceMock.Object, _unitOfWorkMock.Object, _openAiServiceMock.Object);
     }
 
     [Fact]

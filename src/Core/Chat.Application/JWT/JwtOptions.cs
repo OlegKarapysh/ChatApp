@@ -1,6 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-
-namespace Chat.Application.JWT;
+﻿namespace Chat.Application.JWT;
 
 public sealed class JwtOptions
 {

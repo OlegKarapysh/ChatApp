@@ -1,9 +1,4 @@
-﻿using Chat.Domain.DTOs;
-using Chat.Domain.DTOs.Conversations;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Web;
-
-namespace Chat.WebUI.Services.Conversations;
+﻿namespace Chat.WebUI.Services.Conversations;
 
 public interface IConversationsWebApiService
 {

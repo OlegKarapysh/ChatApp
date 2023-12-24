@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
-
-namespace Chat.Domain.ValidationAttributes;
+﻿namespace Chat.Domain.ValidationAttributes;
 
 [AttributeUsage(AttributeTargets.Property)]
 public class IdentityPasswordAttribute : ValidationAttribute

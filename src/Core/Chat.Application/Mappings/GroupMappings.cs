@@ -1,7 +1,4 @@
-﻿using Chat.Domain.DTOs.Groups;
-using Chat.Domain.Entities.Groups;
-
-namespace Chat.Application.Mappings;
+﻿namespace Chat.Application.Mappings;
 
 public static class GroupMappings
 {

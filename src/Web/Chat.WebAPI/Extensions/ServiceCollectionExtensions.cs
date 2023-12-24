@@ -1,19 +1,4 @@
-﻿using System.Text;
-using Chat.Application.JWT;
-using Chat.Application.Services;
-using Chat.Application.Services.Authentication;
-using Chat.Application.Services.Conversations;
-using Chat.Application.Services.Groups;
-using Chat.Application.Services.JWT;
-using Chat.Application.Services.Messages;
-using Chat.Application.Services.OpenAI;
-using Chat.Application.Services.Users;
-using Chat.DomainServices.UnitsOfWork;
-using Chat.Persistence.UnitsOfWork;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-
-namespace Chat.WebAPI.Extensions;
+﻿namespace Chat.WebAPI.Extensions;
 
 public static class ServiceCollectionExtensions
 {
@@ -67,10 +52,10 @@ public static class ServiceCollectionExtensions
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
-                ValidIssuer = jwtOptions[nameof(JwtOptions.Issuer)],
+                ValidIssuer = jwtOptions[nameof(JwtOptions.Issuer)]!,
         
                 ValidateAudience = true,
-                ValidAudience = jwtOptions[nameof(JwtOptions.Audience)],
+                ValidAudience = jwtOptions[nameof(JwtOptions.Audience)]!,
         
                 ValidateLifetime = true,
                 RequireExpirationTime = false,
