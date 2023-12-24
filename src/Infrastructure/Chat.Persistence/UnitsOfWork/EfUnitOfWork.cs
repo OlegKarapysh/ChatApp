@@ -1,10 +1,4 @@
-﻿using Chat.Domain.Abstract;
-using Chat.DomainServices.Repositories;
-using Chat.DomainServices.UnitsOfWork;
-using Chat.Persistence.Contexts;
-using Chat.Persistence.Repositories;
-
-namespace Chat.Persistence.UnitsOfWork;
+﻿namespace Chat.Persistence.UnitsOfWork;
 
 public sealed class EfUnitOfWork : IUnitOfWork
 {
