@@ -2,7 +2,7 @@
 
 public sealed class WebRtcService : IWebRtcService
 {
-    public event EventHandler<IJSObjectReference>? OnRemoteStreamAcquired;
+    public event Func<IJSObjectReference, Task>? RemoteStreamAcquired;
     public event Func<string, Task>? InterlocutorLeft;
   
     private readonly IJSRuntime _js;
@@ -103,7 +103,11 @@ public sealed class WebRtcService : IWebRtcService
     public async Task SetRemoteStream()
     {
         var stream = await _jsModule.InvokeAsync<IJSObjectReference>("getRemoteStream");
-        OnRemoteStreamAcquired?.Invoke(this, stream);
+        var invocation = RemoteStreamAcquired?.Invoke(stream);
+        if (invocation is not null)
+        {
+            await invocation;
+        }
     }
 
     private async Task OnSignalReceived(WebRtcSignalDto signal)

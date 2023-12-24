@@ -2,7 +2,7 @@
 
 public interface IWebRtcService : IDisposable
 {
-    event EventHandler<IJSObjectReference>? OnRemoteStreamAcquired;
+    event Func<IJSObjectReference, Task>? RemoteStreamAcquired;
     event Func<string, Task>? InterlocutorLeft;
     
     Task Join(string signalingChannel);

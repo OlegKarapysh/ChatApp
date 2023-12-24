@@ -40,7 +40,7 @@
     public async ValueTask DisposeAsync()
     {
         await RtcService!.Hangup();
-        RtcService.OnRemoteStreamAcquired -= RtcOnOnRemoteStreamAcquired;
+        RtcService.RemoteStreamAcquired -= OnRemoteStreamAcquired;
         RtcService.InterlocutorLeft -= OnInterlocutorLeft;
         RtcService.Dispose();
     }
@@ -50,7 +50,7 @@
         if (firstRender)
         {
             _jsModule = await Js!.InvokeAsync<IJSObjectReference>("import", "./Pages/RtcPage.razor.js");
-            RtcService!.OnRemoteStreamAcquired += RtcOnOnRemoteStreamAcquired;
+            RtcService!.RemoteStreamAcquired += OnRemoteStreamAcquired;
             RtcService.InterlocutorLeft += OnInterlocutorLeft;
             await InitializeStreamAndChannel();
             //await CallAction();
@@ -69,7 +69,7 @@
         StateHasChanged();
     }
 
-    private async void RtcOnOnRemoteStreamAcquired(object? _, IJSObjectReference e)
+    private async Task OnRemoteStreamAcquired(IJSObjectReference e)
     {
         await _jsModule.InvokeVoidAsync("setRemoteStream", e);
         _callDisabled = true;
