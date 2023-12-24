@@ -58,9 +58,9 @@ export async function processAnswer(descriptionText) {
 export async function processOffer(descriptionText) {
     if (isOffering) return;
     createPeerConnection();
-    let description = JSON.parse(descriptionText);
+    const description = JSON.parse(descriptionText);
     await peerConnection.setRemoteDescription(description);
-    let answer = await peerConnection.createAnswer();
+    const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
     dotNet.invokeMethodAsync("SendAnswer", JSON.stringify(answer));
 }
@@ -68,16 +68,15 @@ export async function processCandidate(candidateText) {
     let candidate = JSON.parse(candidateText);
     await peerConnection.addIceCandidate(candidate);
 }
-export function hangupAction() {
+export async function hangupAction() {
 
+    await peerConnection.close();
     dotNet = null;
     localFullStream = null;
     localVideoStream = null;
     remoteStream = null;
     isOffering = false;
     isOffered = false;
-    peerConnection.close();
-    peerConnection = null;
 }
 async function gotRemoteMediaStream(event) {
     const mediaStream = event.stream;
