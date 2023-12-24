@@ -1,6 +1,4 @@
-﻿using Chat.IntegrationTests.SqlTestScripts;
-
-namespace Chat.IntegrationTests;
+﻿namespace Chat.IntegrationTests.TestHelpers;
 
 internal sealed class TestApplicationFactory : WebApplicationFactory<Program>
 {

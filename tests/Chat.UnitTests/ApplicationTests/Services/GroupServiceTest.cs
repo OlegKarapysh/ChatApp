@@ -1,5 +1,4 @@
-﻿using Chat.Domain.DTOs.Groups;
-using Group = Chat.Domain.Entities.Groups.Group;
+﻿using Group = Chat.Domain.Entities.Groups.Group;
 
 namespace Chat.UnitTests.ApplicationTests.Services;
 

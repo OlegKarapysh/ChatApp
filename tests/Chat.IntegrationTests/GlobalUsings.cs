@@ -10,6 +10,7 @@ global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
+global using Chat.IntegrationTests.SqlTestScripts;
 global using Chat.Persistence.Contexts;
 global using Chat.Domain.DTOs.Users;
 global using Chat.Application.RequestExceptions;
