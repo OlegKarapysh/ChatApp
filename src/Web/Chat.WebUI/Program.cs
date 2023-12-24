@@ -8,6 +8,8 @@ builder.Services.AddBlazoredToast();
 builder.Services.AddScoped<DialogService>();
 builder.Services.AddScoped<SpinnerService>();
 builder.Services.AddAuthorizationCore();
-builder.Services.AddCustomServices(builder.Configuration);
+builder.Services.AddCoreServices(builder.Configuration);
+builder.Services.AddWebApiServices();
+builder.Services.AddSignallingServices();
 
 await builder.Build().RunAsync();

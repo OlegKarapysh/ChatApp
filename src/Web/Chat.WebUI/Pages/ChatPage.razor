@@ -4,7 +4,8 @@
 
 @implements IDisposable
 
-@inject IHubConnectionService HubConnectionService
+@inject IChatSignallingService ChatSignallingService
+@inject ISignallingConnectionService SignallingConnectionService
 @inject IMessagesWebApiService MessageService
 @inject IUsersWebApiService UserService
 @inject IConversationsWebApiService ConversationService
@@ -97,10 +98,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        HubConnectionService!.ReceivedMessage += AddMessage;
-        HubConnectionService.UpdatedMessage += UpdateMessage;
-        HubConnectionService.DeletedMessage += DeleteMessage;
-        HubConnectionService.ReceivedCallAnswer += ReceiveCallAnswer;
+        SignallingConnectionService!.ReceivedMessage += AddMessage;
+        SignallingConnectionService.UpdatedMessage += UpdateMessage;
+        SignallingConnectionService.DeletedMessage += DeleteMessage;
+        SignallingConnectionService.ReceivedCallAnswer += ReceiveCallAnswer;
         var messagesResponse = await MessageService!.GetAllConversationMessagesAsync(int.Parse(ConversationId));
         if (messagesResponse.IsSuccessful)
         {
@@ -118,10 +119,10 @@
 
     public void Dispose()
     {
-        HubConnectionService!.ReceivedMessage -= AddMessage;
-        HubConnectionService.UpdatedMessage -= UpdateMessage;
-        HubConnectionService.DeletedMessage -= DeleteMessage;
-        HubConnectionService.ReceivedCallAnswer -= ReceiveCallAnswer;
+        SignallingConnectionService!.ReceivedMessage -= AddMessage;
+        SignallingConnectionService.UpdatedMessage -= UpdateMessage;
+        SignallingConnectionService.DeletedMessage -= DeleteMessage;
+        SignallingConnectionService.ReceivedCallAnswer -= ReceiveCallAnswer;
     }
 
     private Task AddMessage(MessageWithSenderDto message)
@@ -217,7 +218,7 @@
             ToastService!.ShowError(sentMessageResponse.ErrorDetails!.Message);
             return;
         }
-        await HubConnectionService!.SendMessageAsync(ConversationId, sentMessageResponse.Content!);
+        await ChatSignallingService!.SendMessageAsync(ConversationId, sentMessageResponse.Content!);
         ResetTextInMessageTextBox();
     }
 
@@ -238,7 +239,7 @@
             return;
         }
         messageData.TextContent = updatedMessageResponse.Content!.TextContent;
-        await HubConnectionService!.UpdateMessageAsync(ConversationId, messageData);
+        await ChatSignallingService!.UpdateMessageAsync(ConversationId, messageData);
         ResetTextInMessageTextBox();
     }
 
@@ -270,7 +271,7 @@
             return;
         }
 
-        await HubConnectionService!.DeleteMessageAsync(ConversationId, messageData.MapToDo());
+        await ChatSignallingService!.DeleteMessageAsync(ConversationId, messageData.MapToDo());
         StateHasChanged();
     }
 
@@ -278,7 +279,7 @@
     {
         Spinner!.Show();
         IsCalling = true;
-        await HubConnectionService!.CallUserAsync(GetCallData());
+        await ChatSignallingService!.CallUserAsync(GetCallData());
         var timeout = TimeSpan.FromSeconds(11);
         try
         {
