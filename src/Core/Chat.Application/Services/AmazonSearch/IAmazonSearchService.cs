@@ -4,5 +4,5 @@ public interface IAmazonSearchService
 {
     const string HttpClientName = "AmazonClient";
     const string AmazonUrl = "https://www.amazon.com/";
-    Task<IEnumerable<AmazonProductDto>> SearchProductAsync(string name);
+    Task<List<AmazonProductDto>> SearchProductAsync(string name);
 }

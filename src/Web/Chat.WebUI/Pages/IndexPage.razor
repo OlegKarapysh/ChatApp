@@ -1,14 +1,30 @@
 ﻿@page "/"
 @using System.Security.Claims
 
+@inject IAmazonSearchWebApiService AmazonService
+@inject IToastService ToastService
+@inject SpinnerService Spinner
+
 <PageTitle>Home</PageTitle>
 
 <AuthorizeView>
     <Authorized>
-        <h1>Hello, @(context.User.FindFirstValue("sub") ?? "Unknown")!</h1>
+        <h1>Hello, @(context.User.FindFirstValue("sub") ?? "Unknown")! What are you searching today?</h1>
         <RadzenCard>
-            <RadzenTextBox @bind-Value="SearchRequest" Placeholder="Search... "></RadzenTextBox>
+            <RadzenStack Orientation="Orientation.Horizontal">
+                <RadzenTextBox @bind-Value="SearchRequest" Placeholder="Search... "></RadzenTextBox>
+                <RadzenButton Click="async() => await SearchProductsAsync()">Search</RadzenButton>
+            </RadzenStack>
         </RadzenCard>
+        @if (AmazonProducts.Any())
+        {
+            <RadzenStack Orientation="Orientation.Vertical">
+                @foreach (var product in AmazonProducts)
+                {
+                    <AmazonProductComponent Product="@product"></AmazonProductComponent>
+                }
+            </RadzenStack>
+        }
     </Authorized>
     <NotAuthorized>
         <h1>Hello, anonymous!</h1>
@@ -19,6 +35,21 @@
 @code 
 {
     public string SearchRequest { get; set; } = string.Empty;
-    
+    public AmazonProductDto[] AmazonProducts { get; set; } = Array.Empty<AmazonProductDto>();
 
+    private async Task SearchProductsAsync()
+    {
+        Spinner!.Show();
+        var response = await AmazonService!.SearchProductAsync(SearchRequest);
+        if (response is { IsSuccessful: true, Content: not null })
+        {
+            AmazonProducts = response.Content;
+        }
+        else if (response.ErrorDetails is not null)
+        {
+            ToastService!.ShowError(response.ErrorDetails.Message);
+        }
+        
+        Spinner.Hide();
+    }
 }

@@ -19,14 +19,15 @@ public sealed class AmazonSearchService : IAmazonSearchService
         _httpClient.BaseAddress = new Uri(IAmazonSearchService.AmazonUrl);
     }
 
-    public async Task<IEnumerable<AmazonProductDto>> SearchProductAsync(string name)
+    public async Task<List<AmazonProductDto>> SearchProductAsync(string name)
     {
         var response = await _httpClient.GetAsync($"s?k={name}");
         // TODO: detect encoding and compression dynamically.
         var htmlText = await ParseHtmlTextAsync(response);
         var searchResultDivs = GetSearchResultsDivs(htmlText);
         var products = new List<AmazonProductDto>();
-        foreach (var searchResult in searchResultDivs)
+        // TODO: remove Take() call.
+        foreach (var searchResult in searchResultDivs.Take(3))
         {
             var product = await _openAiService.GetFunctionCallArgsAsync<AmazonProductDto>(searchResult, AmazonAssistantId);
             if (product is not null)

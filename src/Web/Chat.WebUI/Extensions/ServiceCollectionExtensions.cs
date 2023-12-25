@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMessagesWebApiService, MessagesWebApiService>();
         services.AddScoped<IOpenAiWebApiService, OpenAiWebApiService>();
         services.AddScoped<IGroupsWebApiService, GroupsWebApiService>();
+        services.AddScoped<IAmazonSearchWebApiService, AmazonSearchWebApiService>();
     }
 
     public static void AddSignallingServices(this IServiceCollection services)
