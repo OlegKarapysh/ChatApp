@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using OpenAI.Assistants;
 using OpenAI.Threads;
 
 namespace Chat.Application.Services.OpenAI;
@@ -9,6 +10,7 @@ public sealed class OpenAiService : IOpenAiService
     private const string OpenAiApiKeyName = "OPENAI_API_KEY";
     private const string DefaultAiModel = "gpt-4-1106-preview";
     private const string RetrievalToolName = "retrieval";
+    private const int PollingIntervalMs = 400;
 
     private readonly OpenAIClient _clientHigLab;
     private readonly global::OpenAI.OpenAIClient _clientDotNet;
@@ -118,26 +120,35 @@ public sealed class OpenAiService : IOpenAiService
         do
         {
             runStatus = (await _clientDotNet.ThreadsEndpoint!.RetrieveRunAsync(threadId, runResponse.Id)).Status;
-            await Task.Delay(TimeSpan.FromMilliseconds(400));
+            await Task.Delay(TimeSpan.FromMilliseconds(PollingIntervalMs));
         } while (runStatus != RunStatus.Completed);
         
         var responseMessages = await _clientDotNet.ThreadsEndpoint!.ListMessagesAsync(threadId)!;
         return responseMessages.Items[0];
     }
 
-    public async Task<string?> GetFunctionCallArgsAsync(string message, string assistantId, string threadId)
+    public async Task<TArgs?> GetFunctionCallArgsAsync<TArgs>(string message, string assistantId)
     {
-        var runResponse = await CreateRunAsync(message, assistantId, threadId);
+        var assistant = await _clientDotNet.AssistantsEndpoint!.RetrieveAssistantAsync(assistantId)!;
+        var runResponse = await assistant.CreateThreadAndRunAsync(message);
         RunStatus runStatus;
         do
         {
-            var run = await _clientDotNet.ThreadsEndpoint!.RetrieveRunAsync(threadId, runResponse.Id);
+            var run = await _clientDotNet.ThreadsEndpoint!.RetrieveRunAsync(runResponse.ThreadId, runResponse.Id);
             runStatus = run.Status;
             if (runStatus == RunStatus.RequiresAction)
             {
-                return run.RequiredAction?.SubmitToolOutputs?.ToolCalls?[0]?.FunctionCall?.Arguments;
+                // var toolCall = run.RequiredAction.SubmitToolOutputs.ToolCalls[0];
+                // var args = JsonConvert.DeserializeObject<TArgs>(toolCall.FunctionCall.Arguments);
+                // var toolOutput = new ToolOutput(toolCall.Id, string.Empty);
+                // var toolOutputRun = await run.SubmitToolOutputsAsync(toolOutput);
+                // await toolOutputRun.WaitForStatusChangeAsync();
+                // return args;
+                await _clientDotNet.ThreadsEndpoint!.DeleteThreadAsync(runResponse.ThreadId);
+                var args = run.RequiredAction?.SubmitToolOutputs?.ToolCalls?[0]?.FunctionCall?.Arguments;
+                return args is null ? default : JsonConvert.DeserializeObject<TArgs>(args);
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(400));
+            await Task.Delay(TimeSpan.FromMilliseconds(PollingIntervalMs));
         } while (runStatus is not (RunStatus.Completed or RunStatus.Cancelled or RunStatus.Failed));
 
         return default;

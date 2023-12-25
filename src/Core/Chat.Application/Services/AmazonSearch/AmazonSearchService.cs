@@ -6,7 +6,7 @@ public sealed class AmazonSearchService : IAmazonSearchService
 {
     // TODO: create assistant for each user.
     private const string AmazonAssistantId = "asst_jIeAugPnrtlH6a2EVtMU2uek";
-    private const string AmazonThreadId = "thread_bem7Xe7zzsrwJfcPZjclznNZ";
+    //private const string AmazonThreadId = "thread_bem7Xe7zzsrwJfcPZjclznNZ";
     private const string SearchResultAttribute = "data-component-type";
     private const string SearchResultAttributeValue = "s-search-result";
     private readonly HttpClient _httpClient;
@@ -28,13 +28,7 @@ public sealed class AmazonSearchService : IAmazonSearchService
         var products = new List<AmazonProductDto>();
         foreach (var searchResult in searchResultDivs)
         {
-            var args = await _openAiService.GetFunctionCallArgsAsync(searchResult, AmazonAssistantId, AmazonThreadId);
-            if (args is null)
-            {
-                continue;
-            }
-
-            var product = JsonConvert.DeserializeObject<AmazonProductDto>(args);
+            var product = await _openAiService.GetFunctionCallArgsAsync<AmazonProductDto>(searchResult, AmazonAssistantId);
             if (product is not null)
             {
                 products.Add(product);
