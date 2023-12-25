@@ -46,3 +46,4 @@ global using Chat.WebUI.Services.OpenAI;
 global using Chat.WebUI.Services.SignalR;
 global using Chat.WebUI.Services.Users;
 global using Chat.WebUI.Services.WebRtc;
+global using Chat.Application.Services.AmazonSearch;

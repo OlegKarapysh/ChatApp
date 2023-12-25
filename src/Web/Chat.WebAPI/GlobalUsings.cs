@@ -34,3 +34,5 @@ global using Chat.Domain.Entities;
 global using Chat.WebAPI.Extensions;
 global using Chat.WebAPI.Middlewares;
 global using Chat.WebAPI.SignalR;
+global using Chat.Application.Services.AmazonSearch;
+global using Chat.Domain.DTOs.AmazonSearch;

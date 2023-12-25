@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
 
     public static void AddCustomServices(this IServiceCollection services)
     {
+        services.AddHttpClient(IAmazonSearchService.HttpClientName);
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthService, AuthService>();
@@ -24,6 +25,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<IOpenAiService, OpenAiService>();
         services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IAmazonSearchService, AmazonSearchService>(provider =>
+        {
+            var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+            var httpClient = httpClientFactory.CreateClient(IAmazonSearchService.HttpClientName);
+            var openAiService = provider.GetRequiredService<IOpenAiService>();
+            return new AmazonSearchService(httpClient, openAiService);
+        });
     }
     
     public static void AddAndConfigureJwtAuthentication(this IServiceCollection services, IConfiguration configuration)

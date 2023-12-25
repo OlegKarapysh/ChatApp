@@ -113,15 +113,7 @@ public sealed class OpenAiService : IOpenAiService
 
     public async Task<MessageResponse> SendMessageAsync(string message, string assistantId, string threadId)
     {
-        var createMessageParameter = new CreateMessageRequest(message);
-        var messageResponse = await _clientDotNet.ThreadsEndpoint!.CreateMessageAsync(threadId, createMessageParameter)!;
-        var createRunParameter = new CreateRunRequest(assistantId);
-        var runResponse = await _clientDotNet.ThreadsEndpoint!.CreateRunAsync(threadId, createRunParameter)!;
-        if (runResponse is null || messageResponse is null)
-        {
-            throw new OpenAiApiRequestException("Failed to initialize a run for this message");
-        }
-        
+        var runResponse = await CreateRunAsync(message, assistantId, threadId);
         RunStatus runStatus;
         do
         {
@@ -131,5 +123,37 @@ public sealed class OpenAiService : IOpenAiService
         
         var responseMessages = await _clientDotNet.ThreadsEndpoint!.ListMessagesAsync(threadId)!;
         return responseMessages.Items[0];
+    }
+
+    public async Task<string?> GetFunctionCallArgsAsync(string message, string assistantId, string threadId)
+    {
+        var runResponse = await CreateRunAsync(message, assistantId, threadId);
+        RunStatus runStatus;
+        do
+        {
+            var run = await _clientDotNet.ThreadsEndpoint!.RetrieveRunAsync(threadId, runResponse.Id);
+            runStatus = run.Status;
+            if (runStatus == RunStatus.RequiresAction)
+            {
+                return run.RequiredAction?.SubmitToolOutputs?.ToolCalls?[0]?.FunctionCall?.Arguments;
+            }
+            await Task.Delay(TimeSpan.FromMilliseconds(400));
+        } while (runStatus is not (RunStatus.Completed or RunStatus.Cancelled or RunStatus.Failed));
+
+        return default;
+    }
+
+    private async Task<RunResponse> CreateRunAsync(string message, string assistantId, string threadId)
+    {
+        var createMessageParameter = new CreateMessageRequest(message);
+        var messageResponse = await _clientDotNet.ThreadsEndpoint!.CreateMessageAsync(threadId, createMessageParameter)!;
+        var createRunParameter = new CreateRunRequest(assistantId);
+        var runResponse = await _clientDotNet.ThreadsEndpoint!.CreateRunAsync(threadId, createRunParameter)!;
+        if (runResponse is null || messageResponse is null)
+        {
+            throw new OpenAiApiRequestException("Failed to initialize a run for this message");
+        }
+
+        return runResponse;
     }
 }

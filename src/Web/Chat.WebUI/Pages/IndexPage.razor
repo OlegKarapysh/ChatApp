@@ -6,8 +6,19 @@
 <AuthorizeView>
     <Authorized>
         <h1>Hello, @(context.User.FindFirstValue("sub") ?? "Unknown")!</h1>
+        <RadzenCard>
+            <RadzenTextBox @bind-Value="SearchRequest" Placeholder="Search... "></RadzenTextBox>
+        </RadzenCard>
     </Authorized>
     <NotAuthorized>
         <h1>Hello, anonymous!</h1>
     </NotAuthorized>
 </AuthorizeView>
+
+
+@code 
+{
+    public string SearchRequest { get; set; } = string.Empty;
+    
+
+}
