@@ -14,6 +14,6 @@ public sealed class AmazonController : ControllerBase
     [AllowAnonymous, HttpGet("search/{productName}")]
     public async Task<ActionResult<AmazonProductDto[]>> SearchProduct(string productName)
     {
-        return Ok(await _amazonSearchService.SearchProductAsync(productName));
+        return Ok(await _amazonSearchService.SearchProductsAsync(productName));
     }
 }

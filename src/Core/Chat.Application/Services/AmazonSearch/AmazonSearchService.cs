@@ -6,8 +6,7 @@ public sealed class AmazonSearchService : IAmazonSearchService
 {
     // TODO: create assistant for each user.
     private const string AmazonAssistantId = "asst_jIeAugPnrtlH6a2EVtMU2uek";
-    //private const string AmazonThreadId = "thread_bem7Xe7zzsrwJfcPZjclznNZ";
-    private const string SearchResultAttribute = "data-component-type";
+    private const string SearchResultAttributeName = "data-component-type";
     private const string SearchResultAttributeValue = "s-search-result";
     private readonly HttpClient _httpClient;
     private readonly IOpenAiService _openAiService;
@@ -19,7 +18,7 @@ public sealed class AmazonSearchService : IAmazonSearchService
         _httpClient.BaseAddress = new Uri(IAmazonSearchService.AmazonUrl);
     }
 
-    public async Task<List<AmazonProductDto>> SearchProductAsync(string name)
+    public async Task<List<AmazonProductDto>> SearchProductsAsync(string name)
     {
         var response = await _httpClient.GetAsync($"s?k={name}");
         // TODO: detect encoding and compression dynamically.
@@ -58,7 +57,7 @@ public sealed class AmazonSearchService : IAmazonSearchService
         
         return htmlDoc.DocumentNode
                       .Descendants("div")
-                      .Where(div => div.GetAttributeValue(SearchResultAttribute, string.Empty) == SearchResultAttributeValue)
+                      .Where(div => div.GetAttributeValue(SearchResultAttributeName, string.Empty) == SearchResultAttributeValue)
                       .Select(div => div.InnerHtml);
     }
 }
