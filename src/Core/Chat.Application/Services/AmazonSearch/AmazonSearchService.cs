@@ -24,18 +24,11 @@ public sealed class AmazonSearchService : IAmazonSearchService
         // TODO: detect encoding and compression dynamically.
         var htmlText = await ParseHtmlTextAsync(response);
         var searchResultDivs = GetSearchResultsDivs(htmlText);
-        var products = new List<AmazonProductDto>();
-        // TODO: remove Take() call.
-        foreach (var searchResult in searchResultDivs.Take(3))
-        {
-            var product = await _openAiService.GetFunctionCallArgsAsync<AmazonProductDto>(searchResult, AmazonAssistantId);
-            if (product is not null)
-            {
-                products.Add(product);
-            }
-        }
-
-        return products;
+        var functionCallTasks = searchResultDivs.Select(searchResult =>
+            _openAiService.GetFunctionCallArgsAsync<AmazonProductDto>(searchResult, AmazonAssistantId)).ToList();
+        await Task.WhenAll(functionCallTasks);
+        
+        return functionCallTasks.Where(t => t.Result is not null).Select(t => t.Result!).ToList();
     }
 
     private async Task<string> ParseHtmlTextAsync(HttpResponseMessage response)
