@@ -5,7 +5,7 @@ namespace Chat.Application.Services.AmazonSearch;
 public sealed class AmazonSearchService : IAmazonSearchService
 {
     // TODO: create assistant for each user.
-    private const string AmazonAssistantId = "asst_jIeAugPnrtlH6a2EVtMU2uek";
+    private const string AmazonAssistantId = "asst_2cVSz0i6XuiCVmYc8zKcJADW";
     private const string SearchResultAttributeName = "data-component-type";
     private const string SearchResultAttributeValue = "s-search-result";
     private readonly HttpClient _httpClient;
@@ -23,8 +23,10 @@ public sealed class AmazonSearchService : IAmazonSearchService
         var response = await _httpClient.GetAsync($"s?k={name}");
         // TODO: detect encoding and compression dynamically.
         var htmlText = await ParseHtmlTextAsync(response);
-        var searchResultDivs = GetSearchResultsDivs(htmlText);
-        var functionCallTasks = searchResultDivs.Select(searchResult =>
+        var searchResultDivs = GetSearchResultsDivs(htmlText).ToArray();
+        LogHtml(searchResultDivs.First());
+        // TODO: remove Take() call.
+        var functionCallTasks = searchResultDivs.Take(2).Select(searchResult =>
             _openAiService.GetFunctionCallArgsAsync<AmazonProductDto>(searchResult, AmazonAssistantId)).ToList();
         await Task.WhenAll(functionCallTasks);
         
@@ -52,5 +54,12 @@ public sealed class AmazonSearchService : IAmazonSearchService
                       .Descendants("div")
                       .Where(div => div.GetAttributeValue(SearchResultAttributeName, string.Empty) == SearchResultAttributeValue)
                       .Select(div => div.InnerHtml);
+    }
+
+    private void LogHtml(string html, string path = @"C:\Users\sebas\OneDrive\Desktop\productsHtml.txt")
+    {
+        // TODO: for testing HTML scraping.
+        File.AppendAllText(path, "\n\n===============================\n\n");
+        File.AppendAllText(path, html);
     }
 }

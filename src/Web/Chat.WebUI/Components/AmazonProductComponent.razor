@@ -1,6 +1,7 @@
 ﻿<RadzenCard>
     <RadzenStack Orientation="Orientation.Vertical">
         <RadzenText TextStyle="TextStyle.H4" Text="@Product.Name"></RadzenText>
+        <RadzenText Text="@Product.Brand"></RadzenText>
         <RadzenImage Path="@Product.ImageUrl" Style="width: 300px; height: 300px"></RadzenImage>
         <RadzenText Text="@GetPrice()"></RadzenText>
         <RadzenText Text="@GetRating()"></RadzenText>
