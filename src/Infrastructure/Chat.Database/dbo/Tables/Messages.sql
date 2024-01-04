@@ -6,6 +6,7 @@
     [ConversationId] INT             NULL,
     [CreatedAt]      DATETIME2 (7)   NOT NULL,
     [UpdatedAt]      DATETIME2 (7)   DEFAULT (getutcdate()) NOT NULL,
+    [IsAiAssisted]   BIT             NOT NULL,
     CONSTRAINT [PK_Messages] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_Messages_AspNetUsers_SenderId] FOREIGN KEY ([SenderId]) REFERENCES [dbo].[AspNetUsers] ([Id]),
     CONSTRAINT [FK_Messages_Conversations_ConversationId] FOREIGN KEY ([ConversationId]) REFERENCES [dbo].[Conversations] ([Id])
