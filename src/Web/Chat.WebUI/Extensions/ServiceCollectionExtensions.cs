@@ -2,8 +2,9 @@
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddCustomServices(this IServiceCollection services, IConfiguration configuration)
+    public static void AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddScoped<DialogService>();
         services.AddScoped<SpinnerService>();
         services.AddScoped<ITokenStorageService, TokenStorageService>();
         services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
@@ -13,14 +14,25 @@ public static class ServiceCollectionExtensions
         {
             httpClient.BaseAddress = new Uri(configuration["ApiUrl"]!);
         }).AddHttpMessageHandler<JwtAuthInterceptor>();
+    }
+
+    public static void AddWebApiServices(this IServiceCollection services)
+    {
         services.AddScoped<IAuthWebApiService, AuthWebApiService>();
         services.AddScoped<IJwtAuthService, JwtAuthService>();
         services.AddScoped<IUsersWebApiService, UsersWebApiService>();
         services.AddScoped<IConversationsWebApiService, ConversationsWebApiService>();
         services.AddScoped<IMessagesWebApiService, MessagesWebApiService>();
         services.AddScoped<IOpenAiWebApiService, OpenAiWebApiService>();
-        services.AddScoped<IHubConnectionService, HubConnectionService>();
         services.AddScoped<IGroupsWebApiService, GroupsWebApiService>();
-        services.AddTransient<WebRtcService>();
+        services.AddScoped<IAmazonSearchWebApiService, AmazonSearchWebApiService>();
+    }
+
+    public static void AddSignallingServices(this IServiceCollection services)
+    {
+        services.AddScoped<ISignallingConnectionService, SignallingConnectionService>();
+        services.AddScoped<IChatSignallingService, ChatSignallingService>();
+        services.AddScoped<IVideoCallSignallingService, VideoCallSignallingService>();
+        services.AddTransient<IWebRtcService, WebRtcService>();
     }
 }

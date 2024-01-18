@@ -17,4 +17,5 @@ public interface IOpenAiService
     Task<UploadedFileDto> UploadFileAsync(IFormFile? file);
     Task<ThreadObjectResponse> CreateThreadAsync();
     Task<MessageResponse> SendMessageAsync(string message, string assistantId, string threadId);
+    Task<TArgs?> GetFunctionCallArgsAsync<TArgs>(string message, string assistantId);
 }

@@ -4,7 +4,9 @@
 
 @implements IDisposable
 
-@inject IHubConnectionService HubConnectionService
+@inject IVideoCallSignallingService VideoCallSignallingService
+@inject IChatSignallingService ChatSignallingService
+@inject ISignallingConnectionService SignallingConnectionService
 @inject IMessagesWebApiService MessageService
 @inject IUsersWebApiService UserService
 @inject IConversationsWebApiService ConversationService
@@ -90,6 +92,7 @@
     public string ConversationType { get; set; } = string.Empty;
     public string MessageText { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
+    public bool IsAiAssisted { get; set; }
     public List<MessageWithSenderDto> Messages { get; } = new();
     public UserDto CurrentUser { get; set; } = new();
     public CancellationTokenSource CancellationSource { get; set; } = new();
@@ -97,10 +100,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        HubConnectionService!.ReceivedMessage += AddMessage;
-        HubConnectionService.UpdatedMessage += UpdateMessage;
-        HubConnectionService.DeletedMessage += DeleteMessage;
-        HubConnectionService.ReceivedCallAnswer += ReceiveCallAnswer;
+        SignallingConnectionService!.ReceivedMessage += AddMessage;
+        SignallingConnectionService.UpdatedMessage += UpdateMessage;
+        SignallingConnectionService.DeletedMessage += DeleteMessage;
+        SignallingConnectionService.ReceivedCallAnswer += ReceiveCallAnswer;
         var messagesResponse = await MessageService!.GetAllConversationMessagesAsync(int.Parse(ConversationId));
         if (messagesResponse.IsSuccessful)
         {
@@ -118,10 +121,10 @@
 
     public void Dispose()
     {
-        HubConnectionService!.ReceivedMessage -= AddMessage;
-        HubConnectionService.UpdatedMessage -= UpdateMessage;
-        HubConnectionService.DeletedMessage -= DeleteMessage;
-        HubConnectionService.ReceivedCallAnswer -= ReceiveCallAnswer;
+        SignallingConnectionService!.ReceivedMessage -= AddMessage;
+        SignallingConnectionService.UpdatedMessage -= UpdateMessage;
+        SignallingConnectionService.DeletedMessage -= DeleteMessage;
+        SignallingConnectionService.ReceivedCallAnswer -= ReceiveCallAnswer;
     }
 
     private Task AddMessage(MessageWithSenderDto message)
@@ -217,8 +220,9 @@
             ToastService!.ShowError(sentMessageResponse.ErrorDetails!.Message);
             return;
         }
-        await HubConnectionService!.SendMessageAsync(ConversationId, sentMessageResponse.Content!);
+        await ChatSignallingService!.SendMessageAsync(ConversationId, sentMessageResponse.Content!);
         ResetTextInMessageTextBox();
+        ResetAiAssistedFlag();
     }
 
     private async Task UpdateMessageAsync(MessageWithSenderDto messageData)
@@ -238,13 +242,15 @@
             return;
         }
         messageData.TextContent = updatedMessageResponse.Content!.TextContent;
-        await HubConnectionService!.UpdateMessageAsync(ConversationId, messageData);
+        await ChatSignallingService!.UpdateMessageAsync(ConversationId, messageData);
         ResetTextInMessageTextBox();
+        
     }
 
     private async Task AssistWithMessageAsync(MessageWithSenderDto messageDto)
     {
         Spinner!.Show();
+        IsAiAssisted = true;
         var messageForAssist = new MessageForAssistDto
         {
             MessageId = messageDto.Id, ReceiverUserName = CurrentUser.UserName
@@ -270,7 +276,7 @@
             return;
         }
 
-        await HubConnectionService!.DeleteMessageAsync(ConversationId, messageData.MapToDo());
+        await ChatSignallingService!.DeleteMessageAsync(ConversationId, messageData.MapToDo());
         StateHasChanged();
     }
 
@@ -278,7 +284,7 @@
     {
         Spinner!.Show();
         IsCalling = true;
-        await HubConnectionService!.CallUserAsync(GetCallData());
+        await VideoCallSignallingService!.CallUserAsync(GetCallData());
         var timeout = TimeSpan.FromSeconds(11);
         try
         {
@@ -299,6 +305,7 @@
     private MessageDto GetCurrentMessageData() => new()
     {
         ConversationId = int.Parse(ConversationId),
+        IsAiAssisted = IsAiAssisted,
         TextContent = MessageText
     };
 
@@ -312,4 +319,6 @@
     };
 
     private void ResetTextInMessageTextBox() => MessageText = string.Empty;
+
+    private void ResetAiAssistedFlag() => IsAiAssisted = false;
 }

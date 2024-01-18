@@ -53,19 +53,21 @@ public sealed class ChatHub : Hub<IChatClient>, IChatHub
         await Clients.OthersInGroup(channel).Leave(Context.ConnectionId);
     }
 
-    public async Task SignalWebRtc(string channel, string type, string payload)
+    public async Task SignalWebRtc(WebRtcSignalDto signal)
     {
-        await Clients.OthersInGroup(channel).SignalWebRtc(channel, type, payload);
+        await Clients.OthersInGroup(signal.Channel).SignalWebRtc(signal);
     }
 
     public async Task Offer(string channel, string offer)
     {
         await Clients.OthersInGroup(channel).ReceiveOffer(offer);
     }
+    
     public async Task Answer(string channel, string answer)
     {
         await Clients.OthersInGroup(channel).ReceiveAnswer(answer);
     }
+    
     public async Task Candidate(string channel, string candidate)
     {
         await Clients.OthersInGroup(channel).ReceiveCandidate(candidate);

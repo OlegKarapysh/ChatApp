@@ -7,6 +7,7 @@ public class Message : AuditableEntityBase<int>
     [MaxLength(MaxTextLength)]
     public string TextContent { get; set; } = string.Empty;
     public bool IsRead { get; set; }
+    public bool IsAiAssisted { get; set; }
     public int? SenderId { get; set; }
     public int? ConversationId { get; set; }
     public Conversation? Conversation { get; set; }

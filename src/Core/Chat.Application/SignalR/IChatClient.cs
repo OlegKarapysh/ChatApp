@@ -9,7 +9,7 @@ public interface IChatClient
     Task ReceiveCallAnswer(CallDto callData);
     Task Join(string signalingChannel);
     Task Leave(string signalingChannel);
-    Task SignalWebRtc(string channel, string type, string payload);
+    Task SignalWebRtc(WebRtcSignalDto signal);
     Task ReceiveOffer(string offer);
     Task ReceiveAnswer(string answer);
     Task ReceiveCandidate(string candidate);

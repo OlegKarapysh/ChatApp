@@ -1,0 +1,17 @@
+﻿<RadzenCard>
+    <RadzenStack Orientation="Orientation.Vertical">
+        <RadzenText TextStyle="TextStyle.H4" Text="@Product.Name"></RadzenText>
+        <RadzenText Text="@Product.Brand"></RadzenText>
+        <RadzenImage Path="@Product.ImageUrl" Style="width: 300px; height: 300px"></RadzenImage>
+        <RadzenText Text="@GetPrice()"></RadzenText>
+        <RadzenText Text="@GetRating()"></RadzenText>
+    </RadzenStack>
+</RadzenCard>
+
+@code 
+{
+    [Parameter] public AmazonProductDto Product { get; set; } = new();
+
+    private string GetPrice() => Product.Price is null ? "No price" : $"${Product.Price.ToString()}";
+    private string GetRating() => Product.Rating is null ? "No rating" : $"{Product.Rating.ToString()} out of 5";
+}

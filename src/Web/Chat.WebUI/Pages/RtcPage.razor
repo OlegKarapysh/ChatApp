@@ -2,15 +2,14 @@
 
 @implements IAsyncDisposable
 
-@inject WebRtcService RtcService;
+@inject IWebRtcService RtcService;
 @inject IJSRuntime Js
 @inject NavigationManager Navigation
 
 <PageTitle>Video call</PageTitle>
 
 <div class="py-4">
-    <input id="channelInput" @bind="_channel" hidden/>
-    <button id="startButton" @onclick="StartAction" disabled="@_startDisabled" hidden>Start</button>
+    <input id="channelInput" @bind="ConversationId" hidden/>
     <RadzenButton id="callButton" Click="CallAction" disabled="@_callDisabled">Ready</RadzenButton>
     <RadzenButton id="hangupButton" ButtonStyle="ButtonStyle.Danger" Click="HangupAction" disabled="@_hangupDisabled">Hang Up</RadzenButton>
 </div>
@@ -27,75 +26,60 @@
     
     [Parameter]
     public string ConversationId { get; set; } = string.Empty;
-    private IJSObjectReference? _module;
-    private bool _startDisabled;
+    private IJSObjectReference _jsModule;
     private bool _callDisabled = true;
     private bool _hangupDisabled = true;
-    private string _channel = "foo";
-
-    protected override async Task OnInitializedAsync()
-    {
-        _channel = ConversationId;
-        await base.OnInitializedAsync();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await RtcService!.Hangup();
-        RtcService.OnRemoteStreamAcquired -= RtcOnOnRemoteStreamAcquired;
-        RtcService.InterlocutorLeft -= OnInterlocutorLeft;
-    }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            _module = await Js!.InvokeAsync<IJSObjectReference>("import", "./Pages/RtcPage.razor.js");
-            RtcService!.OnRemoteStreamAcquired += RtcOnOnRemoteStreamAcquired;
+            _jsModule = await Js!.InvokeAsync<IJSObjectReference>("import", "./Pages/RtcPage.razor.js");
+            RtcService!.RemoteStreamAcquired += OnRemoteStreamAcquired;
             RtcService.InterlocutorLeft += OnInterlocutorLeft;
-            await StartAction();
+            await InitializeStreamAndChannelAsync();
             //await CallAction();
         }
         await base.OnAfterRenderAsync(firstRender);
     }
-
-    private async Task StartAction()
+    
+    public async ValueTask DisposeAsync()
     {
-        if (_startDisabled) return;
-        if (string.IsNullOrWhiteSpace(_channel)) return;
-        if (_module == null) throw new InvalidOperationException();
-        _startDisabled = true;
-        await RtcService!.Join(_channel);
-        var stream = await RtcService.StartLocalStream();
-        await _module.InvokeVoidAsync("setLocalStream", stream);
+        await RtcService!.Hangup();
+        RtcService.RemoteStreamAcquired -= OnRemoteStreamAcquired;
+        RtcService.InterlocutorLeft -= OnInterlocutorLeft;
+        RtcService.Dispose();
+    }
+
+    private async Task InitializeStreamAndChannelAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ConversationId)) return;
+        
+        await RtcService!.InitializeAsync(ConversationId);
+        var localMediaStream = await RtcService.StartLocalStreamAsync();
+        await _jsModule.InvokeVoidAsync("setLocalStream", localMediaStream);
         _callDisabled = false;
         StateHasChanged();
     }
 
-    private async void RtcOnOnRemoteStreamAcquired(object? _, IJSObjectReference e)
+    private async Task OnRemoteStreamAcquired(IJSObjectReference e)
     {
-        if (_module == null) throw new InvalidOperationException();
-        
-        await _module.InvokeVoidAsync("setRemoteStream", e);
+        await _jsModule.InvokeVoidAsync("setRemoteStream", e);
         _callDisabled = true;
         _hangupDisabled = false;
-        _startDisabled = true;
         StateHasChanged();
     }
 
     private async Task CallAction()
     {
-        //if (_callDisabled) return;
         _callDisabled = true;
-        await RtcService.Call();
+        await RtcService!.Call();
         _hangupDisabled = false;
     }
     
     private async Task HangupAction()
     {
-        await RtcService.Hangup();
-        //_callDisabled = true;
-        _hangupDisabled = true;
+        await RtcService!.Hangup();
         Navigation!.NavigateTo(ChatsPage.Path);
     }
 
