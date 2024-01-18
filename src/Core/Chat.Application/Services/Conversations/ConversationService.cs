@@ -136,4 +136,12 @@ public sealed class ConversationService : IConversationService
         return await _conversationsRepository.GetByIdAsync(id) ??
             throw new EntityNotFoundException(nameof(Conversation));
     }
+
+    public async Task<ConversationDto> GetConversationByTitleAndMemberAsync(
+        string conversationTitle,
+        string memberUsername)
+    {
+        // TODO: create logic:
+        return new ConversationDto();
+    }
 }

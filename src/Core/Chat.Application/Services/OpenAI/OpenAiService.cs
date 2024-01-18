@@ -1,14 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using OpenAI.Assistants;
+﻿using OpenAI.Assistants;
 using OpenAI.Threads;
 
 namespace Chat.Application.Services.OpenAI;
 
 public sealed class OpenAiService : IOpenAiService
 {
-    private const string OpenAiApiKeyName = "OPENAI_API_KEY";
-    private const string DefaultAiModel = "gpt-3.5-turbo-1106";
+    private const string OpenAiApiKeyName = "OPENAI_API_KEY_REENBIT";
+    private const string DefaultAiModel = "gpt-4-1106-preview";
     private const string RetrievalToolName = "retrieval";
     private const int PollingIntervalMs = 400;
 
