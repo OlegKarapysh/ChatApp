@@ -1,11 +1,6 @@
-﻿using System.Security.Claims;
-using System.Text.Json;
-using Microsoft.AspNetCore.Components.Authorization;
-using Chat.WebUI.Services.Auth;
+﻿namespace Chat.WebUI.Providers;
 
-namespace Chat.WebUI.Providers;
-
-public class JwtAuthenticationStateProvider : AuthenticationStateProvider, INotifyAuthenticationChanged
+public sealed class JwtAuthenticationStateProvider : AuthenticationStateProvider, INotifyAuthenticationChanged
 {
     private readonly ITokenStorageService _tokenService;
 

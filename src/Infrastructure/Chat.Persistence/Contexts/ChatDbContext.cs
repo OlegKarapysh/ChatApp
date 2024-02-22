@@ -1,13 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using Chat.Domain.Entities;
-using Chat.Domain.Entities.Attachments;
-using Chat.Domain.Entities.Conversations;
-using Chat.Domain.Entities.Groups;
-using Chat.Persistence.EntityConfigurations;
-
-namespace Chat.Persistence.Contexts;
+﻿namespace Chat.Persistence.Contexts;
 
 public class ChatDbContext : IdentityDbContext<User, IdentityRole<int>, int>
 {

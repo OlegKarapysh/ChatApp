@@ -1,8 +1,4 @@
-﻿using Chat.Domain.Entities.Attachments;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Chat.Persistence.EntityConfigurations;
+﻿namespace Chat.Persistence.EntityConfigurations;
 
 public sealed class AttachmentConfig : IEntityTypeConfiguration<Attachment>
 {

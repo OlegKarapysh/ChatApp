@@ -1,6 +1,4 @@
-﻿using Chat.Domain.DTOs.AssistantFiles;
-
-namespace Chat.Domain.DTOs.Groups;
+﻿namespace Chat.Domain.DTOs.Groups;
 
 public class GroupWithFilesDto : GroupDto
 {

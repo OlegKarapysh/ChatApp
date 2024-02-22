@@ -1,14 +1,6 @@
-﻿using Chat.Domain.DTOs;
-using Microsoft.AspNetCore.WebUtilities;
-using Chat.Domain.DTOs.Messages;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Web;
-using Chat.WebUI.Services.Auth;
-using OpenAI.Threads;
+﻿namespace Chat.WebUI.Services.Messages;
 
-namespace Chat.WebUI.Services.Messages;
-
-public class MessagesWebApiService : WebApiServiceBase, IMessagesWebApiService
+public sealed class MessagesWebApiService : WebApiServiceBase, IMessagesWebApiService
 {
     private protected override string BaseRoute { get; init; } = "/messages";
 

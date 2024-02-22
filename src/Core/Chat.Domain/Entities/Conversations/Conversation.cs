@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Chat.Domain.Abstract;
-
-namespace Chat.Domain.Entities.Conversations;
+﻿namespace Chat.Domain.Entities.Conversations;
 
 public class Conversation : AuditableEntityBase<int>
 {

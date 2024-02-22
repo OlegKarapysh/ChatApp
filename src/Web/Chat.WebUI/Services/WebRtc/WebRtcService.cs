@@ -1,135 +1,131 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.JSInterop;
-using Chat.Application.SignalR;
-using Chat.WebUI.Services.Auth;
+﻿namespace Chat.WebUI.Services.WebRtc;
 
-namespace Chat.WebUI.Services.WebRtc;
-
-public sealed class WebRtcService
+public sealed class WebRtcService : IWebRtcService
 {
-    public event EventHandler<IJSObjectReference>? OnRemoteStreamAcquired;
+    public event Func<IJSObjectReference, Task>? RemoteStreamAcquired;
     public event Func<string, Task>? InterlocutorLeft;
   
     private readonly IJSRuntime _js;
-    private readonly ITokenStorageService _tokenService;
-    private IJSObjectReference? _jsModule;
+    private readonly ISignallingConnectionService _connectionService;
+    private IJSObjectReference _jsModule;
     private DotNetObjectReference<WebRtcService>? _jsThis;
-    private HubConnection? _hub;
-    private string? _signalingChannel;
-    private readonly string _hubUrl;
+    private string _signalingChannel = string.Empty;
 
-    public WebRtcService(IJSRuntime js, ITokenStorageService tokenService, IConfiguration config)
+    public WebRtcService(IJSRuntime js, ISignallingConnectionService connectionService)
     {
         _js = js;
-        _tokenService = tokenService;
-        _hubUrl = config["SignalR:HubUrl"]!;
+        _connectionService = connectionService;
+        _connectionService.ReceivedWebRtcSignal += OnSignalReceived;
+        _connectionService.InterlocutorLeft += OnInterlocutorLeft;
+    }
+    
+    public void Dispose()
+    {
+        _connectionService.ReceivedWebRtcSignal -= OnSignalReceived;
+        _connectionService.InterlocutorLeft -= OnInterlocutorLeft;
     }
 
-    public async Task Join(string signalingChannel)
+    public async Task InitializeAsync(string signalingChannel)
     {
-        if (_signalingChannel != null) throw new InvalidOperationException();
-
         Console.WriteLine("Joining in webRTC service...");
         _signalingChannel = signalingChannel;
-        var hub = await GetHub();
-        await hub.SendAsync("join", signalingChannel);
-        _jsModule = await _js.InvokeAsync<IJSObjectReference>(
-            "import", "/js/WebRtcService.cs.js");
+        _jsModule = await _js.InvokeAsync<IJSObjectReference>("import", "/js/WebRtcService.cs.js");
+        await _connectionService.InvokeHubMethodAsync(
+            connection => connection?.SendAsync(nameof(IChatHub.Join), signalingChannel));
         _jsThis = DotNetObjectReference.Create(this);
         await _jsModule.InvokeVoidAsync("initialize", _jsThis);
     }
     
-    public async Task<IJSObjectReference> StartLocalStream()
+    public async Task<IJSObjectReference> StartLocalStreamAsync()
     {
-        if (_jsModule == null) throw new InvalidOperationException();
-        
-        var stream = await _jsModule.InvokeAsync<IJSObjectReference>("startLocalStream");
-        return stream;
+        return await _jsModule.InvokeAsync<IJSObjectReference>("startLocalStream");
     }
     
     public async Task Call()
     {
-        if (_jsModule == null) throw new InvalidOperationException();
-        
         var offerDescription = await _jsModule.InvokeAsync<string>("callAction");
         await SendOffer(offerDescription);
     }
 
     public async Task Hangup()
     {
-        if (_jsModule == null) throw new InvalidOperationException();
-        
         await _jsModule.InvokeVoidAsync("hangupAction");
-        var hub = await GetHub();
-        await hub.SendAsync("leave", _signalingChannel);
-
+        await _connectionService.InvokeHubMethodAsync(
+            connection => connection?.SendAsync(nameof(IChatHub.Leave), _signalingChannel));
         _signalingChannel = null;
     }
     
     [JSInvokable]
     public async Task SendOffer(string offer)
     {
-        var hub = await GetHub();
-        await hub.SendAsync("SignalWebRtc", _signalingChannel, "offer", offer);
+        await _connectionService.InvokeHubMethodAsync(
+            connection => connection?.SendAsync(nameof(IChatHub.SignalWebRtc), new WebRtcSignalDto
+            {
+                Channel = _signalingChannel,
+                SignalType = WebRtcSignalType.Offer,
+                PayloadJson = offer
+            }));
     }
 
     [JSInvokable]
     public async Task SendAnswer(string answer)
     {
-        var hub = await GetHub();
-        await hub.SendAsync("SignalWebRtc", _signalingChannel, "answer", answer);
+        await _connectionService.InvokeHubMethodAsync(
+            connection => connection?.SendAsync(nameof(IChatHub.SignalWebRtc), new WebRtcSignalDto
+            {
+                Channel = _signalingChannel,
+                SignalType = WebRtcSignalType.Answer,
+                PayloadJson = answer
+            }));
     }
 
     [JSInvokable]
     public async Task SendCandidate(string candidate)
     {
-        var hub = await GetHub();
-        await hub.SendAsync("SignalWebRtc", _signalingChannel, "candidate", candidate);
+        await _connectionService.InvokeHubMethodAsync(
+            connection => connection?.SendAsync(nameof(IChatHub.SignalWebRtc), new WebRtcSignalDto
+            {
+                Channel = _signalingChannel,
+                SignalType = WebRtcSignalType.Candidate,
+                PayloadJson = candidate
+            }));
     }
 
     [JSInvokable]
     public async Task SetRemoteStream()
     {
-        if (_jsModule == null) throw new InvalidOperationException();
-
         var stream = await _jsModule.InvokeAsync<IJSObjectReference>("getRemoteStream");
-        OnRemoteStreamAcquired?.Invoke(this, stream);
-    }
-    
-    private async Task<HubConnection> GetHub()
-    {
-        if (_hub != null) return _hub;
-
-        var hub = new HubConnectionBuilder()
-                  .WithUrl(_hubUrl,
-                      options =>
-                      {
-                          options.AccessTokenProvider = async () => (await _tokenService.GetTokensAsync()).AccessToken;
-                      })
-                  .Build();
-        hub.On<string>(nameof(IChatClient.Leave), id => InterlocutorLeft?.Invoke(id));
-        hub.On<string, string, string>("SignalWebRtc", async (signalingChannel, type, payload) =>
+        var invocation = RemoteStreamAcquired?.Invoke(stream);
+        if (invocation is not null)
         {
-            if (_jsModule == null) throw new InvalidOperationException();
+            await invocation;
+        }
+    }
 
-            if (_signalingChannel != signalingChannel) return;
-            
-            switch (type)
-            {
-                case "offer":
-                    await _jsModule.InvokeVoidAsync("processOffer", payload);
-                    break;
-                case "answer":
-                    await _jsModule.InvokeVoidAsync("processAnswer", payload);
-                    break;
-                case "candidate":
-                    await _jsModule.InvokeVoidAsync("processCandidate", payload);
-                    break;
-            }
-        });
+    private async Task OnSignalReceived(WebRtcSignalDto signal)
+    {
+        if (_signalingChannel != signal.Channel)
+        {
+            return;
+        }
 
-        await hub.StartAsync();
-        _hub = hub;
-        return _hub;
+        var invokeJsTask = signal.SignalType switch
+        {
+            WebRtcSignalType.Offer => _jsModule.InvokeVoidAsync("processOffer", signal.PayloadJson),
+            WebRtcSignalType.Answer => _jsModule.InvokeVoidAsync("processAnswer", signal.PayloadJson),
+            WebRtcSignalType.Candidate => _jsModule.InvokeVoidAsync("processCandidate", signal.PayloadJson),
+            _ => throw new InvalidOperationException($"{signal.SignalType} web RTC signal is not supported!")
+        };
+
+        await invokeJsTask;
+    }
+
+    private async Task OnInterlocutorLeft(string id)
+    {
+        var task = InterlocutorLeft?.Invoke(id);
+        if (task is not null)
+        {
+            await task;
+        }
     }
 }

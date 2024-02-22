@@ -1,7 +1,4 @@
-﻿using Chat.Domain.Abstract;
-using Chat.DomainServices.Repositories;
-
-namespace Chat.DomainServices.UnitsOfWork;
+﻿namespace Chat.DomainServices.UnitsOfWork;
 
 public interface IUnitOfWork
 {

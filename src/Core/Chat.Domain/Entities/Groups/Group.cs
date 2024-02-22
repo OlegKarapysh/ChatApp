@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Chat.Domain.Abstract;
-
-namespace Chat.Domain.Entities.Groups;
+﻿namespace Chat.Domain.Entities.Groups;
 
 public class Group : EntityBase<int>
 {

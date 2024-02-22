@@ -1,11 +1,6 @@
-﻿using Chat.Domain.DTOs.AssistantFiles;
-using Chat.Domain.Web;
-using Chat.WebUI.Services.Auth;
-using Microsoft.AspNetCore.Components.Forms;
+﻿namespace Chat.WebUI.Services.OpenAI;
 
-namespace Chat.WebUI.Services.OpenAI;
-
-public class OpenAiWebApiService : WebApiServiceBase, IOpenAiWebApiService
+public sealed class OpenAiWebApiService : WebApiServiceBase, IOpenAiWebApiService
 {
     public string FileUploadUrl => BuildFullRoute("/file");
     private protected override string BaseRoute { get; init; } = "/openai";

@@ -43,3 +43,5 @@ global using Chat.Domain.DTOs.Messages;
 global using Chat.Application.Services.OpenAI;
 global using Chat.Application.Services.Groups;
 global using Chat.Domain.Entities.Groups;
+global using Chat.Domain.DTOs.Groups;
+

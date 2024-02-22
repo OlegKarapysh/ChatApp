@@ -1,16 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Chat.Application.Extensions;
-using Chat.Application.Mappings;
-using Chat.Application.RequestExceptions;
-using Chat.Application.Services.Groups;
-using Chat.Application.Services.OpenAI;
-using Chat.Application.Services.Users;
-using Chat.Domain.DTOs.Messages;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Entities.Groups;
-using Chat.Domain.Web;
-using Chat.DomainServices.Repositories;
-using Chat.DomainServices.UnitsOfWork;
+﻿using Chat.Application.Services.OpenAI;
 using OpenAI.Threads;
 using Message = Chat.Domain.Entities.Message;
 
@@ -70,7 +58,7 @@ public sealed class MessageService : IMessageService
     public async Task<MessageResponse> AssistWithMessageAsync(MessageForAssistDto messageDto)
     {
         var message = await GetMessageByIdAsync(messageDto.MessageId);
-        var sender = await _userService.GetUserByIdAsync((int)message.SenderId);
+        var sender = await _userService.GetUserByIdAsync(message.SenderId);
         var receiver = await _userService.GetUserByNameAsync(messageDto.ReceiverUserName);
         var groupRepository = _unitOfWork.GetRepository<Group, int>();
         var group = await groupRepository.AsQueryable()
@@ -84,7 +72,7 @@ public sealed class MessageService : IMessageService
         }
 
         var threadId = group.GroupMembers.FirstOrDefault(x => x.UserId == sender.Id)?.ThreadId;
-        return await _openAiService.SendMessageAsync(message.TextContent, group.AssistantId, threadId);
+        return await _openAiService.SendMessageAsync(message.TextContent, group.AssistantId, threadId ?? string.Empty);
     }
 
     public async Task<MessageDto> UpdateMessageAsync(MessageDto messageData, int updaterId)

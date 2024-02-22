@@ -1,6 +1,4 @@
-﻿using Chat.Domain.Entities.Conversations;
-
-namespace Chat.Domain.DTOs.Conversations;
+﻿namespace Chat.Domain.DTOs.Conversations;
 
 public class ConversationDto : ConversationBasicInfoDto
 {

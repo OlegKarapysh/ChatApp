@@ -1,4 +1,4 @@
-﻿namespace Chat.IntegrationTests;
+﻿namespace Chat.IntegrationTests.TestHelpers;
 
 public class IntegrationTest : IDisposable
 {

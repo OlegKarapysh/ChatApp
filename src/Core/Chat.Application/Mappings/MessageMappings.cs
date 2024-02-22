@@ -1,8 +1,4 @@
-﻿using System.Globalization;
-using Chat.Domain.DTOs.Messages;
-using Chat.Domain.Entities;
-
-namespace Chat.Application.Mappings;
+﻿namespace Chat.Application.Mappings;
 
 public static class MessageMappings
 {
@@ -24,6 +20,7 @@ public static class MessageMappings
         {
             Id = message.Id,
             IsRead = message.IsRead,
+            IsAiAssisted = message.IsAiAssisted,
             ConversationId = message.ConversationId ?? default,
             SenderId = message.SenderId ?? default,
             TextContent = message.TextContent,
@@ -38,6 +35,7 @@ public static class MessageMappings
         {
             Id = message.Id,
             IsRead = message.IsRead,
+            IsAiAssisted = message.IsAiAssisted,
             ConversationId = message.ConversationId ?? default,
             SenderId = message.SenderId ?? default,
             UserName = message.Sender?.UserName ?? string.Empty,
@@ -46,18 +44,12 @@ public static class MessageMappings
             UpdatedAt = message.UpdatedAt.ToString(SqlDateTimeFormat, CultureInfo.InvariantCulture)
         };
     }
-
-    public static Message MapFrom(this Message message, MessageBasicInfoDto messageDto)
-    {
-        message.TextContent = messageDto.TextContent;
-
-        return message;
-    }
     
     public static Message MapFrom(this Message message, MessageDto messageDto)
     {
-        message.IsRead = messageDto.IsRead;
         message.Id = messageDto.Id;
+        message.IsRead = messageDto.IsRead;
+        message.IsAiAssisted = messageDto.IsAiAssisted;
         message.SenderId = messageDto.SenderId;
         message.ConversationId = messageDto.ConversationId;
         message.TextContent = messageDto.TextContent;
@@ -72,6 +64,7 @@ public static class MessageMappings
             Id = message.Id,
             TextContent = message.TextContent,
             IsRead = message.IsRead,
+            IsAiAssisted = message.IsAiAssisted,
             SenderId = message.SenderId,
             ConversationId = message.ConversationId,
             CreatedAt = message.CreatedAt,

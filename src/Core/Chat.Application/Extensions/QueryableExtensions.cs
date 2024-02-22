@@ -1,9 +1,4 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
-using LinqKit;
-using Chat.Domain.Enums;
-
-namespace Chat.Application.Extensions;
+﻿namespace Chat.Application.Extensions;
 
 public static class QueryableExtensions
 {

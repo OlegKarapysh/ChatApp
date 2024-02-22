@@ -1,10 +1,4 @@
-﻿using System.Net.Http.Json;
-using Chat.Domain.DTOs;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Errors;
-using Chat.Domain.Web;
-using Chat.WebUI.HttpHandlers;
-using Chat.WebUI.Services.Auth;
+﻿
 
 namespace Chat.WebUI.Services;
 

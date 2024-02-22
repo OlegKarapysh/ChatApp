@@ -1,12 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Chat.Application.Extensions;
-using Chat.Application.Services.Messages;
-using Chat.Domain.DTOs.Messages;
-using Chat.Domain.DTOs.Users;
-using OpenAI.Threads;
-
-namespace Chat.WebAPI.Controllers;
+﻿namespace Chat.WebAPI.Controllers;
 
 [ApiController, Authorize, Route("api/[controller]")]
 public sealed class MessagesController : ControllerBase

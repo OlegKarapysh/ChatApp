@@ -1,12 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Chat.Application.Extensions;
-using Chat.Application.Mappings;
-using Chat.Application.Services.Groups;
-using Chat.Domain.DTOs.AssistantFiles;
-using Chat.Domain.DTOs.Groups;
-
-namespace Chat.WebAPI.Controllers;
+﻿namespace Chat.WebAPI.Controllers;
 
 [ApiController, Authorize, Route("api/[controller]")]
 public sealed class GroupsController : ControllerBase

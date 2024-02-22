@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Chat.Domain.DTOs.AssistantFiles;
 using OpenAI.Threads;
 
 namespace Chat.Application.Services.OpenAI;
@@ -18,4 +17,5 @@ public interface IOpenAiService
     Task<UploadedFileDto> UploadFileAsync(IFormFile? file);
     Task<ThreadObjectResponse> CreateThreadAsync();
     Task<MessageResponse> SendMessageAsync(string message, string assistantId, string threadId);
+    Task<TArgs?> GetFunctionCallArgsAsync<TArgs>(string message, string assistantId);
 }

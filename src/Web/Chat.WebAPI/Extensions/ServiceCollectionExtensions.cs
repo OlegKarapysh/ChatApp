@@ -1,17 +1,4 @@
-﻿using System.Text;
-using Chat.Application.JWT;
-using Chat.Application.Services;
-using Chat.Application.Services.Authentication;
-using Chat.Application.Services.Conversations;
-using Chat.Application.Services.Groups;
-using Chat.Application.Services.JWT;
-using Chat.Application.Services.Messages;
-using Chat.Application.Services.OpenAI;
-using Chat.Application.Services.Users;
-using Chat.DomainServices.UnitsOfWork;
-using Chat.Persistence.UnitsOfWork;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+﻿using Chat.Application.Services.AiCopilot;
 
 namespace Chat.WebAPI.Extensions;
 
@@ -31,6 +18,7 @@ public static class ServiceCollectionExtensions
 
     public static void AddCustomServices(this IServiceCollection services)
     {
+        services.AddHttpClient(IAmazonSearchService.HttpClientName);
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthService, AuthService>();
@@ -39,6 +27,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<IOpenAiService, OpenAiService>();
         services.AddScoped<IGroupService, GroupService>();
+        services.AddScoped<IAmazonSearchService, AmazonSearchService>(provider =>
+        {
+            var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+            var httpClient = httpClientFactory.CreateClient(IAmazonSearchService.HttpClientName);
+            var openAiService = provider.GetRequiredService<IOpenAiService>();
+            return new AmazonSearchService(httpClient, openAiService);
+        });
+        services.AddScoped<IAiCopilotService, AiCopilotService>();
     }
     
     public static void AddAndConfigureJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
@@ -67,10 +63,10 @@ public static class ServiceCollectionExtensions
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
-                ValidIssuer = jwtOptions[nameof(JwtOptions.Issuer)],
+                ValidIssuer = jwtOptions[nameof(JwtOptions.Issuer)]!,
         
                 ValidateAudience = true,
-                ValidAudience = jwtOptions[nameof(JwtOptions.Audience)],
+                ValidAudience = jwtOptions[nameof(JwtOptions.Audience)]!,
         
                 ValidateLifetime = true,
                 RequireExpirationTime = false,

@@ -1,6 +1,4 @@
-﻿using Chat.Domain.DTOs.Authentication;
-
-namespace Chat.Application.Services.Authentication;
+﻿namespace Chat.Application.Services.Authentication;
 
 public interface IAuthService
 {

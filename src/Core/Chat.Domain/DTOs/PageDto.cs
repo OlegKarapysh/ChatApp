@@ -1,6 +1,4 @@
-﻿using Chat.Domain.Web;
-
-namespace Chat.Domain.DTOs;
+﻿namespace Chat.Domain.DTOs;
 
 public abstract class PageDto
 {

@@ -1,8 +1,4 @@
-﻿using Chat.Domain.DTOs;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Web;
-
-namespace Chat.WebUI.Services.Users;
+﻿namespace Chat.WebUI.Services.Users;
 
 public interface IUsersWebApiService
 {

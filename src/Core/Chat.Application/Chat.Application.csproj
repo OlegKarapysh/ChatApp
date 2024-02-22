@@ -14,10 +14,13 @@
 
     <ItemGroup>
       <PackageReference Include="HigLabo.OpenAI" Version="7.0.3.1" />
+      <PackageReference Include="HtmlAgilityPack" Version="1.11.57" />
       <PackageReference Include="LinqKit" Version="1.2.4" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
       <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.0.3" />
+      <PackageReference Include="Microsoft.SemanticKernel" Version="1.1.0" />
       <PackageReference Include="OpenAI-DotNet" Version="7.4.4" />
+      <PackageReference Include="PuppeteerSharp" Version="13.0.2" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
     </ItemGroup>
 

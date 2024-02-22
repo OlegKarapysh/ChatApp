@@ -1,7 +1,4 @@
-﻿using Blazored.LocalStorage;
-using Chat.Domain.DTOs.Authentication;
-
-namespace Chat.WebUI.Services.Auth;
+﻿namespace Chat.WebUI.Services.Auth;
 
 public sealed class TokenStorageService : ITokenStorageService
 {

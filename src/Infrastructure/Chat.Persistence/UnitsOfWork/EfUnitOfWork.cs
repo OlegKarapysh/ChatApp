@@ -1,10 +1,4 @@
-﻿using Chat.Domain.Abstract;
-using Chat.DomainServices.Repositories;
-using Chat.DomainServices.UnitsOfWork;
-using Chat.Persistence.Contexts;
-using Chat.Persistence.Repositories;
-
-namespace Chat.Persistence.UnitsOfWork;
+﻿namespace Chat.Persistence.UnitsOfWork;
 
 public sealed class EfUnitOfWork : IUnitOfWork
 {
@@ -28,6 +22,11 @@ public sealed class EfUnitOfWork : IUnitOfWork
 
         var repositoryType = typeof(EfRepository<T, TId>);
         var newRepository = Activator.CreateInstance(repositoryType, _dbContext);
+        if (newRepository is null)
+        {
+            throw new InvalidOperationException($"Cannot instantiate a repository of {repositoryType.FullName} type");
+        }
+        
         _repositories.Add(entityType, newRepository);
 
         return (IRepository<T, TId>)newRepository;

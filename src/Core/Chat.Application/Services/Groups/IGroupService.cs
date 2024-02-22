@@ -1,8 +1,4 @@
-﻿using Chat.Domain.DTOs.AssistantFiles;
-using Chat.Domain.DTOs.Groups;
-using Chat.Domain.Entities.Groups;
-
-namespace Chat.Application.Services.Groups;
+﻿namespace Chat.Application.Services.Groups;
 
 public interface IGroupService
 {

@@ -1,12 +1,4 @@
-﻿using System.Globalization;
-using System.Reflection;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Primitives;
-using Chat.Domain.Attributes;
-using Microsoft.JSInterop;
-
-namespace Chat.WebUI.Extensions;
+﻿namespace Chat.WebUI.Extensions;
 
 public static class QueryStringParameterExtensions
 {

@@ -1,9 +1,4 @@
-﻿using Chat.Domain.Entities.Conversations;
-using Chat.Persistence.Contexts;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Chat.Persistence.EntityConfigurations;
+﻿namespace Chat.Persistence.EntityConfigurations;
 
 public sealed class ConversationConfig : IEntityTypeConfiguration<Conversation>
 {

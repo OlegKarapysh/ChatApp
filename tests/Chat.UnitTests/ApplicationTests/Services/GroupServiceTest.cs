@@ -1,5 +1,4 @@
-﻿using Chat.Domain.DTOs.Groups;
-using Group = Chat.Domain.Entities.Groups.Group;
+﻿using Group = Chat.Domain.Entities.Groups.Group;
 
 namespace Chat.UnitTests.ApplicationTests.Services;
 
@@ -44,7 +43,7 @@ public sealed class GroupServiceTest
 
         // Assert.
         result.Should()!.HaveCount(1);
-        resultGroup.Should()!.NotBeNull().And!.BeEquivalentTo(expectedGroup);
+        resultGroup!.Should()!.NotBeNull()!.And!.BeEquivalentTo(expectedGroup);
     }
 
     private List<Group> GetTestGroup()

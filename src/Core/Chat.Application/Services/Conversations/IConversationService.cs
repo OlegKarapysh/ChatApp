@@ -1,8 +1,4 @@
-﻿using Chat.Domain.DTOs.Conversations;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Entities.Conversations;
-
-namespace Chat.Application.Services.Conversations;
+﻿namespace Chat.Application.Services.Conversations;
 
 public interface IConversationService
 {
@@ -14,4 +10,5 @@ public interface IConversationService
     Task<ConversationDto> AddGroupMemberAsync(NewConversationMemberDto conversationMemberData);
     Task<bool> RemoveUserFromConversationAsync(int conversationId, int userId);
     Task<Conversation> GetConversationByIdAsync(int id);
+    Task<ConversationDto> GetConversationByTitleAsync(string conversationTitle);
 }

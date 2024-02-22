@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Chat.Domain.DTOs.Authentication;
+﻿namespace Chat.Domain.DTOs.Authentication;
 
 public class RegistrationDto : LoginDto
 {

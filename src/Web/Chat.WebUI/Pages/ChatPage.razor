@@ -4,7 +4,9 @@
 
 @implements IDisposable
 
-@inject IHubConnectionService HubConnectionService
+@inject IVideoCallSignallingService VideoCallSignallingService
+@inject IChatSignallingService ChatSignallingService
+@inject ISignallingConnectionService SignallingConnectionService
 @inject IMessagesWebApiService MessageService
 @inject IUsersWebApiService UserService
 @inject IConversationsWebApiService ConversationService
@@ -90,17 +92,18 @@
     public string ConversationType { get; set; } = string.Empty;
     public string MessageText { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
+    public bool IsAiAssisted { get; set; }
     public List<MessageWithSenderDto> Messages { get; } = new();
     public UserDto CurrentUser { get; set; } = new();
     public CancellationTokenSource CancellationSource { get; set; } = new();
-    public bool IsCalling { get; set; } = false;
+    public bool IsCalling { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        HubConnectionService!.ReceivedMessage += AddMessage;
-        HubConnectionService.UpdatedMessage += UpdateMessage;
-        HubConnectionService.DeletedMessage += DeleteMessage;
-        HubConnectionService.ReceivedCallAnswer += ReceiveCallAnswer;
+        SignallingConnectionService!.ReceivedMessage += AddMessage;
+        SignallingConnectionService.UpdatedMessage += UpdateMessage;
+        SignallingConnectionService.DeletedMessage += DeleteMessage;
+        SignallingConnectionService.ReceivedCallAnswer += ReceiveCallAnswer;
         var messagesResponse = await MessageService!.GetAllConversationMessagesAsync(int.Parse(ConversationId));
         if (messagesResponse.IsSuccessful)
         {
@@ -118,10 +121,10 @@
 
     public void Dispose()
     {
-        HubConnectionService!.ReceivedMessage -= AddMessage;
-        HubConnectionService.UpdatedMessage -= UpdateMessage;
-        HubConnectionService.DeletedMessage -= DeleteMessage;
-        HubConnectionService.ReceivedCallAnswer -= ReceiveCallAnswer;
+        SignallingConnectionService!.ReceivedMessage -= AddMessage;
+        SignallingConnectionService.UpdatedMessage -= UpdateMessage;
+        SignallingConnectionService.DeletedMessage -= DeleteMessage;
+        SignallingConnectionService.ReceivedCallAnswer -= ReceiveCallAnswer;
     }
 
     private Task AddMessage(MessageWithSenderDto message)
@@ -167,29 +170,6 @@
         return Task.CompletedTask;
     }
 
-    private Task ReceiveCallAnswer(CallDto call)
-    {
-        Spinner!.Hide();
-        CancellationSource.Cancel();
-        CancellationSource.TryReset();
-        IsCalling = false;
-        Console.WriteLine("call status: " + call.Status.ToString());
-        if (call.Status == CallStatus.Accepted)
-        {
-            Navigation!.NavigateTo($"{RtcPage.Path}/{call.Id}");
-        }
-        else if (call.Status == CallStatus.NoAnswer)
-        {
-            ToastService!.ShowError("No answer");
-        }
-        else
-        {
-            ToastService!.ShowError($"Call is {call.Status.ToString().ToLower()}");
-        }
-
-        return Task.CompletedTask;
-    }
-
     private async Task AddUserToGroupAsync()
     {
         var newMemberData = new NewConversationMemberDto
@@ -217,8 +197,9 @@
             ToastService!.ShowError(sentMessageResponse.ErrorDetails!.Message);
             return;
         }
-        await HubConnectionService!.SendMessageAsync(ConversationId, sentMessageResponse.Content!);
+        await ChatSignallingService!.SendMessageAsync(ConversationId, sentMessageResponse.Content!);
         ResetTextInMessageTextBox();
+        ResetAiAssistedFlag();
     }
 
     private async Task UpdateMessageAsync(MessageWithSenderDto messageData)
@@ -238,13 +219,15 @@
             return;
         }
         messageData.TextContent = updatedMessageResponse.Content!.TextContent;
-        await HubConnectionService!.UpdateMessageAsync(ConversationId, messageData);
+        await ChatSignallingService!.UpdateMessageAsync(ConversationId, messageData);
         ResetTextInMessageTextBox();
+        
     }
 
     private async Task AssistWithMessageAsync(MessageWithSenderDto messageDto)
     {
         Spinner!.Show();
+        IsAiAssisted = true;
         var messageForAssist = new MessageForAssistDto
         {
             MessageId = messageDto.Id, ReceiverUserName = CurrentUser.UserName
@@ -252,7 +235,7 @@
         var assistResponse = await MessageService!.AssistWithMessageAsync(messageForAssist);
         if (assistResponse is { IsSuccessful: true, Content: not null })
         {
-            MessageText = assistResponse.Content.Content[0].Text.Value;
+            MessageText = assistResponse.Content.Content?[0]?.Text?.Value ?? string.Empty;
         }
         else if (assistResponse.ErrorDetails is not null)
         {
@@ -270,7 +253,7 @@
             return;
         }
 
-        await HubConnectionService!.DeleteMessageAsync(ConversationId, messageData.MapToDo());
+        await ChatSignallingService!.DeleteMessageAsync(ConversationId, messageData.MapToDo());
         StateHasChanged();
     }
 
@@ -278,7 +261,7 @@
     {
         Spinner!.Show();
         IsCalling = true;
-        await HubConnectionService!.CallUserAsync(GetCallData());
+        await VideoCallSignallingService!.CallUserAsync(GetCallData());
         var timeout = TimeSpan.FromSeconds(11);
         try
         {
@@ -290,12 +273,38 @@
                 ToastService!.ShowError("No answer");
             }
         }
-        catch { }
+        catch
+        {
+            // Just stop calling.
+        }
+    }
+    
+    private Task ReceiveCallAnswer(CallDto call)
+    {
+        Spinner!.Hide();
+        CancellationSource.Cancel();
+        CancellationSource.TryReset();
+        IsCalling = false;
+        if (call.Status == CallStatus.Accepted)
+        {
+            Navigation!.NavigateTo($"{RtcPage.Path}/{call.Id}");
+        }
+        else if (call.Status == CallStatus.NoAnswer)
+        {
+            ToastService!.ShowError("No answer");
+        }
+        else
+        {
+            ToastService!.ShowError($"Call is {call.Status.ToString().ToLower()}");
+        }
+
+        return Task.CompletedTask;
     }
 
     private MessageDto GetCurrentMessageData() => new()
     {
         ConversationId = int.Parse(ConversationId),
+        IsAiAssisted = IsAiAssisted,
         TextContent = MessageText
     };
 
@@ -309,4 +318,6 @@
     };
 
     private void ResetTextInMessageTextBox() => MessageText = string.Empty;
+
+    private void ResetAiAssistedFlag() => IsAiAssisted = false;
 }

@@ -1,0 +1,67 @@
+﻿@page "/ai-copilot"
+@using Chat.WebUI.Services.AiCopilot
+
+@attribute [Authorize]
+
+@inject IAiCopilotWebApiService AiCopilotService
+@inject IToastService ToastService
+@inject SpinnerService Spinner
+
+<PageTitle>AI Copilot</PageTitle>
+
+<RadzenCard Style="margin: 10px">
+    <h3>AI Copilot</h3>
+    <div style="margin: 10px; display: flex; flex-direction: column; gap: 5px; overflow: auto; max-height: 90%">
+        @if (!Messages.Any())
+        {
+            <div style="display: flex; align-items: center; justify-content: center; margin: 15px; min-height: 150px">
+                No messages yet. Start your conversation with the Copilot!
+            </div>
+        }
+        @foreach (var message in Messages)
+        {
+            <RadzenCard>
+                <div class="message-container">
+                    <RadzenText Style="text-wrap: normal">
+                        <strong>@(message.Sender): </strong> @message.Text
+                    </RadzenText>
+                </div>
+            </RadzenCard>
+        }
+    </div>
+    <div class="send-message-container">
+        <RadzenTextBox @bind-Value="MessageText" Placeholder="Message... "></RadzenTextBox>
+        <RadzenButton Style="@MessageButtonStyle" ButtonStyle="ButtonStyle.Primary" 
+                      Click="SendMessageAsync" disabled="@(string.IsNullOrWhiteSpace(MessageText))">
+            Send
+        </RadzenButton>
+    </div>
+</RadzenCard>
+
+@code {
+    public const string Path = "/ai-copilot";
+    public const string MessageButtonStyle = "width: 90px";
+
+    public List<SimpleMessageDto> Messages { get; } = new();
+    public string MessageText { get; set; } = string.Empty;
+
+    public async Task SendMessageAsync()
+    {
+        Spinner!.Show();
+        var response = await AiCopilotService!.SendMessageToCopilotAsync(MessageText);
+        if (response is { IsSuccessful: false, ErrorDetails: not null })
+        {
+            ToastService!.ShowError(response.ErrorDetails.Message);
+            return;
+        }
+        
+        if (response.Content is not null)
+        {
+            Messages.Add(MessageText);
+            Messages.Add(response.Content);
+        }
+
+        MessageText = string.Empty;
+        Spinner.Hide();
+    }
+}

@@ -1,7 +1,7 @@
 ﻿namespace Chat.IntegrationTests.WebApiTests;
 
 [Collection("Sequential")]
-public class UsersModifyTest : IClassFixture<IntegrationTest>
+public sealed class UsersModifyTest : IClassFixture<IntegrationTest>
 {
     private readonly IntegrationTest _test;
     private readonly TestDbHelper _testDbHelper;

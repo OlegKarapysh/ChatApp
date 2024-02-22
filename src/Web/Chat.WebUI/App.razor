@@ -1,5 +1,6 @@
-﻿@using Chat.Domain.DTOs.Calls
-@inject IHubConnectionService HubConnectionService
+﻿@inject IChatSignallingService ChatSignallingService
+@inject IVideoCallSignallingService VideoCallSignallingService
+@inject ISignallingConnectionService SignallingConnectionService
 @inject IConversationsWebApiService ConversationService
 @inject IToastService ToastService
 @inject NavigationManager Navigation
@@ -52,8 +53,8 @@
     protected override async Task OnInitializedAsync()
     {
         await TryConnectToHub();
-        HubConnectionService!.ReceivedMessage += ShowNotificationOnMessageReceived;
-        HubConnectionService.ReceivedCallRequest += AnswerOnCallReceived;
+        SignallingConnectionService!.ReceivedMessage += ShowNotificationOnMessageReceived;
+        SignallingConnectionService.ReceivedCallRequest += AnswerOnCallReceived;
         await base.OnInitializedAsync();
     }
 
@@ -89,7 +90,7 @@
             call.Status = CallStatus.Declined;
         }
         Console.WriteLine("answered status: " + call.Status.ToString());
-        await HubConnectionService!.AnswerCallAsync(call);
+        await VideoCallSignallingService!.AnswerCallAsync(call);
         DialogService.Close();
     }
 
@@ -98,8 +99,8 @@
         try
         {
             var conversationIds = await ConversationService!.GetAllUserConversationIdsAsync();
-            await HubConnectionService!.ConnectAsync();
-            await HubConnectionService!.JoinConversationsAsync(
+            await SignallingConnectionService!.ConnectAsync();
+            await ChatSignallingService!.JoinConversationsAsync(
                 conversationIds.Content?.Select(x => x.ToString()).ToArray() ?? Array.Empty<string>());
             return true;
         }

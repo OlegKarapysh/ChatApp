@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Chat.Domain.Abstract;
-using Chat.Domain.Entities.Groups;
+﻿using Group = Chat.Domain.Entities.Groups.Group;
 
 namespace Chat.Domain.Entities;
 

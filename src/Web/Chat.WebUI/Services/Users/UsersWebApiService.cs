@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
-using Chat.Domain.DTOs;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Web;
-using Chat.WebUI.Services.Auth;
-
-namespace Chat.WebUI.Services.Users;
+﻿namespace Chat.WebUI.Services.Users;
 
 public sealed class UsersWebApiService : WebApiServiceBase, IUsersWebApiService
 {

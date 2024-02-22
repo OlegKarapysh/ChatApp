@@ -1,11 +1,4 @@
-﻿using Chat.Domain.DTOs;
-using Microsoft.AspNetCore.WebUtilities;
-using Chat.Domain.DTOs.Conversations;
-using Chat.Domain.DTOs.Users;
-using Chat.Domain.Web;
-using Chat.WebUI.Services.Auth;
-
-namespace Chat.WebUI.Services.Conversations;
+﻿namespace Chat.WebUI.Services.Conversations;
 
 public class ConversationsWebApiService : WebApiServiceBase, IConversationsWebApiService
 {
