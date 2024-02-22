@@ -10,7 +10,10 @@ public sealed class MessageSenderPlugin
     private readonly IConversationService _conversationService;
     private readonly IUserService _userService;
 
-    public MessageSenderPlugin(IMessageService messageService, IConversationService conversationService, IUserService userService)
+    public MessageSenderPlugin(
+        IMessageService messageService,
+        IConversationService conversationService,
+        IUserService userService)
     {
         _messageService = messageService;
         _conversationService = conversationService;
@@ -23,13 +26,14 @@ public sealed class MessageSenderPlugin
     public async Task<string> SendMessageAsync(
         Kernel kernel,
         [Description("The message for chat")] string message,
-        [Description("The username of the user who sends the message")]
+        [Description("The username of the user who sends the message. You can ask user's username if its not mentioned.")]
         string senderUsername,
-        [Description("The title of the chat")] string chatTitle)
+        [Description("The title of the chat. If this title is not mentioned directly," +
+                     " you can form it by using this formula: '{senderUsername} - {receiverUsername} Dialog'")]
+        string chatTitle)
     {
         var senderId = (await _userService.GetUserByNameAsync(senderUsername)).Id;
-        var conversationId =
-            (await _conversationService.GetConversationByTitleAndMemberAsync(chatTitle, senderUsername)).Id;
+        var conversationId = (await _conversationService.GetConversationByTitleAsync(chatTitle)).Id;
         var messageDto = new MessageDto
         {
             TextContent = message,

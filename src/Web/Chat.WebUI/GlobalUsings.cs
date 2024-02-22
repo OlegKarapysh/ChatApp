@@ -48,3 +48,4 @@ global using Chat.WebUI.Services.Users;
 global using Chat.WebUI.Services.WebRtc;
 global using Chat.Domain.DTOs.AmazonSearch;
 global using Chat.WebUI.Services.Amazon;
+global using Chat.WebUI.Services.AiCopilot;

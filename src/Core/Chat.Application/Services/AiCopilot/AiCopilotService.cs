@@ -1,26 +1,32 @@
-﻿using Microsoft.SemanticKernel.ChatCompletion;
+﻿using Chat.Application.Services.Conversations;
+using Chat.Application.Services.Messages;
+using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using OpenAIClient = Azure.AI.OpenAI.OpenAIClient;
 
 namespace Chat.Application.Services.AiCopilot;
 
-public class AiCopilotService : IAiCopilot
+public sealed class AiCopilotService : IAiCopilotService
 {
     private const string OpenAiApiKeyName = "OPENAI_API_KEY_REENBIT";
-    private const string DefaultAiModel = "gpt-4";
+    private const string DefaultAiModel = "gpt-3.5-turbo";
     
     private readonly Kernel _kernel;
     private readonly IChatCompletionService _chatCompletionService;
     private readonly OpenAIPromptExecutionSettings _promptExecutionSettings;
     private readonly ChatHistory _chatHistory;
 
-    public AiCopilotService(IConfiguration configuration)
+    public AiCopilotService(
+        IConfiguration configuration,
+        IMessageService messageService,
+        IConversationService conversationService,
+        IUserService userService)
     {
         var apiKey = configuration[OpenAiApiKeyName];
         ArgumentException.ThrowIfNullOrEmpty(apiKey);
         var kernelBuilder = Kernel.CreateBuilder();
         kernelBuilder.AddOpenAIChatCompletion(DefaultAiModel, new OpenAIClient(apiKey));
-        kernelBuilder.Plugins.AddFromType<MessageSenderPlugin>();
+        kernelBuilder.Plugins.AddFromObject(new MessageSenderPlugin(messageService, conversationService, userService));
         _kernel = kernelBuilder.Build();
         _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
         _promptExecutionSettings = new OpenAIPromptExecutionSettings
@@ -36,14 +42,18 @@ public class AiCopilotService : IAiCopilot
             """);
     }
 
-    public async Task<string> SendMessageToChatAsync(string message)
+    public async Task<SimpleMessageDto> SendMessageToChatAsync(SimpleMessageDto message)
     {
         _chatHistory.AddUserMessage(message);
-        var response = await _chatCompletionService.GetChatMessageContentsAsync(
+        var response = await _chatCompletionService.GetChatMessageContentAsync(
             _chatHistory,
             executionSettings: _promptExecutionSettings,
             kernel: _kernel);
+        _chatHistory.AddMessage(response.Role, response.Content ?? string.Empty);
 
-        return response.FirstOrDefault()?.Content ?? string.Empty;
+        return new SimpleMessageDto
+        {
+            Text = response.Content ?? string.Empty, Sender = MessageSender.Copilot.ToString()
+        };
     }
 }

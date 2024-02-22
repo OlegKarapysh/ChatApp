@@ -137,11 +137,14 @@ public sealed class ConversationService : IConversationService
             throw new EntityNotFoundException(nameof(Conversation));
     }
 
-    public async Task<ConversationDto> GetConversationByTitleAndMemberAsync(
-        string conversationTitle,
-        string memberUsername)
+    public async Task<ConversationDto> GetConversationByTitleAsync(string conversationTitle)
     {
-        // TODO: create logic:
-        return new ConversationDto();
+        var conversation = await _conversationsRepository.FindFirstAsync(x => x.Title == conversationTitle);
+        if (conversation is null)
+        {
+            throw new EntityNotFoundException(nameof(Conversation));
+        }
+        
+        return conversation.MapToDto();
     }
 }

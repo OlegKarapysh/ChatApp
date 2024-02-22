@@ -1,4 +1,6 @@
-﻿namespace Chat.WebAPI.Extensions;
+﻿using Chat.Application.Services.AiCopilot;
+
+namespace Chat.WebAPI.Extensions;
 
 public static class ServiceCollectionExtensions
 {
@@ -32,6 +34,7 @@ public static class ServiceCollectionExtensions
             var openAiService = provider.GetRequiredService<IOpenAiService>();
             return new AmazonSearchService(httpClient, openAiService);
         });
+        services.AddScoped<IAiCopilotService, AiCopilotService>();
     }
     
     public static void AddAndConfigureJwtAuthentication(this IServiceCollection services, IConfiguration configuration)

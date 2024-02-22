@@ -170,29 +170,6 @@
         return Task.CompletedTask;
     }
 
-    private Task ReceiveCallAnswer(CallDto call)
-    {
-        Spinner!.Hide();
-        CancellationSource.Cancel();
-        CancellationSource.TryReset();
-        IsCalling = false;
-        Console.WriteLine("call status: " + call.Status.ToString());
-        if (call.Status == CallStatus.Accepted)
-        {
-            Navigation!.NavigateTo($"{RtcPage.Path}/{call.Id}");
-        }
-        else if (call.Status == CallStatus.NoAnswer)
-        {
-            ToastService!.ShowError("No answer");
-        }
-        else
-        {
-            ToastService!.ShowError($"Call is {call.Status.ToString().ToLower()}");
-        }
-
-        return Task.CompletedTask;
-    }
-
     private async Task AddUserToGroupAsync()
     {
         var newMemberData = new NewConversationMemberDto
@@ -300,6 +277,28 @@
         {
             // Just stop calling.
         }
+    }
+    
+    private Task ReceiveCallAnswer(CallDto call)
+    {
+        Spinner!.Hide();
+        CancellationSource.Cancel();
+        CancellationSource.TryReset();
+        IsCalling = false;
+        if (call.Status == CallStatus.Accepted)
+        {
+            Navigation!.NavigateTo($"{RtcPage.Path}/{call.Id}");
+        }
+        else if (call.Status == CallStatus.NoAnswer)
+        {
+            ToastService!.ShowError("No answer");
+        }
+        else
+        {
+            ToastService!.ShowError($"Call is {call.Status.ToString().ToLower()}");
+        }
+
+        return Task.CompletedTask;
     }
 
     private MessageDto GetCurrentMessageData() => new()

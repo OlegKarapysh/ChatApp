@@ -10,5 +10,5 @@ public interface IConversationService
     Task<ConversationDto> AddGroupMemberAsync(NewConversationMemberDto conversationMemberData);
     Task<bool> RemoveUserFromConversationAsync(int conversationId, int userId);
     Task<Conversation> GetConversationByIdAsync(int id);
-    Task<ConversationDto> GetConversationByTitleAndMemberAsync(string conversationTitle, string memberUsername);
+    Task<ConversationDto> GetConversationByTitleAsync(string conversationTitle);
 }
